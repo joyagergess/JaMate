@@ -16,9 +16,6 @@ return new class extends Migration
 
             $table->string('name')->nullable();
 
-            $table->foreignId('created_by_profile_id')
-                ->constrained('profiles')
-                ->cascadeOnDelete();
 
             $table->timestamp('created_at')->useCurrent();
         });

@@ -17,8 +17,6 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->timestamp('joined_at')->useCurrent();
-
             $table->unique(['conversation_id', 'profile_id']);
             $table->index('profile_id');
         });
