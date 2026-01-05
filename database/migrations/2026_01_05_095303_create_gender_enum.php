@@ -12,7 +12,7 @@ return new class extends Migration
         DB::statement("
             CREATE TYPE gender AS ENUM (
                 'male',
-                'female',
+                'female'
             )
         ");
     }
