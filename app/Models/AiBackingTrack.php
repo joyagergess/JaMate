@@ -5,25 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ProfileMedia extends Model
+class AiBackingTrack extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
 
     protected $fillable = [
-        'profile_id',
-        'media_type',
-        'media_url',
-        'order_index',
+        'ai_jam_id',
+        'variation',
+        'audio_url',
+        'duration',
     ];
 
     protected $casts = [
-        'order_index' => 'integer',
+        'duration' => 'integer',
     ];
 
-    public function profile()
+
+    public function aiJam()
     {
-        return $this->belongsTo(Profile::class);
+        return $this->belongsTo(AiJam::class);
     }
 }

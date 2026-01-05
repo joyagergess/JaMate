@@ -23,7 +23,6 @@ return new class extends Migration
                 ->constrained('user_tracks')
                 ->cascadeOnDelete();
 
-            $table->string('context')->nullable();
 
             $table->timestamp('created_at')->useCurrent();
 
