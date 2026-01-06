@@ -3,29 +3,33 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Profile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AuthService
 {
-
     public function register(array $data): void
     {
         DB::transaction(function () use ($data) {
+
+            $existingUser = User::where('email', $data['email'])->first();
+
+            if ($existingUser && ! $existingUser->hasVerifiedEmail()) {
+                $existingUser->sendEmailVerificationNotification();
+                return;
+            }
+
+            if ($existingUser && $existingUser->hasVerifiedEmail()) {
+                throw new \Exception('Email already registered');
+            }
 
             $user = new User();
             $user->email = $data['email'];
             $user->password = Hash::make($data['password']);
             $user->save();
-
-            $profile = new Profile();
-            $profile->fill([
-                'user_id' => $user->id,
-                'name' => $data['name'] ?? null,
-            ]);
-            $profile->save();
 
             $authProvider = $user->authProviders()->make();
             $authProvider->provider = 'email';
@@ -36,21 +40,19 @@ class AuthService
         });
     }
 
-
     public function login(array $data): string
     {
-        if (! $token = JWTAuth::attempt($data)) {
-            throw new \Exception('Invalid credentials');
-        }
+        $user = User::where('email', $data['email'])->first();
 
-        $user = JWTAuth::user();
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            throw new AuthenticationException('Invalid email or password');
+        }
 
         if (! $user->hasVerifiedEmail()) {
-            JWTAuth::invalidate($token);
-            throw new \Exception('Email not verified');
+            throw new HttpException(403, 'Email not verified');
         }
 
-        return $token;
+        return JWTAuth::fromUser($user);
     }
 
     public function logout(): void

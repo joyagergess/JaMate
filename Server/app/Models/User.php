@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use App\Models\Profile;
-use App\Models\AuthProvider;
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
+    use Notifiable; 
+
     protected $fillable = [
         'email',
         'password',
