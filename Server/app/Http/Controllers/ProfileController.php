@@ -25,20 +25,41 @@ class ProfileController extends Controller
                 'Profile created successfully',
                 201
             );
-
         } catch (HttpException $e) {
             return $this->errorResponse(
                 $e->getMessage(),
                 $e->getStatusCode()
             );
-
         } catch (\Throwable $e) {
-    return $this->errorResponse(
-        $e->getMessage(),
-        500
-    );
-}
-
+            return $this->errorResponse(
+                $e->getMessage(),
+                500
+            );
         }
     }
 
+    public function update(CreateProfileRequest $request)
+    {
+        try {
+            $profile = $this->profileService->update(
+                auth()->user(),
+                $request->validated()
+            );
+
+            return $this->successResponse(
+                $profile,
+                'Profile updated successfully'
+            );
+        } catch (HttpException $e) {
+            return $this->errorResponse(
+                $e->getMessage(),
+                $e->getStatusCode()
+            );
+        } catch (\Throwable $e) {
+            return $this->errorResponse(
+                $e->getMessage(),
+                500
+            );
+        }
+    }
+}

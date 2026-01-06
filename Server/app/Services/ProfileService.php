@@ -141,4 +141,41 @@ class ProfileService
     {
         return ucfirst(strtolower(trim($name)));
     }
+
+public function update(User $user, array $data): Profile
+{
+    $profile = $user->profile;
+
+    if (!$profile) {
+        throw new HttpException(404, 'Profile not found');
+    }
+
+    return DB::transaction(function () use ($profile, $data) {
+
+        
+        $profile->name = $data['name'];
+        $profile->birth_date = $data['birth_date'];
+        $profile->gender = strtolower($data['gender']);
+        $profile->experience_level = strtolower($data['experience_level']);
+        $profile->location = $data['location'] ?? null;
+        $profile->bio = $data['bio'] ?? null;
+        $profile->save();
+
+   
+        $this->syncInstruments($profile, $data['instruments']);
+        $this->syncGenres($profile, $data['genres']);
+        $this->syncObjectives($profile, $data['objectives']);
+
+       
+        $profile->media()->delete();
+        $this->createMedia($profile, $data['media'] ?? []);
+
+        return $profile->load([
+            'instruments',
+            'genres',
+            'objectives',
+            'media',
+        ]);
+    });
+}
 }

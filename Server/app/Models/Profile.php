@@ -75,4 +75,9 @@ class Profile extends Model
             'swiped_profile_id'
         );
     }
+      public function media()
+    {
+        return $this->hasMany(ProfileMedia::class)
+            ->orderBy('order_index');
+    }
 }
