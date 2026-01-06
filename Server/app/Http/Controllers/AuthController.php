@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
-use Illuminate\Http\Request;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\LoginRequest;
 
 class AuthController extends Controller
 {
@@ -12,29 +13,22 @@ class AuthController extends Controller
         protected AuthService $authService
     ) {}
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $data = $request->validate([
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'display_name' => 'nullable|string',
-        ]);
-
-        $this->authService->register($data);
+        $this->authService->register(
+            $request->validated()
+        );
 
         return response()->json([
             'message' => 'Verification email sent'
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $data = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $token = $this->authService->login($data);
+        $token = $this->authService->login(
+            $request->validated()
+        );
 
         return response()->json([
             'token' => $token,
