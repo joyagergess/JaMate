@@ -6,12 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Traits\ApiResponse;
+
 
 class AuthController extends Controller
 {
-    use ApiResponse;
-
     public function __construct(
         protected AuthService $authService
     ) {}
