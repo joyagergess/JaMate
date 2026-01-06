@@ -47,11 +47,9 @@ class AuthService
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw new AuthenticationException('Invalid email or password');
         }
-
         if (! $user->hasVerifiedEmail()) {
             throw new HttpException(403, 'Email not verified');
         }
-
         return JWTAuth::fromUser($user);
     }
 

@@ -33,6 +33,7 @@ class AuthController extends Controller
             return $this->successResponse([
                 'token' => $token,
             ]);
+            
         } catch (AuthenticationException $e) {
             return $this->errorResponse(
                 $e->getMessage(),

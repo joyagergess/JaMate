@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\ProfileController;
+
 
 Route::prefix('v0.1')->group(function () {
 
@@ -18,4 +20,11 @@ Route::prefix('v0.1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
         });
     });
+
+    Route::middleware('auth:api') ->prefix('profile')->group(function () {
+            Route::get('get', [ProfileController::class, 'get']);
+            Route::post('create', [ProfileController::class, 'create']);
+            Route::post('update', [ProfileController::class, 'update']);
+            Route::post('delete', [ProfileController::class, 'delete']);
+        });
 });
