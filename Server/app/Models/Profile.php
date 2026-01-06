@@ -4,6 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Instrument;
+use App\Models\Genre;
+use App\Models\Objective;
+use App\Models\Swipe;
 
 class Profile extends Model
 {
@@ -26,7 +31,6 @@ class Profile extends Model
         'experience_level' => 'string',
     ];
 
-  
     public function user()
     {
         return $this->belongsTo(User::class);

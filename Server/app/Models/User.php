@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Profile;
+use App\Models\AuthProvider;
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {

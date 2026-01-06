@@ -6,28 +6,36 @@ use App\Models\User;
 use App\Models\Profile;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\DB;
 
 class AuthService
 {
+
     public function register(array $data): void
     {
-        $user = new User();
-        $user->email = $data['email'];
-        $user->password = Hash::make($data['password']);
-        $user->save();
+        DB::transaction(function () use ($data) {
 
-        $profile = new Profile();
-        $profile->user_id = $user->id;
-        $profile->display_name = $data['display_name'] ?? null;
-        $profile->save();
+            $user = new User();
+            $user->email = $data['email'];
+            $user->password = Hash::make($data['password']);
+            $user->save();
 
-        $authProvider = $user->authProviders()->make();
-        $authProvider->provider = 'email';
-        $authProvider->provider_user_id = $user->email;
-        $authProvider->save();
+            $profile = new Profile();
+            $profile->fill([
+                'user_id' => $user->id,
+                'name' => $data['name'] ?? null,
+            ]);
+            $profile->save();
 
-        $user->sendEmailVerificationNotification();
+            $authProvider = $user->authProviders()->make();
+            $authProvider->provider = 'email';
+            $authProvider->provider_user_id = $user->email;
+            $authProvider->save();
+
+            $user->sendEmailVerificationNotification();
+        });
     }
+
 
     public function login(array $data): string
     {
