@@ -55,4 +55,5 @@ class AuthController extends Controller
             'Logged out'
         );
     }
+  
 }
