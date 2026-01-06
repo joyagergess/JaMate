@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Traits\ApiResponse;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         protected AuthService $authService
     ) {}
@@ -19,9 +22,7 @@ class AuthController extends Controller
             $request->validated()
         );
 
-        return response()->json([
-            'message' => 'Verification email sent'
-        ], 201);
+        return $this->successResponse(null,'Verification email sent',201 );
     }
 
     public function login(LoginRequest $request)
@@ -30,17 +31,13 @@ class AuthController extends Controller
             $request->validated()
         );
 
-        return response()->json([
-            'token' => $token,
-        ]);
+        return $this->successResponse([ 'token' => $token,]);
     }
 
     public function logout()
     {
         $this->authService->logout();
 
-        return response()->json([
-            'message' => 'Logged out'
-        ]);
+        return $this->successResponse(  null, 'Logged out');
     }
 }
