@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Profile\CreateProfileRequest;
 use App\Services\ProfileService;
+
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProfileController extends Controller
@@ -16,7 +17,7 @@ class ProfileController extends Controller
     {
         try {
             $profile = $this->profileService->create(
-                auth()->user(),
+                $request->user(),
                 $request->validated()
             );
 
@@ -59,6 +60,24 @@ class ProfileController extends Controller
             return $this->errorResponse(
                 $e->getMessage(),
                 500
+            );
+        }
+    }
+
+
+    public function get()
+    {
+        try {
+            $profile = $this->profileService->get(auth()->user());
+
+            return $this->successResponse(
+                $profile,
+                'Profile fetched successfully'
+            );
+        } catch (HttpException $e) {
+            return $this->errorResponse(
+                $e->getMessage(),
+                $e->getStatusCode()
             );
         }
     }
