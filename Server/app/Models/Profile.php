@@ -10,6 +10,9 @@ use App\Models\Genre;
 use App\Models\Objective;
 use App\Models\Swipe;
 
+/**
+ * @mixin IdeHelperProfile
+ */
 class Profile extends Model
 {
     use HasFactory;

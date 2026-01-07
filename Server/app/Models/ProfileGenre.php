@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperProfileGenre
+ */
 class ProfileGenre extends Model
 {
     protected $table = 'profile_genres';

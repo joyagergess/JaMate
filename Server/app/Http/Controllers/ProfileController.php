@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Profile\CreateProfileRequest;
 use App\Services\ProfileService;
-
+use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProfileController extends Controller
@@ -21,21 +21,11 @@ class ProfileController extends Controller
                 $request->validated()
             );
 
-            return $this->successResponse(
-                $profile,
-                'Profile created successfully',
-                201
-            );
+            return $this->successResponse($profile, 'Profile created successfully', 201);
         } catch (HttpException $e) {
-            return $this->errorResponse(
-                $e->getMessage(),
-                $e->getStatusCode()
-            );
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         } catch (\Throwable $e) {
-            return $this->errorResponse(
-                $e->getMessage(),
-                500
-            );
+            return $this->errorResponse('Internal server error', 500);
         }
     }
 
@@ -43,42 +33,23 @@ class ProfileController extends Controller
     {
         try {
             $profile = $this->profileService->update(
-                auth()->user(),
+                $request->user(),
                 $request->validated()
             );
 
-            return $this->successResponse(
-                $profile,
-                'Profile updated successfully'
-            );
+            return $this->successResponse($profile, 'Profile updated successfully');
         } catch (HttpException $e) {
-            return $this->errorResponse(
-                $e->getMessage(),
-                $e->getStatusCode()
-            );
-        } catch (\Throwable $e) {
-            return $this->errorResponse(
-                $e->getMessage(),
-                500
-            );
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 
-
-    public function get()
+    public function get(Request $request)
     {
         try {
-            $profile = $this->profileService->get(auth()->user());
-
-            return $this->successResponse(
-                $profile,
-                'Profile fetched successfully'
-            );
+            $profile = $this->profileService->get($request->user());
+            return $this->successResponse($profile, 'Profile fetched successfully');
         } catch (HttpException $e) {
-            return $this->errorResponse(
-                $e->getMessage(),
-                $e->getStatusCode()
-            );
+            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
 }

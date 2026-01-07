@@ -83,22 +83,8 @@ class ProfileService
                 collect($data['instruments'])->pluck('name')->all()
             );
 
-            $this->syncByName(
-                $profile,
-                Genre::class,
-                'genres',
-                $data['genres']
-            );
-
-            $this->syncByName(
-                $profile,
-                Objective::class,
-                'objectives',
-                $data['objectives']
-            );
-
-            $profile->media()->delete();
-            $this->createMedia($profile, $data['media'] ?? []);
+            $this->syncByName($profile, Genre::class, 'genres', $data['genres']);
+            $this->syncByName($profile, Objective::class, 'objectives', $data['objectives']);
 
             return $profile->load([
                 'instruments',
@@ -108,6 +94,7 @@ class ProfileService
             ]);
         });
     }
+
 
 
     private function createProfile(User $user, array $data): Profile
