@@ -28,12 +28,17 @@ class Profile extends Model
         'birth_date',
         'gender',
         'experience_level',
+        'embedding_dirty',
+
+
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'gender' => 'string',
         'experience_level' => 'string',
+        'embedding_dirty' => 'boolean',
+
     ];
 
     public function user()

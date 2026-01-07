@@ -13,7 +13,6 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ProfileService
 {
-
     public function create(User $user, array $data): Profile
     {
         if ($user->profile) {
@@ -22,29 +21,19 @@ class ProfileService
 
         return DB::transaction(function () use ($user, $data) {
 
-            $profile = $this->createProfile($user, $data);
+            $profile = Profile::create([
+                'user_id'          => $user->id,
+                'name'             => $data['name'],
+                'birth_date'       => $data['birth_date'],
+                'gender'           => strtolower($data['gender']),
+                'experience_level' => strtolower($data['experience_level']),
+                'location'         => $data['location'] ?? null,
+                'bio'              => $data['bio'] ?? null,
 
-            $this->syncByName(
-                $profile,
-                Instrument::class,
-                'instruments',
-                collect($data['instruments'])->pluck('name')->all()
-            );
+                'embedding_dirty'  => true,
+            ]);
 
-            $this->syncByName(
-                $profile,
-                Genre::class,
-                'genres',
-                $data['genres']
-            );
-
-            $this->syncByName(
-                $profile,
-                Objective::class,
-                'objectives',
-                $data['objectives']
-            );
-
+            $this->syncRelations($profile, $data);
             $this->createMedia($profile, $data['media'] ?? []);
 
             return $profile->load([
@@ -56,7 +45,6 @@ class ProfileService
         });
     }
 
-
     public function update(User $user, array $data): Profile
     {
         $profile = $user->profile;
@@ -67,6 +55,8 @@ class ProfileService
 
         return DB::transaction(function () use ($profile, $data) {
 
+            $embeddingDirty = $this->hasSemanticChanges($profile, $data);
+
             $profile->update([
                 'name'             => $data['name'],
                 'birth_date'       => $data['birth_date'],
@@ -74,17 +64,13 @@ class ProfileService
                 'experience_level' => strtolower($data['experience_level']),
                 'location'         => $data['location'] ?? null,
                 'bio'              => $data['bio'] ?? null,
+
+                'embedding_dirty'  => $embeddingDirty
+                    ? true
+                    : $profile->embedding_dirty,
             ]);
 
-            $this->syncByName(
-                $profile,
-                Instrument::class,
-                'instruments',
-                collect($data['instruments'])->pluck('name')->all()
-            );
-
-            $this->syncByName($profile, Genre::class, 'genres', $data['genres']);
-            $this->syncByName($profile, Objective::class, 'objectives', $data['objectives']);
+            $this->syncRelations($profile, $data);
 
             return $profile->load([
                 'instruments',
@@ -94,69 +80,6 @@ class ProfileService
             ]);
         });
     }
-
-
-
-    private function createProfile(User $user, array $data): Profile
-    {
-        return Profile::create([
-            'user_id'          => $user->id,
-            'name'             => $data['name'],
-            'birth_date'       => $data['birth_date'],
-            'gender'           => strtolower($data['gender']),
-            'experience_level' => strtolower($data['experience_level']),
-            'location'         => $data['location'] ?? null,
-            'bio'              => $data['bio'] ?? null,
-        ]);
-    }
-
-    private function syncByName(Profile $profile, string $modelClass, string $relation, array $names): void
-    {
-        if (empty($names)) {
-            $profile->{$relation}()->sync([]);
-            return;
-        }
-
-        $normalized = collect($names)
-            ->map(fn($n) => $this->normalizeName($n))
-            ->unique()
-            ->values();
-
-        $existing = $modelClass::whereIn('name', $normalized)->get();
-
-        $missing = $normalized->diff($existing->pluck('name'));
-
-        if ($missing->isNotEmpty()) {
-            $modelClass::insert(
-                $missing->map(fn($name) => ['name' => $name])->all()
-            );
-        }
-
-        $ids = $modelClass::whereIn('name', $normalized)->pluck('id')->all();
-        $profile->{$relation}()->sync($ids);
-    }
-
-    private function createMedia(Profile $profile, array $media): void
-    {
-        if (empty($media)) {
-            return;
-        }
-
-        ProfileMedia::insert(
-            collect($media)->map(fn($item) => [
-                'profile_id' => $profile->id,
-                'media_type' => $item['media_type'],
-                'media_url'  => $item['media_url'],
-                'order_index' => $item['order_index'],
-            ])->all()
-        );
-    }
-
-    private function normalizeName(string $name): string
-    {
-        return ucfirst(strtolower(trim($name)));
-    }
-
 
     public function get(User $user): Profile
     {
@@ -174,5 +97,79 @@ class ProfileService
         }
 
         return $profile;
+    }
+
+    private function syncRelations(Profile $profile, array $data): void
+    {
+        $this->syncByName(
+            $profile,
+            Instrument::class,
+            'instruments',
+            collect($data['instruments'])->pluck('name')->all()
+        );
+
+        $this->syncByName($profile, Genre::class, 'genres', $data['genres']);
+        $this->syncByName($profile, Objective::class, 'objectives', $data['objectives']);
+    }
+
+    private function hasSemanticChanges(Profile $profile, array $data): bool
+    {
+        return
+            $profile->bio !== ($data['bio'] ?? null) ||
+            $profile->location !== ($data['location'] ?? null) ||
+            $profile->experience_level !== strtolower($data['experience_level']) ||
+            $this->relationChanged($profile, 'instruments', $data['instruments']) ||
+            $this->relationChanged($profile, 'genres', $data['genres']) ||
+            $this->relationChanged($profile, 'objectives', $data['objectives']);
+    }
+
+    private function relationChanged(Profile $profile, string $relation, array $incoming): bool
+    {
+        $current = $profile->$relation->pluck('name')->sort()->values();
+        $incoming = collect($incoming)->sort()->values();
+
+        return !$current->equals($incoming);
+    }
+
+    private function syncByName(Profile $profile, string $modelClass, string $relation, array $names): void
+    {
+        if (empty($names)) {
+            $profile->{$relation}()->sync([]);
+            return;
+        }
+
+        $normalized = collect($names)
+            ->map(fn ($n) => ucfirst(strtolower(trim($n))))
+            ->unique()
+            ->values();
+
+        $existing = $modelClass::whereIn('name', $normalized)->pluck('id', 'name');
+
+        $missing = $normalized->diff($existing->keys());
+
+        if ($missing->isNotEmpty()) {
+            $modelClass::insert(
+                $missing->map(fn ($name) => ['name' => $name])->all()
+            );
+        }
+
+        $ids = $modelClass::whereIn('name', $normalized)->pluck('id')->all();
+        $profile->{$relation}()->sync($ids);
+    }
+
+    private function createMedia(Profile $profile, array $media): void
+    {
+        if (empty($media)) {
+            return;
+        }
+
+        ProfileMedia::insert(
+            collect($media)->map(fn ($item) => [
+                'profile_id'  => $profile->id,
+                'media_type'  => $item['media_type'],
+                'media_url'   => $item['media_url'],
+                'order_index' => $item['order_index'],
+            ])->all()
+        );
     }
 }
