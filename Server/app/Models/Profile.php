@@ -9,6 +9,8 @@ use App\Models\Instrument;
 use App\Models\Genre;
 use App\Models\Objective;
 use App\Models\Swipe;
+use App\Models\ProfileEmbedding;
+
 
 /**
  * @mixin IdeHelperProfile
@@ -78,9 +80,13 @@ class Profile extends Model
             'swiped_profile_id'
         );
     }
-      public function media()
+    public function media()
     {
         return $this->hasMany(ProfileMedia::class)
             ->orderBy('order_index');
+    }
+    public function embedding()
+    {
+        return $this->hasOne(ProfileEmbedding::class);
     }
 }
