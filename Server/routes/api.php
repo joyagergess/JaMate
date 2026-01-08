@@ -8,6 +8,10 @@ use App\Http\Controllers\ProfileMediaController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\EmbeddingController;
 use App\Http\Controllers\MatchController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\MessageController;
+
+
 
 
 
@@ -46,10 +50,17 @@ Route::prefix('v0.1')->group(function () {
         Route::post('/feed/swipe', [FeedController::class, 'swipe']);
     });
     Route::prefix('internal')->middleware('internal.auth')->group(function () {
-        Route::post( '/embeddings/generate', [EmbeddingController::class, 'generate'] );
+        Route::post('/embeddings/generate', [EmbeddingController::class, 'generate']);
     });
 
-      Route::middleware('auth:api')->prefix('matches')->group(function () {
-        Route::get('/get', [MatchController::class, 'index']);      
+    Route::middleware('auth:api')->prefix('matches')->group(function () {
+        Route::get('/get', [MatchController::class, 'index']);
+    });
+
+    Route::middleware('auth:api')->prefix('conversations')->group(function () {
+        Route::get('/', [ConversationController::class, 'index']);
+        Route::get('/{conversation}/messages',[MessageController::class, 'index'] );
+
+        Route::post('/{conversation}/messages',[MessageController::class, 'store']);
     });
 });
