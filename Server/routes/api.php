@@ -44,9 +44,6 @@ Route::prefix('v0.1')->group(function () {
         Route::post('/feed/swipe', [FeedController::class, 'swipe']);
     });
     Route::prefix('internal')->middleware('internal.auth')->group(function () {
-        Route::post(
-            '/embeddings/generate',
-            [EmbeddingController::class, 'generate']
-        );
+        Route::post( '/embeddings/generate', [EmbeddingController::class, 'generate'] );
     });
 });

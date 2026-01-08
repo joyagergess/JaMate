@@ -7,9 +7,12 @@ use App\Models\ProfileEmbedding;
 
 class ProfileEmbeddingService
 {
-    public function processBatch(int $limit = 10): int
+    public function processBatch(int $limit = 25): int
     {
-        $profiles = Profile::where('embedding_dirty', true)
+        $profiles = Profile::query()
+            ->where('embedding_dirty', true)
+            ->with(['instruments', 'genres', 'objectives'])
+            ->orderBy('updated_at')
             ->limit($limit)
             ->get();
 
@@ -26,23 +29,22 @@ class ProfileEmbeddingService
 
     private function processProfile(Profile $profile): void
     {
-        $profile->loadMissing(['instruments', 'genres', 'objectives']);
-
         $text = app(ProfileEmbeddingTextBuilder::class)->build($profile);
 
         if ($text === '') {
+            $profile->update(['embedding_dirty' => false]);
             return;
         }
 
-        $embedding = app(OpenAIEmbeddingService::class)->generate($text);
+        try {
+            $embedding = app(OpenAIEmbeddingService::class)->generate($text);
 
-        ProfileEmbedding::updateOrCreate(
-            ['profile_id' => $profile->id],
-            ['embedding' => $embedding]
-        );
+            ProfileEmbedding::updateOrCreate(
+                ['profile_id' => $profile->id],
+                ['embedding' => $embedding]
+            );
 
-        $profile->update([
-            'embedding_dirty' => false,
-        ]);
+            $profile->update(['embedding_dirty' => false]);
+        } catch (\Throwable $e) {}
     }
 }

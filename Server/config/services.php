@@ -35,7 +35,10 @@ return [
         ],
     ],
     'internal' => [
-    'key' => env('INTERNAL_API_KEY'),
-],
+        'key' => env('INTERNAL_API_KEY'),
+    ],
+    'openai' => [
+        'embedding_model' => env('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+    ],
 
 ];

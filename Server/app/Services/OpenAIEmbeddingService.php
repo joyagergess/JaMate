@@ -6,14 +6,18 @@ use OpenAI\Client;
 
 class OpenAIEmbeddingService
 {
+    protected string $model;
+
     public function __construct(
         protected Client $client
-    ) {}
+    ) {
+        $this->model = config('services.openai.embedding_model');
+    }
 
     public function generate(string $text): array
     {
         $response = $this->client->embeddings()->create([
-            'model' => 'text-embedding-3-small',
+            'model' => $this->model,
             'input' => $text,
         ]);
 

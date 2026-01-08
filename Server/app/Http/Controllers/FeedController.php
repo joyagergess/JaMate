@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Services\FeedService;
+use App\Services\SwipeService;
 use Illuminate\Http\Request;
 use App\Http\Requests\Feed\SwipeRequest;
-use App\Services\SwipeService;
-use App\Models\Profile;
+use LogicException;
+use InvalidArgumentException;
 
 class FeedController extends Controller
 {
@@ -20,7 +20,7 @@ class FeedController extends Controller
     {
         $profile = $request->user()->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             return $this->errorResponse('Profile not found', 404);
         }
 
@@ -35,35 +35,37 @@ class FeedController extends Controller
         ]);
     }
 
-
     public function next(Request $request)
     {
         $profile = $request->user()->profile;
+
+        if (! $profile) {
+            return $this->errorResponse('Profile not found', 404);
+        }
 
         return $this->successResponse(
             $this->feedService->next($profile)
         );
     }
+
     public function swipe(SwipeRequest $request)
     {
         $me = $request->user()->profile;
 
-        if (!$me) {
+        if (! $me) {
             return $this->errorResponse('Profile not found', 404);
         }
 
-        $target = Profile::findOrFail($request->profile_id);
+        try {
+            $result = $this->swipeService->swipe(
+                $me,
+                $request->profile_id,
+                $request->direction
+            );
 
-        if ($me->id === $target->id) {
-            return $this->errorResponse('Cannot swipe yourself', 400);
+            return $this->successResponse($result);
+        } catch (LogicException | InvalidArgumentException $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
-
-        $result = $this->swipeService->swipe(
-            $me,
-            $target,
-            $request->direction
-        );
-
-        return $this->successResponse($result);
     }
 }
