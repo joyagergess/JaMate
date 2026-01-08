@@ -7,6 +7,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileMediaController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\EmbeddingController;
+use App\Http\Controllers\MatchController;
+
 
 
 Route::prefix('v0.1')->group(function () {
@@ -45,5 +47,9 @@ Route::prefix('v0.1')->group(function () {
     });
     Route::prefix('internal')->middleware('internal.auth')->group(function () {
         Route::post( '/embeddings/generate', [EmbeddingController::class, 'generate'] );
+    });
+
+      Route::middleware('auth:api')->prefix('matches')->group(function () {
+        Route::get('/get', [MatchController::class, 'index']);      
     });
 });

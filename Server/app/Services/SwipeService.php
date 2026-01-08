@@ -13,7 +13,7 @@ use InvalidArgumentException;
 
 class SwipeService
 {
-    
+
     public function swipe(Profile $me, Profile $other, string $direction): array
     {
         if ($me->id === $other->id) {
@@ -53,7 +53,7 @@ class SwipeService
         });
     }
 
-   
+
     protected function recordSwipe(Profile $me, Profile $other, string $direction): void
     {
         Swipe::updateOrCreate(
@@ -83,35 +83,31 @@ class SwipeService
         ]);
     }
 
-    protected function getOrCreateConversation(int $matchId, int $creatorProfileId ): Conversation 
+    protected function getOrCreateConversation(int $matchId): Conversation
     {
         return Conversation::firstOrCreate(
             ['match_id' => $matchId],
-            [
-                'type' => 'direct',
-                'created_by_profile_id' => $creatorProfileId,
-            ]
+            ['type' => 'direct']
         );
     }
 
-    protected function attachParticipants(int $conversationId, int $profileA,int $profileB): void 
+
+    protected function attachParticipants(int $conversationId, int $profileA, int $profileB): void
     {
         ConversationParticipant::insertOrIgnore([
             [
                 'conversation_id' => $conversationId,
                 'profile_id' => $profileA,
-                'joined_at' => now(),
             ],
             [
                 'conversation_id' => $conversationId,
                 'profile_id' => $profileB,
-                'joined_at' => now(),
             ],
         ]);
     }
 
-    protected function swipeResponse(  bool $matched,  ?int $conversationId = null ): array
-     {
+    protected function swipeResponse(bool $matched,  ?int $conversationId = null): array
+    {
         return [
             'status' => 'jammed',
             'match' => $matched,

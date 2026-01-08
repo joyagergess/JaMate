@@ -26,7 +26,7 @@ class MatchModel extends Model
         'created_at' => 'datetime',
     ];
 
-   
+
 
     public function profileOne()
     {
@@ -41,6 +41,15 @@ class MatchModel extends Model
         return $this->belongsTo(
             Profile::class,
             'profile_two_id'
+        );
+    }
+
+    public function conversation()
+    {
+        return $this->hasOne(
+            Conversation::class,
+            'match_id',
+            'id'
         );
     }
 }

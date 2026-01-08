@@ -15,6 +15,7 @@ class Conversation extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'match_id',
         'type',
         'name',
     ];
