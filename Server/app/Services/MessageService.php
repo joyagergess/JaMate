@@ -10,7 +10,6 @@ use LogicException;
 
 class MessageService
 {
-
     public function listMessages(
         Conversation $conversation,
         Profile $profile,

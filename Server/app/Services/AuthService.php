@@ -14,47 +14,77 @@ class AuthService
     public function register(array $data): void
     {
         DB::transaction(function () use ($data) {
+            $user = $this->findUserByEmail($data['email']);
 
-            $existingUser = User::where('email', $data['email'])->first();
-
-            if ($existingUser && ! $existingUser->hasVerifiedEmail()) {
-                $existingUser->sendEmailVerificationNotification();
+            if ($user) {
+                $this->handleExistingUserRegistration($user);
                 return;
             }
 
-            if ($existingUser && $existingUser->hasVerifiedEmail()) {
-                throw new \Exception('Email already registered');
-            }
-
-            $user = new User();
-            $user->email = $data['email'];
-            $user->password = Hash::make($data['password']);
-            $user->save();
-
-            $authProvider = $user->authProviders()->make();
-            $authProvider->provider = 'email';
-            $authProvider->provider_user_id = $user->email;
-            $authProvider->save();
-
-            $user->sendEmailVerificationNotification();
+            $user = $this->createUser($data);
+            $this->attachEmailAuthProvider($user);
+            $this->sendVerificationEmail($user);
         });
     }
 
     public function login(array $data): string
     {
-        $user = User::where('email', $data['email'])->first();
+        $user = $this->findUserByEmail($data['email']);
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            throw new AuthenticationException('Invalid email or password');
-        }
-        if (! $user->hasVerifiedEmail()) {
-            throw new HttpException(403, 'Email not verified');
-        }
+        $this->ensureUserCanLogin($user, $data['password']);
+
         return JWTAuth::fromUser($user);
     }
 
     public function logout(): void
     {
         JWTAuth::invalidate(JWTAuth::getToken());
+    }
+
+    protected function findUserByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+
+    protected function handleExistingUserRegistration(User $user): void
+    {
+        if (! $user->hasVerifiedEmail()) {
+            $this->sendVerificationEmail($user);
+            return;
+        }
+
+        throw new \Exception('Email already registered');
+    }
+
+    protected function createUser(array $data): User
+    {
+        return User::create([
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+    }
+
+    protected function attachEmailAuthProvider(User $user): void
+    {
+        $user->authProviders()->create([
+            'provider'          => 'email',
+            'provider_user_id'  => $user->email,
+        ]);
+    }
+
+    protected function sendVerificationEmail(User $user): void
+    {
+        $user->sendEmailVerificationNotification();
+    }
+
+    protected function ensureUserCanLogin(?User $user, string $password): void
+    {
+        if (! $user || ! Hash::check($password, $user->password)) {
+            throw new AuthenticationException('Invalid email or password');
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            throw new HttpException(403, 'Email not verified');
+        }
     }
 }
