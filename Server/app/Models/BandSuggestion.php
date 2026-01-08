@@ -15,18 +15,18 @@ class BandSuggestion extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'profile_ids',
-        'status',
+        'status',       
         'expires_at',
+        'ai_score',
+        'ai_reason',
     ];
 
     protected $casts = [
-        'profile_ids' => 'array',
-        'status' => 'string',    
+        'status'     => 'string',
         'expires_at' => 'datetime',
+        'ai_score'   => 'integer',
     ];
 
- 
     public function members()
     {
         return $this->hasMany(BandSuggestionMember::class);

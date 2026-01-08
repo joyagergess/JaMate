@@ -17,15 +17,14 @@ class BandSuggestionMember extends Model
     protected $fillable = [
         'band_suggestion_id',
         'profile_id',
-        'decision',
+        'decision',     
         'decided_at',
     ];
 
     protected $casts = [
-        'decision' => 'string',      
+        'decision'   => 'string',
         'decided_at' => 'datetime',
     ];
-
 
     public function bandSuggestion()
     {
