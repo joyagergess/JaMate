@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: Server
-        run: composer install --no-interaction --prefer-dist
+        run: composer install --no-interaction --prefer-dist --no-scripts
 
       - name: Prepare env
         working-directory: Server
