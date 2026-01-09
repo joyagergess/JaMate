@@ -1,13 +1,15 @@
 name: Backend CI (Laravel)
 
 on:
+  push:
+    paths:
+      - "Server/**"
   pull_request:
     paths:
       - "Server/**"
-      - ".github/workflows/backend-ci.yml"
 
 jobs:
-  backend-ci:
+  backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,22 +19,19 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          extensions: mbstring
+          extensions: mbstring, pdo, pdo_pgsql
           coverage: none
 
       - name: Install dependencies
-        run: |
-          cd Server
-          composer install --no-interaction --prefer-dist --no-scripts
+        working-directory: Server
+        run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare env
+      - name: Prepare environment
+        working-directory: Server
         run: |
-          cd Server
-          ls -la
           cp .env.ci .env
           php artisan key:generate
 
       - name: Run tests
-        run: |
-          cd Server
-          php artisan test
+        working-directory: Server
+        run: php artisan test
