@@ -43,13 +43,16 @@ jobs:
           extensions: mbstring, pdo, pdo_pgsql
           coverage: none
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
+      - name: Install Composer dependencies (no scripts)
+        run: composer install --no-interaction --prefer-dist --no-scripts
 
       - name: Prepare environment
         run: |
           cp .env.ci .env
           php artisan key:generate
+
+      - name: Run package discovery
+        run: php artisan package:discover
 
       - name: Wait for PostgreSQL
         run: |
