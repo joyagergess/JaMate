@@ -13,25 +13,6 @@ jobs:
   backend-ci:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: jamate_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    defaults:
-      run:
-        working-directory: Server
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,29 +21,19 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          extensions: mbstring, pdo, pdo_pgsql
+          extensions: mbstring
           coverage: none
 
-      - name: Install Composer dependencies (no scripts)
+      - name: Install Composer dependencies
+        working-directory: Server
         run: composer install --no-interaction --prefer-dist --no-scripts
 
       - name: Prepare environment
+        working-directory: Server
         run: |
-          cp .env.ci .env
+          cp .env.example .env
           php artisan key:generate
 
-      - name: Run package discovery
-        run: php artisan package:discover
-
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
-
-      - name: Run migrations
-        run: php artisan migrate --force
-
       - name: Run tests
+        working-directory: Server
         run: php artisan test
