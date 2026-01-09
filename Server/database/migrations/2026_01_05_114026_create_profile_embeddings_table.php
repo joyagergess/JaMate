@@ -9,14 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('profile_embeddings', function (Blueprint $table) {
-            $table->foreignId('profile_id')
-                ->primary()
-                ->constrained('profiles')
-                ->cascadeOnDelete();
 
-            $table->float('embedding')->array();
+            $table->unsignedBigInteger('profile_id')->primary();
+
+            $table->json('embedding');
 
             $table->timestamp('updated_at')->useCurrent();
+            $table->foreign('profile_id')
+                ->references('id')
+                ->on('profiles')
+                ->cascadeOnDelete();
         });
     }
 

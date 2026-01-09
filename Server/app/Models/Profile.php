@@ -4,7 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Instrument;
+use App\Models\Genre;
+use App\Models\Objective;
+use App\Models\Swipe;
+use App\Models\ProfileEmbedding;
 
+
+/**
+ * @mixin IdeHelperProfile
+ */
 class Profile extends Model
 {
     use HasFactory;
@@ -18,15 +28,19 @@ class Profile extends Model
         'birth_date',
         'gender',
         'experience_level',
+        'embedding_dirty',
+
+
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'gender' => 'string',
         'experience_level' => 'string',
+        'embedding_dirty' => 'boolean',
+
     ];
 
-  
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -70,5 +84,19 @@ class Profile extends Model
             Swipe::class,
             'swiped_profile_id'
         );
+    }
+    public function media()
+    {
+        return $this->hasMany(ProfileMedia::class)
+            ->orderBy('order_index');
+    }
+    public function embedding()
+    {
+        return $this->hasOne(ProfileEmbedding::class);
+    }
+
+    public function bandMembers()
+    {
+        return $this->hasMany(BandMember::class);
     }
 }

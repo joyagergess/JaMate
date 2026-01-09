@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperMatchModel
+ */
 class MatchModel extends Model
 {
     use HasFactory;
@@ -23,7 +26,7 @@ class MatchModel extends Model
         'created_at' => 'datetime',
     ];
 
-   
+
 
     public function profileOne()
     {
@@ -38,6 +41,15 @@ class MatchModel extends Model
         return $this->belongsTo(
             Profile::class,
             'profile_two_id'
+        );
+    }
+
+    public function conversation()
+    {
+        return $this->hasOne(
+            Conversation::class,
+            'match_id',
+            'id'
         );
     }
 }

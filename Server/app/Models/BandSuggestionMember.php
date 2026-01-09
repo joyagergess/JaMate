@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @mixin IdeHelperBandSuggestionMember
+ */
 class BandSuggestionMember extends Model
 {
     use HasFactory;
@@ -19,10 +22,9 @@ class BandSuggestionMember extends Model
     ];
 
     protected $casts = [
-        'decision' => 'string',      
+        'decision'   => 'string',
         'decided_at' => 'datetime',
     ];
-
 
     public function bandSuggestion()
     {
@@ -32,5 +34,13 @@ class BandSuggestionMember extends Model
     public function profile()
     {
         return $this->belongsTo(Profile::class);
+    }
+    
+    public function suggestion()
+    {
+        return $this->belongsTo(
+            BandSuggestion::class,
+            'band_suggestion_id'
+        );
     }
 }
