@@ -94,4 +94,9 @@ class Profile extends Model
     {
         return $this->hasOne(ProfileEmbedding::class);
     }
+
+    public function bandMembers()
+    {
+        return $this->hasMany(BandMember::class);
+    }
 }

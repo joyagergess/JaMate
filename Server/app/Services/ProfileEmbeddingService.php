@@ -45,6 +45,7 @@ class ProfileEmbeddingService
             );
 
             $profile->update(['embedding_dirty' => false]);
-        } catch (\Throwable $e) {}
+        }  catch (\Throwable $e) {}
+
     }
 }

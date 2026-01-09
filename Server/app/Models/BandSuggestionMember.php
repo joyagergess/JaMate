@@ -17,7 +17,7 @@ class BandSuggestionMember extends Model
     protected $fillable = [
         'band_suggestion_id',
         'profile_id',
-        'decision',     
+        'decision',
         'decided_at',
     ];
 
@@ -34,5 +34,13 @@ class BandSuggestionMember extends Model
     public function profile()
     {
         return $this->belongsTo(Profile::class);
+    }
+    
+    public function suggestion()
+    {
+        return $this->belongsTo(
+            BandSuggestion::class,
+            'band_suggestion_id'
+        );
     }
 }

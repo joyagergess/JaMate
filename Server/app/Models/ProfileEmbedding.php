@@ -3,23 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class ProfileEmbedding extends Model
 {
-    protected $table = 'profile_embeddings';
-
-    protected $primaryKey = 'profile_id';
-    public $incrementing = false;
-
-    public $timestamps = false;
-
-    protected $casts = [
-        'embedding' => 'array',
-    ];
+    public $timestamps = false; 
 
     protected $fillable = [
         'profile_id',
         'embedding',
+    ];
+
+    protected $casts = [
+        'embedding' => 'array',
     ];
 
     public function profile()
@@ -27,3 +21,5 @@ class ProfileEmbedding extends Model
         return $this->belongsTo(Profile::class);
     }
 }
+
+  

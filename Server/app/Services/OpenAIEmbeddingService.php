@@ -53,11 +53,11 @@ class OpenAIEmbeddingService
         ]);
     }
 
-
     private function extractEmbedding(object $response): array
     {
-        return $response->data[0]->embedding;
+        return $response->embeddings[0]->embedding;
     }
+
 
     private function extractBandScore(object $response): array
     {

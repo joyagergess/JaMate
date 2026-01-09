@@ -13,10 +13,6 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\BandSuggestionController;
 
 
-
-
-
-
 Route::prefix('v0.1')->group(function () {
 
     Route::prefix('auth')->group(function () {
@@ -53,6 +49,8 @@ Route::prefix('v0.1')->group(function () {
     });
     Route::prefix('internal')->middleware('internal.auth')->group(function () {
         Route::post('/embeddings/generate', [EmbeddingController::class, 'generate']);
+        Route::post('/bands/generate', [BandSuggestionController::class, 'generate']);
+        
     });
 
     Route::middleware('auth:api')->prefix('matches')->group(function () {
@@ -62,11 +60,10 @@ Route::prefix('v0.1')->group(function () {
     Route::middleware('auth:api')->prefix('conversations')->group(function () {
         Route::get('/', [ConversationController::class, 'index']);
         Route::get('/{conversation}/messages', [MessageController::class, 'index']);
-
         Route::post('/{conversation}/messages', [MessageController::class, 'store']);
     });
 
-    Route::middleware('auth:api')->prefix('bands')->group(function () {
+     Route::middleware('auth:api')->prefix('bands')->group(function () {
         Route::get('suggestions', [BandSuggestionController::class, 'index']);
         Route::post('suggestions/{suggestion}/accept', [BandSuggestionController::class, 'accept']);
         Route::post('suggestions/{suggestion}/reject', [BandSuggestionController::class, 'reject']);

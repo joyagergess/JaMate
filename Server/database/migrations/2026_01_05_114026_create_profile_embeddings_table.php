@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('profile_embeddings', function (Blueprint $table) {
             $table->unsignedBigInteger('profile_id')->primary();
+            
 
             $table->json('embedding');
 
