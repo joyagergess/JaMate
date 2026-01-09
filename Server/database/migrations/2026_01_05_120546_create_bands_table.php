@@ -21,8 +21,6 @@ return new class extends Migration
                 ->constrained('conversations')
                 ->nullOnDelete();
 
-            $table->string('cover_image_url')->nullable();
-
             $table->timestamp('created_at')->useCurrent();
         });
     }
