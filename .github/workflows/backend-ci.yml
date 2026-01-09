@@ -16,6 +16,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
+          extensions: mbstring, pdo, pdo_pgsql
 
-      - name: Verify PHP
-        run: php -v
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+        working-directory: Server
+
+      - name: Verify Laravel
+        run: php artisan --version
+        working-directory: Server
