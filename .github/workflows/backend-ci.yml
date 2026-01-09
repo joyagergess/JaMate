@@ -14,8 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -24,14 +23,14 @@ jobs:
           extensions: mbstring
           coverage: none
 
-      - name: Install Composer dependencies
+      - name: Install dependencies
         working-directory: Server
-        run: composer install --no-interaction --prefer-dist --no-scripts
+        run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare environment
+      - name: Prepare env
         working-directory: Server
         run: |
-          cp .env.example .env
+          cp .env.ci .env
           php artisan key:generate
 
       - name: Run tests
