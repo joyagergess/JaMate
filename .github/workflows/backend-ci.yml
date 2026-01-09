@@ -1,13 +1,10 @@
 name: Backend CI (Laravel)
 
 on:
-  push:
-    paths:
-      - "Server/**"
-      - ".github/workflows/backend-ci.yml"
   pull_request:
     paths:
       - "Server/**"
+      - ".github/workflows/backend-ci.yml"
 
 jobs:
   backend-ci:
@@ -24,15 +21,18 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        working-directory: Server
-        run: composer install --no-interaction --prefer-dist --no-scripts
+        run: |
+          cd Server
+          composer install --no-interaction --prefer-dist --no-scripts
 
       - name: Prepare env
-        working-directory: Server
         run: |
+          cd Server
+          ls -la
           cp .env.ci .env
           php artisan key:generate
 
       - name: Run tests
-        working-directory: Server
-        run: php artisan test
+        run: |
+          cd Server
+          php artisan test
