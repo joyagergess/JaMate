@@ -20,8 +20,6 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
-        working-directory: Server
 
       - name: Verify Laravel
         run: php artisan --version
-        working-directory: Server
