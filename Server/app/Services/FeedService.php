@@ -137,7 +137,7 @@ class FeedService
                 'instruments:id,name',
                 'genres:id,name',
                 'objectives:id,name',
-                'embedding:id,profile_id,embedding',
+                'embedding:profile_id,embedding',
                 'media:id,profile_id,media_type,media_url,order_index',
             ])
             ->get();

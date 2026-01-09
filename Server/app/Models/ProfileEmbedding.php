@@ -3,9 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+
 class ProfileEmbedding extends Model
 {
-    public $timestamps = false; 
+    protected $table = 'profile_embeddings';
+
+    protected $primaryKey = 'profile_id';
+    public $incrementing = false;
+    protected $keyType = 'int';
+
+    public $timestamps = false;
 
     protected $fillable = [
         'profile_id',
@@ -21,5 +28,3 @@ class ProfileEmbedding extends Model
         return $this->belongsTo(Profile::class);
     }
 }
-
-  

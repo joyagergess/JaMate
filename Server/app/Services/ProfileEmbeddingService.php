@@ -45,7 +45,17 @@ class ProfileEmbeddingService
             );
 
             $profile->update(['embedding_dirty' => false]);
-        }  catch (\Throwable $e) {}
+          } catch (\Throwable $e) {
 
-    }
+    \Log::error('[Embeddings] FAILED to generate embedding', [
+        'profile_id' => $profile->id,
+        'message'    => $e->getMessage(),
+        'file'       => $e->getFile(),
+        'line'       => $e->getLine(),
+    ]);
+
+    // IMPORTANT: do NOT mark dirty = false on failure
+}
+
+}
 }
