@@ -17,7 +17,7 @@ class ConversationService
             ->with([
                 'participants.profile.media',
                 'messages' => function ($q) {
-                    $q->orderByDesc('sent_at')->limit(1);
+                     $q->orderByDesc('sent_at')->limit(1);
                 },
             ])
 
