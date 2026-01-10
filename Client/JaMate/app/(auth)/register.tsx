@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Checkbox from 'expo-checkbox';
@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 
 import { registerStyles as styles } from '../../styles/register.styles';
+import { AppInput } from '../../components/ui/AppInput';
+import { AppButton } from '../../components/ui/AppButton';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -16,7 +18,6 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -26,30 +27,23 @@ export default function RegisterScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>
           Create Account{'\n'}with Email
         </Text>
 
-        <Text style={styles.inputLabel}>email:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="example@gmail.com"
-          placeholderTextColor="#9CA3AF"
+        <AppInput
+          label="email:"
           value={email}
           onChangeText={setEmail}
-          autoCapitalize="none"
+          placeholder="example@gmail.com"
         />
 
-        <Text style={styles.inputLabel}>Password:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••••"
-          placeholderTextColor="#9CA3AF"
-          secureTextEntry
+        <AppInput
+          label="Password:"
           value={password}
           onChangeText={setPassword}
+          secure
         />
 
         <View style={styles.checkboxRow}>
@@ -64,14 +58,11 @@ export default function RegisterScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.primaryButton}
+        <AppButton
+          title="Create Account"
           onPress={() => {
-            // 🔜 call register API here
           }}
-        >
-          <Text style={styles.primaryText}>Create Account</Text>
-        </TouchableOpacity>
+        />
 
         <View style={styles.dividerRow}>
           <View style={styles.divider} />
