@@ -4,10 +4,12 @@ import { useRouter } from 'expo-router';
 import Checkbox from 'expo-checkbox';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import Toast from 'react-native-toast-message';
 
 import { registerStyles as styles } from '../../styles/register.styles';
 import { AppInput } from '../../components/ui/AppInput';
 import { AppButton } from '../../components/ui/AppButton';
+import { useRegister } from '../../hooks/auth/useRegister';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -16,8 +18,11 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [accepted, setAccepted] = useState(false);
 
+  const { mutate: register, isPending } = useRegister();
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -27,6 +32,7 @@ export default function RegisterScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>
           Create Account{'\n'}with Email
@@ -60,32 +66,41 @@ export default function RegisterScreen() {
 
         <AppButton
           title="Create Account"
-          onPress={() => {
-          }}
+          loading={isPending}
+          disabled={!email || !password || !accepted}
+          onPress={() =>
+            register(
+              { email, password },
+              {
+                onSuccess: () => {
+                  Toast.show({
+                    type: 'success',
+                    text1: 'Account created',
+                    text2: 'You can now log in',
+                  });
+                  router.replace('/(auth)/login');
+                },
+               onError: (err: any) => {
+  console.log('REGISTER ERROR:', err);
+  console.log('RESPONSE:', err?.response?.data);
+
+  Toast.show({
+    type: 'error',
+    text1: 'Registration failed',
+    text2: err?.response?.data?.message || 'Unknown error',
+  });
+}
+,
+              }
+            )
+          }
         />
 
-        <View style={styles.dividerRow}>
-          <View style={styles.divider} />
-          <Text style={styles.dividerText}>or</Text>
-          <View style={styles.divider} />
-        </View>
-
-        <TouchableOpacity style={styles.googleButton}>
-          <Ionicons name="logo-google" size={18} color="#000000" />
-          <Text style={styles.googleText}>Sign in with google</Text>
-        </TouchableOpacity>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Already have an account?{' '}
-            <Text
-              style={styles.link}
-              onPress={() => router.replace('/(auth)/login')}
-            >
-              Log in
-            </Text>
-          </Text>
-        </View>
+        <AppButton
+          title="Sign in with google"
+          variant="secondary"
+          disabled={isPending}
+        />
       </View>
     </SafeAreaView>
   );
