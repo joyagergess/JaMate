@@ -48,7 +48,6 @@ class ProfileMediaService
         /** @var \Illuminate\Http\UploadedFile $file */
         $file = $data['media_file'];
 
-        // Store file (local for now, S3 later)
         $path = $file->store(
             "profiles/{$profile->id}",
             'public'
@@ -75,6 +74,16 @@ class ProfileMediaService
 
     public function delete(ProfileMedia $media): void
     {
+        if ($media->media_url) {
+            $path = str_replace(
+                Storage::disk('public')->url('/'),
+                '',
+                $media->media_url
+            );
+
+            Storage::disk('public')->delete($path);
+        }
+
         $media->delete();
     }
 
