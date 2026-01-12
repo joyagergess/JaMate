@@ -36,7 +36,7 @@ class ProfileEmbeddingService
             return;
         }
 
-        try {
+        
             $embedding = app(OpenAIEmbeddingService::class)->generate($text);
 
             ProfileEmbedding::updateOrCreate(
@@ -45,9 +45,7 @@ class ProfileEmbeddingService
             );
 
             $profile->update(['embedding_dirty' => false]);
-          } catch (\Throwable $e) {
-
-      }
+          
 
 }
 }

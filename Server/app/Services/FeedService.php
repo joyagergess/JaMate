@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Profile;
 use App\Models\Swipe;
 use Illuminate\Support\Collection;
+   use Illuminate\Support\Facades\DB;
 
 class FeedService
 {
@@ -88,50 +89,53 @@ class FeedService
         return $this->softShuffle($scored, $limit);
     }
 
-    protected function candidatePool(Profile $me): Collection
-    {
-        // Select profiles that aren't me , ready embedings,atleast have one media ,never swiped them,never matched before,never blocked 
-        $candidateIds = Profile::query()
-            ->where('id', '!=', $me->id)
-            ->where('embedding_dirty', false)
-            ->whereHas('media')
-            ->whereNotExists(function ($q) use ($me) {
-                $q->selectRaw(1)
-                    ->from('swipes')
-                    ->whereColumn('swipes.swiped_profile_id', 'profiles.id')
-                    ->where('swipes.swiper_profile_id', $me->id);
-            })
-            ->whereNotExists(function ($q) use ($me) {
-                $q->selectRaw(1)
-                    ->from('matches')
-                    ->where(function ($q) use ($me) {
-                        $q->whereColumn('matches.profile_one_id', 'profiles.id')
-                            ->where('matches.profile_two_id', $me->id);
-                    })
-                    ->orWhere(function ($q) use ($me) {
-                        $q->whereColumn('matches.profile_two_id', 'profiles.id')
-                            ->where('matches.profile_one_id', $me->id);
-                    });
-            })
-            ->whereNotExists(function ($q) use ($me) {
-                $q->selectRaw(1)
-                    ->from('user_blocks')
-                    ->whereColumn('user_blocks.blocked_profile_id', 'profiles.id')
-                    ->where('user_blocks.blocker_profile_id', $me->id);
-            })
-            ->limit(self::MAX_CANDIDATES)
-            ->pluck('id');
 
-        return Profile::whereIn('id', $candidateIds)
-            ->with([
-                'instruments:id,name',
-                'genres:id,name',
-                'objectives:id,name',
-                'embedding:profile_id,embedding',
-                'media:id,profile_id,media_type,media_url,order_index',
-            ])
-            ->get();
-    }
+protected function candidatePool(Profile $me): Collection
+{
+    $ids = DB::select(
+        <<<SQL
+        SELECT p.id
+        FROM profiles p
+        WHERE p.id != :me_id
+          AND p.embedding_dirty = FALSE
+          AND EXISTS (
+              SELECT 1 FROM profile_media pm
+              WHERE pm.profile_id = p.id
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM swipes s
+              WHERE s.swiped_profile_id = p.id
+                AND s.swiper_profile_id = :me_id
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM matches m
+              WHERE (m.profile_one_id = p.id AND m.profile_two_id = :me_id)
+                 OR (m.profile_two_id = p.id AND m.profile_one_id = :me_id)
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM user_blocks ub
+              WHERE ub.blocked_profile_id = p.id
+                AND ub.blocker_profile_id = :me_id
+          )
+        LIMIT :limit
+        SQL,
+        [
+            'me_id' => $me->id,
+            'limit' => self::MAX_CANDIDATES,
+        ]
+    );
+
+    return Profile::whereIn('id', collect($ids)->pluck('id'))
+        ->with([
+            'instruments:id,name',
+            'genres:id,name',
+            'objectives:id,name',
+            'embedding:profile_id,embedding',
+            'media:id,profile_id,media_type,media_url,order_index',
+        ])
+        ->get();
+}
+
 
     protected function relationalScore(Profile $candidate, Collection $myInstrumentIds,   Collection $myGenreIds,  Collection $myObjectiveIds, Profile $me): int
     {
