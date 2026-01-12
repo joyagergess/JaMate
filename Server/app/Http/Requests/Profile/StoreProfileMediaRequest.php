@@ -18,7 +18,7 @@ class StoreProfileMediaRequest extends FormRequest
             'media_file' => [
                 'required',
                 'file',
-                'max:51200', 
+                'max:102400', 
             ],
         ];
     }
