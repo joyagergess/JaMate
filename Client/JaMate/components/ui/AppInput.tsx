@@ -1,5 +1,6 @@
 import { Text, TextInput, View } from 'react-native';
 import { colors } from '../../styles/theme';
+import { ReactNode } from 'react';
 
 type Props = {
   label: string;
@@ -7,16 +8,23 @@ type Props = {
   onChangeText: (v: string) => void;
   placeholder?: string;
   secure?: boolean;
+
+  // ✅ NEW (optional)
+  rightIcon?: ReactNode;
+  error?: string | null;
 };
 
 export function AppInput({
   label,
   secure,
   placeholder,
+  rightIcon,
+  error,
   ...props
 }: Props) {
   return (
     <View style={{ marginBottom: 16 }}>
+      {/* Label */}
       <Text
         style={{
           color: colors.muted,
@@ -27,20 +35,51 @@ export function AppInput({
         {label}
       </Text>
 
-      <TextInput
-        {...props}
-        placeholder={placeholder}
-        placeholderTextColor={colors.muted}
-        autoCapitalize="none"
-        secureTextEntry={secure}
+      {/* Input wrapper */}
+      <View
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
           backgroundColor: colors.white,
           borderRadius: 12,
           paddingHorizontal: 16,
-          paddingVertical: 14,
-          fontSize: 14,
+          borderWidth: error ? 1 : 0,
+          borderColor: error ? '#FF4D4F' : 'transparent',
         }}
-      />
+      >
+        <TextInput
+          {...props}
+          placeholder={placeholder}
+          placeholderTextColor={colors.muted}
+          autoCapitalize="none"
+          secureTextEntry={secure}
+          style={{
+            flex: 1,
+            paddingVertical: 14,
+            fontSize: 14,
+          }}
+        />
+
+        {/* Right icon (eye, etc.) */}
+        {rightIcon && (
+          <View style={{ marginLeft: 8 }}>
+            {rightIcon}
+          </View>
+        )}
+      </View>
+
+      {/* Inline error */}
+      {error && (
+        <Text
+          style={{
+            color: '#FF4D4F',
+            fontSize: 12,
+            marginTop: 6,
+          }}
+        >
+          {error}
+        </Text>
+      )}
     </View>
   );
 }

@@ -47,10 +47,10 @@ Route::prefix('v0.1')->group(function () {
         Route::get('/feed/next', [FeedController::class, 'next']);
         Route::post('/feed/swipe', [FeedController::class, 'swipe']);
     });
+    
     Route::prefix('internal')->middleware('internal.auth')->group(function () {
         Route::post('/embeddings/generate', [EmbeddingController::class, 'generate']);
         Route::post('/bands/generate', [BandSuggestionController::class, 'generate']);
-        
     });
 
     Route::middleware('auth:api')->prefix('matches')->group(function () {
@@ -63,9 +63,10 @@ Route::prefix('v0.1')->group(function () {
         Route::post('/{conversation}/messages', [MessageController::class, 'store']);
     });
 
-     Route::middleware('auth:api')->prefix('bands')->group(function () {
+    Route::middleware('auth:api')->prefix('bands')->group(function () {
         Route::get('suggestions', [BandSuggestionController::class, 'index']);
         Route::post('suggestions/{suggestion}/accept', [BandSuggestionController::class, 'accept']);
         Route::post('suggestions/{suggestion}/reject', [BandSuggestionController::class, 'reject']);
     });
+
 });

@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class FeedService
 {
     protected const MAX_CANDIDATES = 50;
-    protected const JAMMED_ME_BOOST = 15;
+    protected const JAMMED_ME_BOOST = 20;
 
     public function __construct(
         protected SimilarityService $similarityService
@@ -55,7 +55,7 @@ class FeedService
                 $me
             );
 
-            // Semantic similarity using precomputed embeddings (i'm very proud of this)
+            // Semantic similarity using embeddings (i'm very proud of this)
             $similarityScore = null;
             if ($myEmbedding && $candidate->embedding) {
                 $similarityScore = $this->similarityService->cosine(
@@ -80,16 +80,6 @@ class FeedService
                 'score'   => round($finalScore, 2),
             ];
 
-            //to debug
-            if ($debug) {
-                $response['debug'] = [
-                    'relational' => $relationalScore,
-                    'similarity' => $similarityScore !== null
-                        ? round($similarityScore, 4)
-                        : null,
-                    'jammed_me' => $jammedBoost > 0,
-                ];
-            }
 
             return $response;
         });
@@ -100,7 +90,7 @@ class FeedService
 
     protected function candidatePool(Profile $me): Collection
     {
-        // Select profiles that aren't me , ready embedings,atleast have one media ,never swiped ,never matched before,never blocked
+        // Select profiles that aren't me , ready embedings,atleast have one media ,never swiped them,never matched before,never blocked 
         $candidateIds = Profile::query()
             ->where('id', '!=', $me->id)
             ->where('embedding_dirty', false)
@@ -205,20 +195,11 @@ class FeedService
             'gender' => $profile->gender,
             'experience_level' => $profile->experience_level,
 
-            'instruments' => $profile->instruments->map(fn($i) => [
-                'id' => $i->id,
-                'name' => $i->name,
-            ])->values(),
+            'instruments' => $profile->instruments,
 
-            'genres' => $profile->genres->map(fn($g) => [
-                'id' => $g->id,
-                'name' => $g->name,
-            ])->values(),
+            'genres' => $profile->genres,
 
-            'objectives' => $profile->objectives->map(fn($o) => [
-                'id' => $o->id,
-                'name' => $o->name,
-            ])->values(),
+            'objectives' => $profile->objectives,
 
             'media' => $profile->media->map(fn($m) => [
                 'id' => $m->id,

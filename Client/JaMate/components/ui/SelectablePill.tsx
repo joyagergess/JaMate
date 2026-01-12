@@ -4,51 +4,34 @@ type Props = {
   label: string;
   selected: boolean;
   onPress: () => void;
-  compact?: boolean;
 };
 
-export function SelectablePill({
-  label,
-  selected,
-  onPress,
-  compact = false,
-}: Props) {
+export function SelectablePill({ label, selected, onPress }: Props) {
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
       style={[
         styles.pill,
-        compact && styles.compact,
         selected ? styles.selected : styles.unselected,
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          selected ? styles.textSelected : styles.textUnselected,
-        ]}
-      >
-        {label}
-      </Text>
+      <Text style={styles.text}>{label}</Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   pill: {
-    height: 48,
-    borderRadius: 24,
+    height: 40,
+    borderRadius: 20,
+
+    paddingHorizontal: 16,         
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
 
-  compact: {
-    height: 40,
-    marginRight: 10,
-    marginBottom: 12,
+    marginRight: 10,              
+    marginBottom: 12,            
   },
 
   selected: {
@@ -64,14 +47,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#FFFFFF",
-  },
-
-  textSelected: {
-    color: "#FFFFFF",
-  },
-
-  textUnselected: {
     color: "#FFFFFF",
   },
 });

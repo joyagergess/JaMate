@@ -10,10 +10,13 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
 apiClient.interceptors.request.use(
   async (config) => {
-    if (Platform.OS !== 'web') {
+    const isAuthRoute =
+      config.url?.includes('/auth/login') ||
+      config.url?.includes('/auth/register');
+
+    if (!isAuthRoute && Platform.OS !== 'web') {
       const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 
       if (token) {

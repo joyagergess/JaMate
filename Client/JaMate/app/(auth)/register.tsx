@@ -1,28 +1,65 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import Checkbox from 'expo-checkbox';
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import Toast from 'react-native-toast-message';
+import { View, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import Checkbox from "expo-checkbox";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 
-import { registerStyles as styles } from '../../styles/register.styles';
-import { AppInput } from '../../components/ui/AppInput';
-import { AppButton } from '../../components/ui/AppButton';
-import { useRegister } from '../../hooks/auth/useRegister';
+import { authStyles as styles } from "../../styles/auth.styles";
+import { AppInput } from "../../components/ui/AppInput";
+import { AppButton } from "../../components/ui/AppButton";
+import { useRegister } from "../../hooks/auth/useRegister";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function getRegisterErrorMessage(err: any): string {
+  const rawMessage =
+    err?.response?.data?.errors?.email?.[0] ||
+    err?.response?.data?.message ||
+    "";
+
+  if (
+    rawMessage === "" ||
+    rawMessage.toLowerCase().includes("server") ||
+    rawMessage.toLowerCase().includes("error")
+  ) {
+    return "This email is already registered. Please try another email.";
+  }
+
+  return rawMessage;
+}
 
 export default function RegisterScreen() {
   const router = useRouter();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [accepted, setAccepted] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { mutate: register, isPending } = useRegister();
 
+  const isEmailValid = EMAIL_REGEX.test(email);
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
+
+  const canSubmit =
+    email &&
+    isEmailValid &&
+    password &&
+    confirmPassword &&
+    passwordsMatch &&
+    accepted &&
+    !isPending;
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -32,34 +69,83 @@ export default function RegisterScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>
-          Create Account{'\n'}with Email
+          Create Account{"\n"}with Email
         </Text>
 
+        {formError && <Text style={styles.errorText}>{formError}</Text>}
+
         <AppInput
-          label="email:"
+          label="Email"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(v) => {
+            setEmail(v);
+            setFormError(null);
+          }}
           placeholder="example@gmail.com"
         />
 
+        {!isEmailValid && email.length > 0 && (
+          <Text style={styles.errorText}>
+            Please enter a valid email address
+          </Text>
+        )}
+
         <AppInput
-          label="Password:"
+          label="Password"
           value={password}
-          onChangeText={setPassword}
-          secure
+          onChangeText={(v) => {
+            setPassword(v);
+            setFormError(null);
+          }}
+          secure={!showPassword}
+          rightIcon={
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color="#999"
+              />
+            </TouchableOpacity>
+          }
         />
+
+        <AppInput
+          label="Confirm Password"
+          value={confirmPassword}
+          onChangeText={(v) => {
+            setConfirmPassword(v);
+            setFormError(null);
+          }}
+          secure={!showConfirmPassword}
+          rightIcon={
+            <TouchableOpacity
+              onPress={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+            >
+              <Ionicons
+                name={showConfirmPassword ? "eye-off" : "eye"}
+                size={20}
+                color="#999"
+              />
+            </TouchableOpacity>
+          }
+        />
+
+        {!passwordsMatch && confirmPassword.length > 0 && (
+          <Text style={styles.errorText}>Passwords do not match</Text>
+        )}
 
         <View style={styles.checkboxRow}>
           <Checkbox
             value={accepted}
             onValueChange={setAccepted}
-            color={accepted ? '#6D5DF6' : undefined}
+            color={accepted ? "#6D5DF6" : undefined}
           />
           <Text style={styles.checkboxText}>
-            I agree to JaMate’s{' '}
+            I agree to JaMate’s{" "}
             <Text style={styles.link}>Privacy Policy</Text>.
           </Text>
         </View>
@@ -67,33 +153,22 @@ export default function RegisterScreen() {
         <AppButton
           title="Create Account"
           loading={isPending}
-          disabled={!email || !password || !accepted}
-          onPress={() =>
+          disabled={!canSubmit}
+          onPress={() => {
+            setFormError(null);
+
             register(
               { email, password },
               {
                 onSuccess: () => {
-                  Toast.show({
-                    type: 'success',
-                    text1: 'Account created',
-                    text2: 'You can now log in',
-                  });
-                  router.replace('/(auth)/login');
+                  router.replace("/(auth)/login");
                 },
-               onError: (err: any) => {
-  console.log('REGISTER ERROR:', err);
-  console.log('RESPONSE:', err?.response?.data);
-
-  Toast.show({
-    type: 'error',
-    text1: 'Registration failed',
-    text2: err?.response?.data?.message || 'Unknown error',
-  });
-}
-,
+                onError: (err: any) => {
+                  setFormError(getRegisterErrorMessage(err));
+                },
               }
-            )
-          }
+            );
+          }}
         />
 
         <AppButton
@@ -101,6 +176,18 @@ export default function RegisterScreen() {
           variant="secondary"
           disabled={isPending}
         />
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Already have an account?{" "}
+            <Text
+              style={styles.footerLink}
+              onPress={() => router.replace("/(auth)/login")}
+            >
+              Log in
+            </Text>
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );
