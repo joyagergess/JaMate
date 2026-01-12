@@ -14,9 +14,12 @@ class StoreProfileMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'media_type' => 'required|string|in:image,audio,video',
-            'media_url'  => 'required|string|url|max:2048',
-            'order_index'=> 'nullable|integer|min:0',
+            'media_type' => ['required', 'string', 'in:image,video'],
+            'media_file' => [
+                'required',
+                'file',
+                'max:51200', 
+            ],
         ];
     }
 }

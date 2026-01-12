@@ -1,28 +1,46 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import * as SecureStore from 'expo-secure-store';
-import Toast from 'react-native-toast-message';
+import { View, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 
-import { loginStyles as styles } from '../../styles/login.styles';
-import { AppInput } from '../../components/ui/AppInput';
-import { AppButton } from '../../components/ui/AppButton';
-import { useLogin } from '../../hooks/auth/useLogin';
-import { AUTH_TOKEN_KEY } from '../../constants/auth';
+import { authStyles as styles } from "../../styles/auth.styles";
+import { AppInput } from "../../components/ui/AppInput";
+import { AppButton } from "../../components/ui/AppButton";
+import { useLogin } from "../../hooks/auth/useLogin";
+import { AUTH_TOKEN_KEY } from "../../constants/auth";
+import { useAuthRefresh } from "../../context/AuthRefreshContext";
+import { setItem } from "../../utils/secureStorage";
+
+function getLoginErrorMessage(err: any): string {
+  const rawMessage = err?.response?.data?.message || "";
+
+  if (
+    rawMessage === "" ||
+    rawMessage.toLowerCase().includes("server") ||
+    rawMessage.toLowerCase().includes("error")
+  ) {
+    return "Invalid email or password. Please try again.";
+  }
+
+  return rawMessage;
+}
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { triggerRefresh } = useAuthRefresh();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { mutate: login, isPending } = useLogin();
 
+  const canSubmit = email && password && !isPending;
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -32,54 +50,60 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>Login</Text>
 
+        {formError && <Text style={styles.errorText}>{formError}</Text>}
+
         <AppInput
-          label="email:"
+          label="Email"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(v) => {
+            setEmail(v);
+            setFormError(null);
+          }}
           placeholder="example@gmail.com"
         />
 
         <AppInput
-          label="Password:"
+          label="Password"
           value={password}
-          onChangeText={setPassword}
-          secure
+          onChangeText={(v) => {
+            setPassword(v);
+            setFormError(null);
+          }}
+          secure={!showPassword}
+          rightIcon={
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={20}
+                color="#999"
+              />
+            </TouchableOpacity>
+          }
         />
 
         <AppButton
           title="Login"
           loading={isPending}
-          disabled={!email || !password}
-          onPress={() =>
+          disabled={!canSubmit}
+          onPress={() => {
+            setFormError(null);
+
             login(
               { email, password },
               {
-                onSuccess: async (token) => {
-                  await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
-                  router.replace('/(tabs)');
+                onSuccess: async (token: string) => {
+                  await setItem(AUTH_TOKEN_KEY, token);
+                  triggerRefresh();
                 },
                 onError: (err: any) => {
-                  Toast.show({
-                    type: 'error',
-                    text1: 'Login failed',
-                    text2:
-                      err?.response?.data?.message ||
-                      'Invalid email or password',
-                  });
+                  setFormError(getLoginErrorMessage(err));
                 },
               }
-            )
-          }
-        />
-
-        <AppButton
-          title="Continue with google"
-          variant="secondary"
-          disabled={isPending}
+            );
+          }}
         />
       </View>
     </SafeAreaView>

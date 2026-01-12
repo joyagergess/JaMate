@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Profile;
-use App\Models\ProfileMedia;
 use App\Models\Instrument;
 use App\Models\Genre;
 use App\Models\Objective;
@@ -29,18 +28,15 @@ class ProfileService
                 'experience_level' => strtolower($data['experience_level']),
                 'location'         => $data['location'] ?? null,
                 'bio'              => $data['bio'] ?? null,
-
                 'embedding_dirty'  => true,
             ]);
 
             $this->syncRelations($profile, $data);
-            $this->createMedia($profile, $data['media'] ?? []);
 
             return $profile->load([
                 'instruments',
                 'genres',
                 'objectives',
-                'media',
             ]);
         });
     }
@@ -64,7 +60,6 @@ class ProfileService
                 'experience_level' => strtolower($data['experience_level']),
                 'location'         => $data['location'] ?? null,
                 'bio'              => $data['bio'] ?? null,
-
                 'embedding_dirty'  => $embeddingDirty
                     ? true
                     : $profile->embedding_dirty,
@@ -76,7 +71,6 @@ class ProfileService
                 'instruments',
                 'genres',
                 'objectives',
-                'media',
             ]);
         });
     }
@@ -144,7 +138,6 @@ class ProfileService
             ->values();
 
         $existing = $modelClass::whereIn('name', $normalized)->pluck('id', 'name');
-
         $missing = $normalized->diff($existing->keys());
 
         if ($missing->isNotEmpty()) {
@@ -155,21 +148,5 @@ class ProfileService
 
         $ids = $modelClass::whereIn('name', $normalized)->pluck('id')->all();
         $profile->{$relation}()->sync($ids);
-    }
-
-    private function createMedia(Profile $profile, array $media): void
-    {
-        if (empty($media)) {
-            return;
-        }
-
-        ProfileMedia::insert(
-            collect($media)->map(fn ($item) => [
-                'profile_id'  => $profile->id,
-                'media_type'  => $item['media_type'],
-                'media_url'   => $item['media_url'],
-                'order_index' => $item['order_index'],
-            ])->all()
-        );
     }
 }

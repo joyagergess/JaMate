@@ -39,11 +39,25 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d530dda5-3af4-4fc3-bad6-2156058957fc"
+      }
+    },
+    "owner": "joya_gergess",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d530dda5-3af4-4fc3-bad6-2156058957fc"
     }
   }
 }

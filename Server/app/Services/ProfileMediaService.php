@@ -5,12 +5,12 @@ namespace App\Services;
 use App\Models\ProfileMedia;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Collection;
 
 class ProfileMediaService
 {
-
     public function getForUser(User $user): Collection
     {
         $profile = $user->profile;
@@ -23,7 +23,6 @@ class ProfileMediaService
             ->orderBy('order_index')
             ->get();
     }
-
 
     public function getProfilePicture(User $user): ?ProfileMedia
     {
@@ -46,13 +45,24 @@ class ProfileMediaService
             throw new HttpException(404, 'Profile not found');
         }
 
+        /** @var \Illuminate\Http\UploadedFile $file */
+        $file = $data['media_file'];
+
+        // Store file (local for now, S3 later)
+        $path = $file->store(
+            "profiles/{$profile->id}",
+            'public'
+        );
+
+        $mediaUrl = Storage::disk('public')->url($path);
+
         $maxOrder = ProfileMedia::where('profile_id', $profile->id)
             ->max('order_index');
 
         return ProfileMedia::create([
             'profile_id'  => $profile->id,
             'media_type'  => $data['media_type'],
-            'media_url'   => $data['media_url'],
+            'media_url'   => $mediaUrl,
             'order_index' => is_null($maxOrder) ? 0 : $maxOrder + 1,
         ]);
     }
@@ -67,7 +77,6 @@ class ProfileMediaService
     {
         $media->delete();
     }
-
 
     public function reorder(User $user, array $media): void
     {
