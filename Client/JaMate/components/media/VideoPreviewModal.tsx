@@ -1,7 +1,9 @@
 import { Modal, View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
+import { Video, ResizeMode } from "expo-av";
 import { useEffect, useRef, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { AUTH_TOKEN_KEY } from "../../constants/auth";
 
 type Props = {
   visible: boolean;
@@ -11,16 +13,15 @@ type Props = {
 
 export function VideoPreviewModal({ visible, videoUrl, onClose }: Props) {
   const videoRef = useRef<Video>(null);
-  const [ready, setReady] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
-  // Reset when opening
   useEffect(() => {
     if (visible) {
-      setReady(false);
+      SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
     }
-  }, [visible, videoUrl]);
+  }, [visible]);
 
-  if (!visible || !videoUrl) return null;
+  if (!visible || !videoUrl || !token) return null;
 
   return (
     <Modal visible animationType="fade" presentationStyle="fullScreen">
@@ -31,24 +32,18 @@ export function VideoPreviewModal({ visible, videoUrl, onClose }: Props) {
 
         <Video
           ref={videoRef}
-          key={videoUrl} 
-          source={{ uri: videoUrl }}
+          key={videoUrl}
+          source={{
+            uri: videoUrl,
+            headers: {
+              Authorization: `Bearer ${token}`, 
+            },
+          }}
           style={styles.video}
           resizeMode={ResizeMode.CONTAIN}
           useNativeControls
-          shouldPlay={false}          
+          shouldPlay
           isLooping
-          isMuted={false}
-          volume={1.0}
-          rate={1.0}
-          ignoreSilentSwitch="ignore" 
-          onLoad={async () => {
-            setReady(true);
-            await videoRef.current?.playAsync(); 
-          }}
-          onError={(e) => {
-            console.log("VIDEO ERROR:", e);
-          }}
         />
       </View>
     </Modal>
@@ -63,7 +58,6 @@ const styles = StyleSheet.create({
   video: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#000",
   },
   close: {
     position: "absolute",

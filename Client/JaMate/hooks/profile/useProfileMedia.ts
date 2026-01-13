@@ -4,10 +4,10 @@ import { apiClient } from "../../api/client";
 export type ProfileMedia = {
   id: number;
   media_type: "image" | "video";
-  url: string;          
+  url: string;
+  thumbnail_url?: string | null;
   order_index: number;
 };
-
 
 
 export function useProfileMedia() {

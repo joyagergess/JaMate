@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { ProfileMedia } from "../../hooks/profile/useProfileMedia";
 import { VideoPreviewModal } from "../media/VideoPreviewModal";
-import { buildMediaUrl } from "../../utils/media";
 
 const { width } = Dimensions.get("window");
 const GAP = 6;
@@ -14,6 +13,7 @@ const ITEM_SIZE = (width - GAP * (COLUMNS + 1)) / COLUMNS;
 export function ProfileMediaSection({ media }: { media: ProfileMedia[] }) {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
+  // Exclude avatar (order_index === 0)
   const gridMedia = media.filter((m) => m.order_index !== 0);
 
   if (gridMedia.length === 0) {
@@ -39,7 +39,7 @@ export function ProfileMediaSection({ media }: { media: ProfileMedia[] }) {
             activeOpacity={0.85}
             onPress={() => {
               if (item.media_type === "video") {
-                setSelectedVideo(item.url);
+                setSelectedVideo(item.url); // ✅ MUST BE api/v0.1/media
               }
             }}
             style={{
@@ -53,25 +53,48 @@ export function ProfileMediaSection({ media }: { media: ProfileMedia[] }) {
           >
             {item.media_type === "image" ? (
               <Image
-                source={{ uri: item.url }}
+                source={{ uri: item.url }} // ✅ FULL URL FROM API
                 style={{ width: "100%", height: "100%" }}
               />
             ) : (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Ionicons name="play-circle" size={36} color="#E5E7EB" />
+              <View style={{ flex: 1 }}>
+                {item.thumbnail_url ? (
+                  <Image
+                    source={{ uri: item.thumbnail_url }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Ionicons name="play-circle" size={36} color="#E5E7EB" />
+                  </View>
+                )}
+
+                {/* ▶ overlay */}
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Ionicons name="play-circle" size={36} color="#FFFFFF" />
+                </View>
               </View>
             )}
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* 🎥 Fullscreen video */}
       <VideoPreviewModal
         visible={!!selectedVideo}
         videoUrl={selectedVideo}
