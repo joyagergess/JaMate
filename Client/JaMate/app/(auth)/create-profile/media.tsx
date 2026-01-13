@@ -1,6 +1,7 @@
 import { Alert, Platform, Text, View, ScrollView } from "react-native";
 import { ActionSheetIOS } from "react-native";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 
 import {
   useCreateProfile,
@@ -16,35 +17,71 @@ import { StepIndicator } from "../../../components/ui/StepIndicator";
 import { AppButton } from "../../../components/ui/AppButton";
 import { createProfileStyles as styles } from "../../../styles/create-profile.styles";
 
-const MAX = 6;
-const MIN = 3;
+const MAX = 2;
+const MIN = 2;
+
+const MAX_VIDEOS = 1;
+const MAX_IMAGES = 1;
+
+const MAX_TOTAL_MB = 100;
+const MAX_TOTAL_BYTES = MAX_TOTAL_MB * 1024 * 1024;
 
 export default function CreateProfileMediaScreen() {
   const router = useRouter();
-
   const { data, update } = useCreateProfile();
-  const videos = data.videos;
+  const media = data.videos;
 
   const [feedIndex, setFeedIndex] = useState<number | null>(null);
 
   const addMedia = async (source: "camera" | "gallery") => {
-    const media =
-      source === "camera" ? await recordFromCamera() : await pickFromGallery();
+    const picked =
+      source === "camera"
+        ? await recordFromCamera()
+        : await pickFromGallery();
 
-    if (!media) return;
+    if (!picked) return;
+
+    const videos = media.filter(m => m.type === "video");
+    const images = media.filter(m => m.type === "image");
+    const totalSize = media.reduce((sum, m) => sum + m.size, 0);
+
+    if (picked.type === "video" && videos.length >= MAX_VIDEOS) {
+      Alert.alert(
+        "Video limit reached",
+        "You can upload only one video."
+      );
+      return;
+    }
+
+    if (picked.type === "image" && images.length >= MAX_IMAGES) {
+      Alert.alert(
+        "Image limit reached",
+        "You can upload only one photo."
+      );
+      return;
+    }
+
+    // ❌ total size limit
+    if (totalSize + picked.size > MAX_TOTAL_BYTES) {
+      Alert.alert(
+        "Storage limit exceeded",
+        "Total media size cannot exceed 100 MB."
+      );
+      return;
+    }
 
     update({
-      videos: [...videos, { ...media, id: Date.now() }],
+      videos: [...media, { ...picked, id: Date.now() }],
     });
   };
 
   const removeMedia = (index: number) => {
-    const next = [...videos];
+    const next = [...media];
     next.splice(index, 1);
     update({ videos: next });
   };
 
-  const openPicker = (index: number) => {
+  const openPicker = () => {
     if (Platform.OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
         {
@@ -66,18 +103,22 @@ export default function CreateProfileMediaScreen() {
   };
 
   const slots: (ProfileMedia | undefined)[] = [
-    ...videos,
-    ...Array(MAX - videos.length).fill(undefined),
+    ...media,
+    ...Array(MAX - media.length).fill(undefined),
   ];
+
+  const hasVideo = media.some(m => m.type === "video");
+  const hasImage = media.some(m => m.type === "image");
+  const canContinue = hasVideo && hasImage;
 
   return (
     <CreateProfileLayout
       footer={
         <>
-          <MediaProgressFooter current={videos.length} min={MIN} />
+          <MediaProgressFooter current={media.length} min={MIN} />
           <AppButton
             title="Next"
-            disabled={videos.length < MIN}
+            disabled={!canContinue}
             onPress={() => router.push("/create-profile/bio")}
           />
         </>
@@ -91,12 +132,11 @@ export default function CreateProfileMediaScreen() {
 
         <View style={{ marginBottom: 20 }}>
           <Text style={styles.title}>
-            Upload videos or photos of you playing
+            Upload a video and a photo
           </Text>
 
           <Text style={styles.subtitle}>
-            These will appear on your public profile. Add at least 3 and arrange
-            them in the order you want.
+            Add exactly one video and one photo to get started.
           </Text>
         </View>
 
@@ -105,7 +145,7 @@ export default function CreateProfileMediaScreen() {
             <MediaSlot
               key={index}
               media={item}
-              onAdd={() => openPicker(index)}
+              onAdd={openPicker}
               onRemove={() => removeMedia(index)}
               onPreview={() => item && setFeedIndex(index)}
             />
@@ -115,7 +155,7 @@ export default function CreateProfileMediaScreen() {
 
       <FeedPreviewModal
         visible={feedIndex !== null}
-        media={videos}
+        media={media}
         startIndex={feedIndex ?? 0}
         onClose={() => setFeedIndex(null)}
       />
@@ -124,7 +164,6 @@ export default function CreateProfileMediaScreen() {
 }
 
 import { StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
 
 const gridStyles = StyleSheet.create({
   grid: {

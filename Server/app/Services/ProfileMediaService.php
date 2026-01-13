@@ -45,6 +45,10 @@ class ProfileMediaService
             throw new HttpException(404, 'Profile not found');
         }
 
+        if (!isset($data['media_file'])) {
+            throw new HttpException(422, 'Media file is required');
+        }
+
         /** @var \Illuminate\Http\UploadedFile $file */
         $file = $data['media_file'];
 
@@ -53,15 +57,13 @@ class ProfileMediaService
             'public'
         );
 
-        $mediaUrl = Storage::disk('public')->url($path);
-
         $maxOrder = ProfileMedia::where('profile_id', $profile->id)
             ->max('order_index');
 
         return ProfileMedia::create([
             'profile_id'  => $profile->id,
-            'media_type'  => $data['media_type'],
-            'media_url'   => $mediaUrl,
+            'media_type'  => $data['media_type'], 
+            'media_url'   => $path,               
             'order_index' => is_null($maxOrder) ? 0 : $maxOrder + 1,
         ]);
     }
@@ -72,21 +74,17 @@ class ProfileMediaService
         return $media;
     }
 
+  
     public function delete(ProfileMedia $media): void
     {
         if ($media->media_url) {
-            $path = str_replace(
-                Storage::disk('public')->url('/'),
-                '',
-                $media->media_url
-            );
-
-            Storage::disk('public')->delete($path);
+            Storage::disk('public')->delete($media->media_url);
         }
 
         $media->delete();
     }
 
+   
     public function reorder(User $user, array $media): void
     {
         if (empty($media)) {
@@ -100,14 +98,14 @@ class ProfileMediaService
         }
 
         $cases = [];
-        $ids = [];
+        $ids   = [];
 
         foreach ($media as $item) {
-            $id = (int) $item['id'];
+            $id    = (int) $item['id'];
             $order = (int) $item['order_index'];
 
             $cases[] = "WHEN id = {$id} THEN {$order}";
-            $ids[] = $id;
+            $ids[]   = $id;
         }
 
         DB::statement("
