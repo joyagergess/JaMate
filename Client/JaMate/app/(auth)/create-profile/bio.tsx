@@ -40,7 +40,7 @@ export default function CreateProfileBioScreen() {
     submitProfile.mutate(finalPayload, {
       onSuccess: () => {
         console.log(" PROFILE CREATED");
-        router.replace("/"); 
+        router.replace("/(tabs)"); 
       },
       onError: (error: any) => {
         console.log(" PROFILE CREATION FAILED", error);
