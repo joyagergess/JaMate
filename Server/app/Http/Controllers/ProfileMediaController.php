@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\ProfileMedia;
@@ -6,6 +7,7 @@ use App\Services\ProfileMediaService;
 use App\Http\Requests\Profile\StoreProfileMediaRequest;
 use App\Http\Requests\Profile\UpdateProfileMediaRequest;
 use App\Http\Requests\Profile\ReorderProfileMediaRequest;
+use App\Http\Resources\MediaResource;
 use Illuminate\Http\Request;
 
 class ProfileMediaController extends Controller
@@ -14,7 +16,7 @@ class ProfileMediaController extends Controller
         protected ProfileMediaService $profileMediaService
     ) {}
 
-    
+  
     public function get(Request $request)
     {
         $media = $this->profileMediaService->getForUser(
@@ -22,11 +24,12 @@ class ProfileMediaController extends Controller
         );
 
         return $this->successResponse(
-            $media,
+            MediaResource::collection($media),
             'Profile media fetched successfully'
         );
     }
 
+    
     public function store(StoreProfileMediaRequest $request)
     {
         $media = $this->profileMediaService->store(
@@ -35,12 +38,13 @@ class ProfileMediaController extends Controller
         );
 
         return $this->successResponse(
-            $media,
+            new MediaResource($media),
             'Media added successfully',
             201
         );
     }
 
+  
     public function update(UpdateProfileMediaRequest $request, ProfileMedia $media)
     {
         if ($media->profile->user_id !== $request->user()->id) {
@@ -53,10 +57,11 @@ class ProfileMediaController extends Controller
         );
 
         return $this->successResponse(
-            $media,
+            new MediaResource($media),
             'Media updated successfully'
         );
     }
+
 
     public function destroy(Request $request, ProfileMedia $media)
     {

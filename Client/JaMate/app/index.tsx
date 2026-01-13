@@ -10,7 +10,7 @@ import { useAuthRefresh } from '../context/AuthRefreshContext';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { triggerRefresh } = useAuthRefresh(); // ✅ added
+  const { triggerRefresh } = useAuthRefresh(); 
 
   const logoutTemp = async () => {
     await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
@@ -20,7 +20,7 @@ export default function WelcomeScreen() {
       text1: 'Logged out (TEMP)',
     });
 
-    triggerRefresh(); // 🔥 force auth bootstrap
+    triggerRefresh();
   };
 
   return (
@@ -53,7 +53,6 @@ export default function WelcomeScreen() {
           <Text style={styles.secondaryText}>Sign in</Text>
         </TouchableOpacity>
 
-        {/* 🔴 TEMP LOGOUT BUTTON */}
         <TouchableOpacity
           style={[styles.secondaryButton, { marginTop: 12, opacity: 0.7 }]}
           onPress={logoutTemp}

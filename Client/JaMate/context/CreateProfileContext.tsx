@@ -5,6 +5,7 @@ export type ProfileMedia = {
   localUri: string;
   type: "image" | "video";
   mimeType: string;
+  size:number;
 };
 
 export type CreateProfileData = {
