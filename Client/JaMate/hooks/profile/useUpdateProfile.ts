@@ -5,7 +5,7 @@ type UpdateProfilePayload = {
   name: string;
   username?: string | null;
   bio?: string | null;
-  location: string;
+  location: string|null;
   experience_level: string;
   gender: "male" | "female";
   birth_date: string;

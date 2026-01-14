@@ -5,22 +5,23 @@ import { ProfileInfoSection } from "./ProfileInfoSection";
 import { ProfileMediaSection } from "./ProfileMediaSection";
 import { ProfileMedia } from "../../hooks/profile/useProfileMedia";
 
-const tabs = ["Infos", "Media"];
+const tabs = ["Infos", "Media"] as const;
 
 type Props = {
   profile: any;
-  media?: ProfileMedia[];
+  media: ProfileMedia[];
+  onMediaUploaded: () => void;
 };
 
-export function ProfileTabs({ profile, media }: Props) {
-  const [active, setActive] = useState<"Infos" | "Media">("Infos");
+export function ProfileTabs({ profile, media, onMediaUploaded }: Props) {
+  const [active, setActive] = useState<(typeof tabs)[number]>("Infos");
 
   return (
     <View style={{ marginTop: 32 }}>
-      {/* Tab bar */}
+      {/* Tabs */}
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
         {tabs.map((tab) => (
-          <TouchableOpacity key={tab} onPress={() => setActive(tab as any)}>
+          <TouchableOpacity key={tab} onPress={() => setActive(tab)}>
             <Text
               style={{
                 color: active === tab ? "#6D5DF6" : "#9CA3AF",
@@ -34,8 +35,16 @@ export function ProfileTabs({ profile, media }: Props) {
       </View>
 
       <View style={{ marginTop: 24 }}>
-        {active === "Infos" && <ProfileInfoSection profile={profile} />}
-        {active === "Media" && <ProfileMediaSection media={media ?? []} />}
+        {active === "Infos" && (
+          <ProfileInfoSection profile={profile} />
+        )}
+
+        {active === "Media" && (
+          <ProfileMediaSection
+            media={media}
+            onUploaded={onMediaUploaded}
+          />
+        )}
       </View>
     </View>
   );

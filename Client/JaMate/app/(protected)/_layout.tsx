@@ -1,30 +1,37 @@
-import { Slot, useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { useAuthBootstrap } from '../../hooks/auth/useAuthBootstrap';
+import { Slot, useRouter, usePathname } from "expo-router";
+import { useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { useAuthBootstrap } from "../../hooks/auth/useAuthBootstrap";
 import { Href } from "expo-router";
 
 export default function ProtectedLayout() {
   const router = useRouter();
+  const pathname = usePathname();
+
   const { isReady, isAuthenticated, hasProfile } = useAuthBootstrap();
 
   useEffect(() => {
     if (!isReady) return;
 
-    if (!isAuthenticated) {
-      router.replace('/(auth)/login');
+    const isAuthRoute = pathname.startsWith("/(auth)");
+    const isProtectedRoute = pathname.startsWith("/(app)");
+
+    // 🔒 Only protect APP routes
+    if (!isAuthenticated && isProtectedRoute) {
+      router.replace("/(auth)/login");
       return;
     }
 
-    if (hasProfile === false) {
-router.replace("/create-profile" as Href);
+    // 🚀 Authenticated but missing profile
+    if (isAuthenticated && hasProfile === false && !isAuthRoute) {
+      router.replace("/create-profile" as Href);
       return;
     }
-  }, [isReady, isAuthenticated, hasProfile]);
+  }, [isReady, isAuthenticated, hasProfile, pathname]);
 
   if (!isReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator />
       </View>
     );

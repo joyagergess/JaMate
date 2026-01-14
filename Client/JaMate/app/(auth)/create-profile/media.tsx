@@ -2,6 +2,7 @@ import { Alert, Platform, Text, View, ScrollView } from "react-native";
 import { ActionSheetIOS } from "react-native";
 import { useState } from "react";
 import { useRouter } from "expo-router";
+import { StyleSheet } from "react-native";
 
 import {
   useCreateProfile,
@@ -17,14 +18,16 @@ import { StepIndicator } from "../../../components/ui/StepIndicator";
 import { AppButton } from "../../../components/ui/AppButton";
 import { createProfileStyles as styles } from "../../../styles/create-profile.styles";
 
-const MAX = 2;
-const MIN = 2;
+const MAX_TOTAL = 4;
+const MAX_VIDEOS = 2;
+const MAX_VIDEO_SECONDS = 16;
 
-const MAX_VIDEOS = 1;
-const MAX_IMAGES = 1;
-
-const MAX_TOTAL_MB = 100;
-const MAX_TOTAL_BYTES = MAX_TOTAL_MB * 1024 * 1024;
+function normalizeOrder(media: ProfileMedia[]): ProfileMedia[] {
+  return media.map((m, i) => ({
+    ...m,
+    order_index: i + 1,
+  }));
+}
 
 export default function CreateProfileMediaScreen() {
   const router = useRouter();
@@ -34,6 +37,11 @@ export default function CreateProfileMediaScreen() {
   const [feedIndex, setFeedIndex] = useState<number | null>(null);
 
   const addMedia = async (source: "camera" | "gallery") => {
+    if (media.length >= MAX_TOTAL) {
+      Alert.alert("Limit reached", "You can upload up to 4 media.");
+      return;
+    }
+
     const picked =
       source === "camera"
         ? await recordFromCamera()
@@ -41,44 +49,42 @@ export default function CreateProfileMediaScreen() {
 
     if (!picked) return;
 
-    const videos = media.filter(m => m.type === "video");
-    const images = media.filter(m => m.type === "image");
-    const totalSize = media.reduce((sum, m) => sum + m.size, 0);
+    const videos = media.filter((m) => m.type === "video");
 
-    if (picked.type === "video" && videos.length >= MAX_VIDEOS) {
-      Alert.alert(
-        "Video limit reached",
-        "You can upload only one video."
-      );
-      return;
+    if (picked.type === "video") {
+      if (videos.length >= MAX_VIDEOS) {
+        Alert.alert("Video limit", "You can upload only 2 videos.");
+        return;
+      }
+
+      if (picked.duration && picked.duration > MAX_VIDEO_SECONDS) {
+        Alert.alert(
+          "Video too long",
+          "Videos must be 16 seconds or less."
+        );
+        return;
+      }
     }
 
-    if (picked.type === "image" && images.length >= MAX_IMAGES) {
-      Alert.alert(
-        "Image limit reached",
-        "You can upload only one photo."
-      );
-      return;
-    }
+    const next = normalizeOrder([
+      ...media,
+      {
+        ...picked,
+        id: Date.now(),
+        order_index: media.length + 1, // temporary, normalized below
+      } as ProfileMedia,
+    ]);
 
-    // ❌ total size limit
-    if (totalSize + picked.size > MAX_TOTAL_BYTES) {
-      Alert.alert(
-        "Storage limit exceeded",
-        "Total media size cannot exceed 100 MB."
-      );
-      return;
-    }
-
-    update({
-      videos: [...media, { ...picked, id: Date.now() }],
-    });
+    update({ videos: next });
   };
 
   const removeMedia = (index: number) => {
     const next = [...media];
     next.splice(index, 1);
-    update({ videos: next });
+
+    update({
+      videos: normalizeOrder(next),
+    });
   };
 
   const openPicker = () => {
@@ -104,51 +110,42 @@ export default function CreateProfileMediaScreen() {
 
   const slots: (ProfileMedia | undefined)[] = [
     ...media,
-    ...Array(MAX - media.length).fill(undefined),
+    ...Array(Math.max(0, MAX_TOTAL - media.length)).fill(undefined),
   ];
-
-  const hasVideo = media.some(m => m.type === "video");
-  const hasImage = media.some(m => m.type === "image");
-  const canContinue = hasVideo && hasImage;
 
   return (
     <CreateProfileLayout
       footer={
         <>
-          <MediaProgressFooter current={media.length} min={MIN} />
+          <MediaProgressFooter current={media.length} min={1} />
           <AppButton
             title="Next"
-            disabled={!canContinue}
+            disabled={media.length === 0}
             onPress={() => router.push("/create-profile/bio")}
           />
         </>
       }
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 140 }}
-      >
+      <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>
         <StepIndicator current={6} total={6} />
 
         <View style={{ marginBottom: 20 }}>
-          <Text style={styles.title}>
-            Upload a video and a photo
-          </Text>
-
+          <Text style={styles.title}>Upload your media</Text>
           <Text style={styles.subtitle}>
-            Add exactly one video and one photo to get started.
+            Max 4 media · up to 2 videos (16s max each)
           </Text>
         </View>
 
         <View style={gridStyles.grid}>
           {slots.map((item, index) => (
-            <MediaSlot
-              key={index}
-              media={item}
-              onAdd={openPicker}
-              onRemove={() => removeMedia(index)}
-              onPreview={() => item && setFeedIndex(index)}
-            />
+            <View key={index} style={gridStyles.cell}>
+              <MediaSlot
+                media={item}
+                onAdd={openPicker}
+                onRemove={() => removeMedia(index)}
+                onPreview={() => item && setFeedIndex(index)}
+              />
+            </View>
           ))}
         </View>
       </ScrollView>
@@ -163,12 +160,13 @@ export default function CreateProfileMediaScreen() {
   );
 }
 
-import { StyleSheet } from "react-native";
-
 const gridStyles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 20,
+  },
+  cell: {
+    width: "48%",
   },
 });

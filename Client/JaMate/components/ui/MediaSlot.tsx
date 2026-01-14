@@ -4,6 +4,7 @@ import { Video, ResizeMode } from "expo-av";
 
 import { ProfileMedia } from "../../context/CreateProfileContext";
 import { mediaGridStyles } from "../../styles/create-profile-media.styles";
+
 type Props = {
   media?: ProfileMedia;
   onAdd: () => void;
@@ -16,7 +17,10 @@ export function MediaSlot({ media, onAdd, onRemove, onPreview }: Props) {
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={media ? onPreview : onAdd}
-      style={[mediaGridStyles.slot, media && mediaGridStyles.filled]}
+      style={[
+        mediaGridStyles.slot,
+        media && mediaGridStyles.filled,
+      ]}
     >
       {media ? (
         <>
@@ -34,6 +38,7 @@ export function MediaSlot({ media, onAdd, onRemove, onPreview }: Props) {
             />
           )}
 
+          {/* Remove */}
           <TouchableOpacity
             onPress={onRemove}
             style={mediaGridStyles.remove}
@@ -42,9 +47,15 @@ export function MediaSlot({ media, onAdd, onRemove, onPreview }: Props) {
           </TouchableOpacity>
         </>
       ) : (
-        <View style={mediaGridStyles.plus}>
-          <Ionicons name="add" size={22} color="#fff" />
-        </View>
+        <>
+          {/* Dashed placeholder */}
+          <View style={mediaGridStyles.placeholder} />
+
+          {/* Floating + */}
+          <View style={mediaGridStyles.plus}>
+            <Ionicons name="add" size={20} color="#fff" />
+          </View>
+        </>
       )}
     </TouchableOpacity>
   );
