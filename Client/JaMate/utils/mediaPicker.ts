@@ -2,24 +2,22 @@ import * as ImagePicker from "expo-image-picker";
 import { Platform, Alert } from "react-native";
 
 const MAX_VIDEO_DURATION = 16;
-
-type PickedMedia = {
+export type PickedMedia = {
   localUri: string;
   type: "image" | "video";
   mimeType: string;
   size: number;
+  duration?: number; 
 };
-function getDurationInSeconds(
-  duration: number | null | undefined
-): number {
+
+function getDurationInSeconds(duration: number | null | undefined): number {
   if (duration == null) return 0;
 
   return duration > 100 ? duration / 1000 : duration;
 }
 
 export async function pickFromGallery(): Promise<PickedMedia | null> {
-  const permission =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (!permission.granted) return null;
 
@@ -54,15 +52,13 @@ export async function pickFromGallery(): Promise<PickedMedia | null> {
     localUri: asset.uri,
     type: asset.type === "video" ? "video" : "image",
     mimeType:
-      asset.mimeType ??
-      (asset.type === "video" ? "video/mp4" : "image/jpeg"),
+      asset.mimeType ?? (asset.type === "video" ? "video/mp4" : "image/jpeg"),
     size: asset.fileSize ?? 0,
   };
 }
 
 export async function recordFromCamera(): Promise<PickedMedia | null> {
-  const permission =
-    await ImagePicker.requestCameraPermissionsAsync();
+  const permission = await ImagePicker.requestCameraPermissionsAsync();
 
   if (!permission.granted) return null;
 
@@ -97,8 +93,7 @@ export async function recordFromCamera(): Promise<PickedMedia | null> {
     localUri: asset.uri,
     type: asset.type === "video" ? "video" : "image",
     mimeType:
-      asset.mimeType ??
-      (asset.type === "video" ? "video/mp4" : "image/jpeg"),
+      asset.mimeType ?? (asset.type === "video" ? "video/mp4" : "image/jpeg"),
     size: asset.fileSize ?? 0,
   };
 }

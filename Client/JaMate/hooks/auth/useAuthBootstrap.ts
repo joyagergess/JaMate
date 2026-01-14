@@ -1,3 +1,4 @@
+// useAuthBootstrap.ts
 import { useEffect, useState } from "react";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { apiClient } from "../../api/client";
@@ -12,11 +13,15 @@ export function useAuthBootstrap() {
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     const bootstrap = async () => {
       setIsReady(false);
 
       try {
         const token = await getItem(AUTH_TOKEN_KEY);
+
+        if (!mounted) return;
 
         if (!token) {
           setIsAuthenticated(false);
@@ -28,16 +33,20 @@ export function useAuthBootstrap() {
 
         try {
           await apiClient.get("/profile/get");
-          setHasProfile(true);
+          if (mounted) setHasProfile(true);
         } catch {
-          setHasProfile(false);
+          if (mounted) setHasProfile(false);
         }
       } finally {
-        setIsReady(true);
+        if (mounted) setIsReady(true);
       }
     };
 
     bootstrap();
+
+    return () => {
+      mounted = false;
+    };
   }, [refreshKey]);
 
   return { isReady, isAuthenticated, hasProfile };
