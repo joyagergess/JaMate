@@ -5,36 +5,66 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-
-import { Picker } from "@react-native-picker/picker";
+import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { useProfile } from "../hooks/profile/useProfile";
 import { useUpdateProfile } from "../hooks/profile/useUpdateProfile";
 
-type Gender = "male" | "female";
-type Experience = "beginner" | "intermediate" | "advanced" | "pro";
+import { SelectablePill } from "../components/ui/SelectablePill";
+import { AppButton } from "../components/ui/AppButton";
+import { SearchablePickerModal } from "../components/ui/SearchablePickerModal";
+
+import { ALL_GENRES } from "../constants/genres";
+import { ALL_INSTRUMENTS } from "../constants/instruments";
+import { orderBySelected } from "../utils/orderBySelected";
+
+/* ===================== CONSTANTS ===================== */
+
+const EXPERIENCE_LEVELS = ["Beginner", "Intermediate", "Advanced", "Pro"] as const;
+const GENDERS = ["male", "female"] as const;
+
+const MAX_GENRES = 3;
+const MAX_OBJECTIVES = 3;
+
+const OBJECTIVES = [
+  "Jam sessions",
+  "Live Gigs",
+  "Production / Recording",
+  "Song Writing",
+  "Band",
+  "Band members",
+];
+
+/* ===================== SCREEN ===================== */
 
 export default function EditProfileScreen() {
   const router = useRouter();
-
   const { data: profile, isLoading } = useProfile();
-  const { mutate, isPending, isError } = useUpdateProfile();
+  const { mutate, isPending } = useUpdateProfile();
 
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
-
-  const [gender, setGender] = useState<Gender>("male");
-  const [experience, setExperience] = useState<Experience>("beginner");
-
-  const [birthDate, setBirthDate] = useState<Date>(new Date());
+  const [birthDate, setBirthDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [gender, setGender] = useState<"male" | "female">("male");
+  const [experience, setExperience] =
+    useState<(typeof EXPERIENCE_LEVELS)[number]>("Beginner");
+
+  const [genres, setGenres] = useState<string[]>([]);
+  const [instruments, setInstruments] = useState<string[]>([]);
+  const [objectives, setObjectives] = useState<string[]>([]);
+
+  const [showGenres, setShowGenres] = useState(false);
+  const [showInstruments, setShowInstruments] = useState(false);
+
+  const orderedGenres = orderBySelected(ALL_GENRES, genres);
+  const orderedInstruments = orderBySelected(ALL_INSTRUMENTS, instruments);
 
   useEffect(() => {
     if (!profile) return;
@@ -43,9 +73,17 @@ export default function EditProfileScreen() {
     setUsername(profile.username ?? "");
     setBio(profile.bio ?? "");
     setLocation(profile.location ?? "");
-    setGender(profile.gender);
-    setExperience(profile.experience_level);
     setBirthDate(new Date(profile.birth_date));
+
+    setGender(profile.gender);
+    setExperience(
+      (profile.experience_level.charAt(0).toUpperCase() +
+        profile.experience_level.slice(1)) as any
+    );
+
+    setGenres(profile.genres.map((g: any) => g.name));
+    setInstruments(profile.instruments.map((i: any) => i.name));
+    setObjectives(profile.objectives.map((o: any) => o.name));
   }, [profile]);
 
   if (isLoading) {
@@ -58,231 +96,266 @@ export default function EditProfileScreen() {
 
   if (!profile) return null;
 
+  /* ===================== SAVE ===================== */
+
   const onSave = () => {
     mutate(
       {
         name: name.trim(),
         username: username.trim() || null,
         bio: bio.trim() || null,
-        location: location.trim(),
+        location: location.trim() || null,
         gender,
-        experience_level: experience,
         birth_date: birthDate.toISOString().split("T")[0],
-
-        genres: profile.genres.map((g: { name: string }) => g.name),
-        objectives: profile.objectives.map((o: { name: string }) => o.name),
-        instruments: profile.instruments.map((i: { name: string }) => ({
-          name: i.name,
-          level: experience,
+        experience_level: experience.toLowerCase(),
+        genres,
+        objectives,
+        instruments: instruments.map((name) => ({
+          name,
+          level: experience.toLowerCase(),
         })),
       },
-      {
-        onSuccess: () => router.back(),
-        onError: (err: any) =>
-          console.error("UPDATE PROFILE ERROR:", err.response?.data ?? err),
-      }
+      { onSuccess: () => router.back() }
     );
   };
 
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
-      <View style={{ padding: 24 }}>
-        <Title>Edit Profile</Title>
+    <>
+      <ScrollView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
+        <View style={{ padding: 24 }}>
+          <Title>Edit Profile</Title>
 
-        <Label>Name</Label>
-        <Input value={name} onChangeText={setName} />
+          <Label>Name</Label>
+          <Input value={name} onChangeText={setName} placeholder="Your name" />
 
-        <Label>Username</Label>
-        <Input value={username} onChangeText={setUsername} />
+          <Label>Username</Label>
+          <Input value={username} onChangeText={setUsername} placeholder="Username" />
 
-        <Label>Bio</Label>
-        <Input
-          value={bio}
-          onChangeText={setBio}
-          multiline
-          style={{ height: 100 }}
-        />
-
-        <Label>Location</Label>
-        <Input value={location} onChangeText={setLocation} />
-
-        {/* Gender */}
-        <Label>Gender</Label>
-        <PickerContainer>
-          <Picker
-            selectedValue={gender}
-            onValueChange={(v: Gender) => setGender(v)}
-          >
-            <Picker.Item label="Male" value="male" />
-            <Picker.Item label="Female" value="female" />
-          </Picker>
-        </PickerContainer>
-
-        {/* Experience */}
-        <Label>Experience level</Label>
-        <PickerContainer>
-          <Picker
-            selectedValue={experience}
-            onValueChange={(v: Experience) => setExperience(v)}
-          >
-            <Picker.Item label="Beginner" value="beginner" />
-            <Picker.Item label="Intermediate" value="intermediate" />
-            <Picker.Item label="Advanced" value="advanced" />
-            <Picker.Item label="Pro" value="pro" />
-          </Picker>
-        </PickerContainer>
-
-        {/* Birth date */}
-        <Label>Birth date</Label>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={dateButton}
-        >
-          <Text style={{ color: "#fff" }}>
-            {birthDate.toISOString().split("T")[0]}
-          </Text>
-        </TouchableOpacity>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={birthDate}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            maximumDate={new Date()}
-            onChange={(_, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) setBirthDate(selectedDate);
-            }}
+          <Label>Bio</Label>
+          <Input
+            value={bio}
+            onChangeText={setBio}
+            placeholder="Tell us about you"
+            multiline
+            style={{ height: 100 }}
           />
-        )}
 
-        {/* Actions */}
-        <View style={{ flexDirection: "row", marginTop: 32, gap: 12 }}>
-          <ButtonSecondary label="Cancel" onPress={() => router.back()} />
-          <ButtonPrimary
-            label={isPending ? "Saving..." : "Save"}
-            onPress={onSave}
-            disabled={isPending}
-          />
+          <Label>Location</Label>
+          <Input value={location} onChangeText={setLocation} placeholder="City, country" />
+
+          <Label>Birth date</Label>
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={inputStyle}>
+            <Text style={{ color: "#fff" }}>
+              {birthDate.toISOString().split("T")[0]}
+            </Text>
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={birthDate}
+              mode="date"
+              maximumDate={new Date()}
+              onChange={(_, d) => {
+                setShowDatePicker(false);
+                if (d) setBirthDate(d);
+              }}
+            />
+          )}
+
+          <Section title="Gender">
+            <Row>
+              {GENDERS.map((g) => (
+                <Segment
+                  key={g}
+                  label={g.charAt(0).toUpperCase() + g.slice(1)}
+                  selected={gender === g}
+                  onPress={() => setGender(g)}
+                />
+              ))}
+            </Row>
+          </Section>
+
+          <Section title="Experience level">
+            <Row wrap>
+              {EXPERIENCE_LEVELS.map((lvl) => (
+                <Segment
+                  key={lvl}
+                  label={lvl}
+                  selected={experience === lvl}
+                  onPress={() => setExperience(lvl)}
+                />
+              ))}
+            </Row>
+          </Section>
+
+          <Section title="Objectives (max 3)">
+            <Row wrap>
+              {OBJECTIVES.map((o) => (
+                <Segment
+                  key={o}
+                  label={o}
+                  selected={objectives.includes(o)}
+                  onPress={() =>
+                    setObjectives(
+                      objectives.includes(o)
+                        ? objectives.filter((x) => x !== o)
+                        : objectives.length < MAX_OBJECTIVES
+                        ? [...objectives, o]
+                        : objectives
+                    )
+                  }
+                />
+              ))}
+            </Row>
+          </Section>
+
+          <Section title="Genres">
+            <Row wrap>
+              {orderedGenres.slice(0, 6).map((g) => (
+                <SelectablePill
+                  key={g}
+                  label={g}
+                  selected={genres.includes(g)}
+                  onPress={() =>
+                    setGenres(
+                      genres.includes(g)
+                        ? genres.filter((x) => x !== g)
+                        : genres.length < MAX_GENRES
+                        ? [...genres, g]
+                        : genres
+                    )
+                  }
+                />
+              ))}
+              <SelectablePill label="More" selected={false} onPress={() => setShowGenres(true)} />
+            </Row>
+          </Section>
+
+          <Section title="Instruments">
+            <Row wrap>
+              {orderedInstruments.slice(0, 6).map((i) => (
+                <SelectablePill
+                  key={i}
+                  label={i}
+                  selected={instruments.includes(i)}
+                  onPress={() =>
+                    setInstruments(
+                      instruments.includes(i)
+                        ? instruments.filter((x) => x !== i)
+                        : [...instruments, i]
+                    )
+                  }
+                />
+              ))}
+              <SelectablePill label="More" selected={false} onPress={() => setShowInstruments(true)} />
+            </Row>
+          </Section>
+
+          <View style={{ marginTop: 40 }}>
+            <AppButton
+              title={isPending ? "Saving..." : "Save changes"}
+              onPress={onSave}
+              disabled={isPending}
+            />
+          </View>
         </View>
+      </ScrollView>
 
-        {isError && (
-          <Text style={{ color: "#EF4444", marginTop: 16 }}>
-            Failed to update profile.
-          </Text>
-        )}
-      </View>
-    </ScrollView>
+      {/* ===== SEARCH MODALS ===== */}
+
+      <SearchablePickerModal
+        visible={showGenres}
+        title="Select genres"
+        items={ALL_GENRES}
+        selected={genres}
+        max={MAX_GENRES}
+        onChange={setGenres}
+        onClose={() => setShowGenres(false)}
+      />
+
+      <SearchablePickerModal
+        visible={showInstruments}
+        title="Select instruments"
+        items={ALL_INSTRUMENTS}
+        selected={instruments}
+        onChange={setInstruments}
+        onClose={() => setShowInstruments(false)}
+      />
+    </>
   );
 }
 
-/* ---------- UI helpers ---------- */
+/* ===================== SMALL UI ===================== */
 
-function Title({ children }: { children: string }) {
+function Title({ children }: any) {
   return (
-    <Text
-      style={{
-        color: "#fff",
-        fontSize: 24,
-        fontWeight: "700",
-        marginBottom: 24,
-      }}
-    >
+    <Text style={{ color: "#fff", fontSize: 24, fontWeight: "700", marginBottom: 24 }}>
       {children}
     </Text>
   );
 }
 
-function Label({ children }: { children: string }) {
+function Label({ children }: any) {
   return <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>{children}</Text>;
 }
 
+const inputStyle = {
+  backgroundColor: "#111827",
+  padding: 14,
+  borderRadius: 12,
+  marginBottom: 18,
+};
 function Input(props: any) {
   return (
     <TextInput
       {...props}
-      placeholderTextColor="#6B7280"
-      style={{
-        backgroundColor: "#111827",
-        color: "#fff",
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        borderRadius: 12,
-        marginBottom: 18,
-      }}
+      style={[
+        inputStyle,
+        { color: "#FFFFFF" }, 
+      ]}
+      placeholderTextColor="#6B7280" 
     />
   );
 }
 
-function PickerContainer({ children }: { children: React.ReactNode }) {
+
+
+function Section({ title, children }: any) {
   return (
-    <View
-      style={{
-        backgroundColor: "#111827",
-        borderRadius: 12,
-        marginBottom: 18,
-      }}
-    >
+    <View style={{ marginTop: 24 }}>
+      <Text style={{ color: "#fff", fontWeight: "600", marginBottom: 12 }}>
+        {title}
+      </Text>
       {children}
     </View>
   );
 }
 
-function ButtonPrimary({
-  label,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-}) {
+function Row({ children, wrap }: any) {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      style={{
-        flex: 1,
-        backgroundColor: "#6D5DF6",
-        paddingVertical: 14,
-        borderRadius: 28,
-        alignItems: "center",
-        opacity: disabled ? 0.6 : 1,
-      }}
-    >
-      <Text style={{ color: "#fff", fontWeight: "600" }}>{label}</Text>
-    </TouchableOpacity>
+    <View style={{ flexDirection: "row", flexWrap: wrap ? "wrap" : "nowrap", gap: 10 }}>
+      {children}
+    </View>
   );
 }
 
-function ButtonSecondary({
-  label,
-  onPress,
-}: {
-  label: string;
-  onPress: () => void;
-}) {
+function Segment({ label, selected, onPress }: any) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{
-        flex: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 999,
+        backgroundColor: selected ? "#6D5DF6" : "transparent",
         borderWidth: 1,
-        borderColor: "#374151",
-        paddingVertical: 14,
-        borderRadius: 28,
-        alignItems: "center",
+        borderColor: selected ? "#6D5DF6" : "#374151",
       }}
     >
-      <Text style={{ color: "#E5E7EB", fontWeight: "600" }}>{label}</Text>
+      <Text style={{ color: selected ? "#fff" : "#E5E7EB", fontWeight: "600" }}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
-
-const dateButton = {
-  backgroundColor: "#111827",
-  paddingVertical: 14,
-  paddingHorizontal: 14,
-  borderRadius: 12,
-  marginBottom: 18,
-};

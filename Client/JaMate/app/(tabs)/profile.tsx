@@ -8,7 +8,11 @@ import { ProfileTabs } from "../../components/profile/ProfileTabs";
 
 export default function ProfileScreen() {
   const { data: profile, isLoading: loadingProfile } = useProfile();
-  const { data: media, isLoading: loadingMedia } = useProfileMedia();
+  const {
+    data: media,
+    isLoading: loadingMedia,
+    refetch: refetchMedia,
+  } = useProfileMedia();
 
   if (loadingProfile || loadingMedia) {
     return (
@@ -17,8 +21,6 @@ export default function ProfileScreen() {
       </View>
     );
   }
-console.log("PROFILE:", profile);
-console.log("MEDIA ARRAY:", media);
 
   if (!profile) return null;
 
@@ -28,7 +30,12 @@ console.log("MEDIA ARRAY:", media);
       contentContainerStyle={{ paddingBottom: 120 }}
     >
       <ProfileHeader profile={profile} media={media} />
-      <ProfileTabs profile={profile} media={media} />
+
+      <ProfileTabs
+        profile={profile}
+        media={media ?? []}
+        onMediaUploaded={refetchMedia}
+      />
     </ScrollView>
   );
 }
