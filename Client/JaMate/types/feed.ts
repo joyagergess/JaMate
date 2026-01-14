@@ -6,7 +6,7 @@ export type FeedProfile = {
   location: string | null;
   gender: string;
   experience_level: string;
-
+  birth_date?: string;
   instruments: { id: number; name: string }[];
   genres: { id: number; name: string }[];
   objectives: { id: number; name: string }[];

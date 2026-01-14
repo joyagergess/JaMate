@@ -32,7 +32,7 @@ export function FeedPreviewModal({
 }: Props) {
   const [index, setIndex] = useState(startIndex);
   const [token, setToken] = useState<string | null>(null);
-  const insets = useSafeAreaInsets(); // 🔥 KEY FIX
+  const insets = useSafeAreaInsets(); 
 
   useEffect(() => {
     if (visible) {
