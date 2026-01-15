@@ -42,7 +42,7 @@ export function ProfileInfoSection({ profile }: { profile: Profile }) {
       {age !== null && (
         <InfoRow label="Age" value={`${age} `} />
       )}
-
+ 
       {profile.gender && (
         <InfoRow label="Gender" value={profile.gender} />
       )}

@@ -6,54 +6,52 @@ export const chatStyles = StyleSheet.create({
     backgroundColor: "#0B0E13",
   },
 
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#0B0E13",
+  },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.06)",
   },
 
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-
-  headerAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    marginBottom: 4,
-  },
-
-  headerName: {
+  headerTitle: {
     color: "#fff",
+    fontSize: 16,
     fontWeight: "600",
   },
 
   block: {
     color: "#FF4D4D",
-    fontWeight: "600",
+    fontSize: 12,
   },
 
   bubble: {
-    maxWidth: "70%",
-    padding: 12,
+    maxWidth: "75%",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderRadius: 16,
     marginVertical: 6,
-    marginHorizontal: 16,
+    marginHorizontal: 12,
   },
 
-  bubbleMine: {
-    backgroundColor: "#6D5DF6",
+  bubbleMe: {
     alignSelf: "flex-end",
+    backgroundColor: "#6D5DF6",
     borderBottomRightRadius: 4,
   },
 
   bubbleOther: {
-    backgroundColor: "#1F2937",
     alignSelf: "flex-start",
+    backgroundColor: "#1F2937",
     borderBottomLeftRadius: 4,
   },
 
@@ -62,41 +60,29 @@ export const chatStyles = StyleSheet.create({
     fontSize: 14,
   },
 
-  bubbleTextMine: {
-    fontWeight: "600",
-  },
-
   time: {
-    fontSize: 11,
-    color: "#9CA3AF",
     marginTop: 4,
+    fontSize: 10,
+    color: "rgba(255,255,255,0.5)",
     alignSelf: "flex-end",
   },
 
   inputBar: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.06)",
   },
 
   input: {
     flex: 1,
-    height: 44,
-    backgroundColor: "#111827",
-    borderRadius: 22,
-    paddingHorizontal: 16,
     color: "#fff",
-  },
-
-  voiceBtn: {
-    marginLeft: 10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#6D5DF6",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#111827",
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 8,
   },
 });

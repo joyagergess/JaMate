@@ -10,21 +10,37 @@ const tabs = ["Infos", "Media"] as const;
 type Props = {
   profile: any;
   media: ProfileMedia[];
-  onMediaUploaded: () => void;
+  onMediaUploaded?: () => void;
+  readOnly?: boolean;
 };
 
-export function ProfileTabs({ profile, media, onMediaUploaded }: Props) {
-  const [active, setActive] = useState<(typeof tabs)[number]>("Infos");
+export function ProfileTabs({
+  profile,
+  media,
+  onMediaUploaded,
+  readOnly,
+}: Props) {
+  const [active, setActive] =
+    useState<(typeof tabs)[number]>("Infos");
 
   return (
     <View style={{ marginTop: 32 }}>
       {/* Tabs */}
-      <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+        }}
+      >
         {tabs.map((tab) => (
-          <TouchableOpacity key={tab} onPress={() => setActive(tab)}>
+          <TouchableOpacity
+            key={tab}
+            onPress={() => setActive(tab)}
+          >
             <Text
               style={{
-                color: active === tab ? "#6D5DF6" : "#9CA3AF",
+                color:
+                  active === tab ? "#6D5DF6" : "#9CA3AF",
                 fontWeight: "600",
               }}
             >
@@ -43,6 +59,7 @@ export function ProfileTabs({ profile, media, onMediaUploaded }: Props) {
           <ProfileMediaSection
             media={media}
             onUploaded={onMediaUploaded}
+            readOnly={readOnly}
           />
         )}
       </View>

@@ -13,26 +13,29 @@ export const messagesStyles = StyleSheet.create({
     backgroundColor: "#0B0E13",
   },
 
-  tabs: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.08)",
-  },
+ tabs: {
+    
+     paddingHorizontal: 18,
+  flexDirection: "row",
+  marginTop: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: "rgba(255,255,255,0.1)",
+},
 
-  tabText: {
-    color: "rgba(255,255,255,0.5)",
-    fontSize: 15,
-    paddingBottom: 12,
-    marginHorizontal: 24,
-  },
 
-  tabActive: {
-    color: "#7C6DFF",
-    borderBottomWidth: 2,
-    borderBottomColor: "#7C6DFF",
-  },
+tabText: {
+  color: "rgba(255,255,255,0.5)",
+  fontSize: 15,
+  marginRight: 24,
+  paddingBottom: 10,
+},
+
+tabActive: {
+  color: "#7C6DFF",
+  borderBottomWidth: 2,
+  borderBottomColor: "#7C6DFF",
+},
+
 
   searchBox: {
     marginTop: 16,

@@ -9,10 +9,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { Spinner } from "../../components/ui/Spinner";
 
 import { useMatches } from "../../hooks/matches/useMatches";
 import { matchesStyles as styles } from "../../styles/matches.styles";
 import { buildImageUrl } from "../../utils/media";
+import { router, type Href } from "expo-router";
 
 /* ------------------ TYPES ------------------ */
 
@@ -44,11 +46,15 @@ export default function Matches() {
   const [search, setSearch] = useState("");
 
   /* ------------------ LOADING ------------------ */
-
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.loading}>
-        <Text style={{ color: "#fff" }}>Loading…</Text>
+      <SafeAreaView
+        style={[
+          styles.loading,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Spinner size={40} />
       </SafeAreaView>
     );
   }
@@ -62,17 +68,12 @@ export default function Matches() {
 
     const q = search.toLowerCase();
 
-    return safeMatches.filter((m) =>
-      m.profile.name.toLowerCase().includes(q)
-    );
+    return safeMatches.filter((m) => m.profile.name.toLowerCase().includes(q));
   }, [safeMatches, search]);
 
   /* ------------------ TAB DATA ------------------ */
 
-  const listData =
-    tab === "matches"
-      ? filteredMatches
-      : []; // 👈 Band Suggestions EMPTY ON PURPOSE
+  const listData = tab === "matches" ? filteredMatches : []; // 👈 Band Suggestions EMPTY ON PURPOSE
 
   /* ------------------ RENDER ------------------ */
 
@@ -81,23 +82,13 @@ export default function Matches() {
       {/* ------------------ TABS ------------------ */}
       <View style={styles.tabs}>
         <TouchableOpacity onPress={() => setTab("matches")}>
-          <Text
-            style={[
-              styles.tabText,
-              tab === "matches" && styles.tabActive,
-            ]}
-          >
+          <Text style={[styles.tabText, tab === "matches" && styles.tabActive]}>
             New Matches
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => setTab("bands")}>
-          <Text
-            style={[
-              styles.tabText,
-              tab === "bands" && styles.tabActive,
-            ]}
-          >
+          <Text style={[styles.tabText, tab === "bands" && styles.tabActive]}>
             Band Suggestions
           </Text>
         </TouchableOpacity>
@@ -142,26 +133,28 @@ export default function Matches() {
 
               {/* INFO */}
               <View style={styles.info}>
-                <Text style={styles.name}>
-                  {item.profile.name}
-                </Text>
+                <Text style={styles.name}>{item.profile.name}</Text>
                 <Text style={styles.sub}>
-                  Jamming Sessions
+                  {item.profile.name} wants to jam{" "}
                 </Text>
               </View>
 
               {/* ACTIONS */}
               <View style={styles.actions}>
                 <TouchableOpacity style={styles.chatBtn}>
-                  <Text style={styles.chatText}>
-                    Message
-                  </Text>
+                  <Text style={styles.chatText}>Message</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.profileBtn}>
-                  <Text style={styles.profileText}>
-                    View Profile
-                  </Text>
+                <TouchableOpacity
+                  style={styles.profileBtn}
+                  onPress={() => {
+                    router.push({
+                      pathname: "/profile/[id]",
+                      params: { id: String(item.profile.id) },
+                    } as unknown as Href);
+                  }}
+                >
+                  <Text style={styles.profileText}>View Profile</Text>
                 </TouchableOpacity>
               </View>
             </View>

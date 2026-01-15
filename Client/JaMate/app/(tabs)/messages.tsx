@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useMemo, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { Spinner } from "../../components/ui/Spinner";
 
 import { useConversations } from "../../hooks/messages/useConversations";
 import { useProfile } from "../../hooks/profile/useProfile";
@@ -23,68 +24,67 @@ export default function Messages() {
   const [tab, setTab] = useState<"direct" | "band">("direct");
   const [search, setSearch] = useState("");
 
-  /* ------------------ LOADING ------------------ */
-
   if (isLoading || !me) {
     return (
-      <SafeAreaView style={styles.loading}>
-        <Text style={{ color: "#fff" }}>Loading…</Text>
+      <SafeAreaView
+        style={[
+          styles.loading,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Spinner size={40} />
       </SafeAreaView>
     );
   }
 
-  /* ------------------ FILTER ------------------ */
-
   const filtered = useMemo(() => {
-    return (conversations ?? []).filter((c) => {
-      if (tab === "band" && c.type !== "band") return false;
-      if (tab === "direct" && c.type !== "direct") return false;
+    return (conversations ?? [])
+      .filter((c) => {
+        if (tab === "band" && c.type !== "band") return false;
+        if (tab === "direct" && c.type !== "direct") return false;
 
-      const other = c.participants
-        .map((p) => p.profile)
-        .find((p) => p.id !== me.id);
+        const other = c.participants
+          .map((p) => p.profile)
+          .find((p) => p.id !== me.id);
 
-      if (!other) return false;
+        if (!other) return false;
 
-      return other.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-    });
+        return other.name.toLowerCase().includes(search.toLowerCase());
+      })
+      .sort((a, b) => {
+        const aLast = a.messages?.[0]?.sent_at
+          ? new Date(a.messages[0].sent_at).getTime()
+          : 0;
+
+        const bLast = b.messages?.[0]?.sent_at
+          ? new Date(b.messages[0].sent_at).getTime()
+          : 0;
+
+        return bLast - aLast;
+      });
   }, [conversations, tab, search, me.id]);
-
-  /* ------------------ RENDER ------------------ */
 
   return (
     <SafeAreaView style={styles.screen}>
-      {/* ------------------ TABS ------------------ */}
+      {/* TABS */}
       <View style={styles.tabs}>
         <TouchableOpacity onPress={() => setTab("direct")}>
-          <Text
-            style={[
-              styles.tabText,
-              tab === "direct" && styles.tabActive,
-            ]}
-          >
+          <Text style={[styles.tabText, tab === "direct" && styles.tabActive]}>
             Chats
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => setTab("band")}>
-          <Text
-            style={[
-              styles.tabText,
-              tab === "band" && styles.tabActive,
-            ]}
-          >
+          <Text style={[styles.tabText, tab === "band" && styles.tabActive]}>
             Band chats
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* ------------------ SEARCH ------------------ */}
+      {/* SEARCH */}
       <View style={styles.searchBox}>
         <TextInput
-          placeholder="search profile.."
+          placeholder="Search profile…"
           placeholderTextColor="rgba(255,255,255,0.4)"
           value={search}
           onChangeText={setSearch}
@@ -93,7 +93,7 @@ export default function Messages() {
         <Ionicons name="search" size={18} color="#aaa" />
       </View>
 
-      {/* ------------------ LIST ------------------ */}
+      {/* LIST */}
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
@@ -103,19 +103,16 @@ export default function Messages() {
             .find((p) => p.id !== me.id);
 
           if (!otherProfile) return null;
+          const avatarPath = otherProfile.media
+            ?.slice()
+            .sort((a, b) => a.order_index - b.order_index)
+            .find((m) => m.media_type === "image")?.media_url;
 
-          // ✅ SAME AVATAR LOGIC AS MATCHES
-          const avatarPath =
-            otherProfile.media
-              ?.slice()
-              .sort(
-                (a, b) => a.order_index - b.order_index
-              )
-              .find((m) => m.media_type === "image")
-              ?.media_url ?? null;
+          const avatarUrl = avatarPath ? buildImageUrl(avatarPath) : null;
 
-          const avatarUrl = buildImageUrl(avatarPath);
-          const lastMessage = item.messages[0];
+          console.log("MEDIA:", otherProfile.media);
+
+          const lastMessage = item.messages?.[0];
 
           return (
             <TouchableOpacity
@@ -128,7 +125,6 @@ export default function Messages() {
               activeOpacity={0.85}
             >
               <View style={styles.row}>
-                {/* AVATAR */}
                 <Image
                   source={
                     avatarUrl
@@ -138,20 +134,37 @@ export default function Messages() {
                   style={styles.avatar}
                 />
 
-                {/* INFO */}
                 <View style={styles.info}>
-                  <Text style={styles.name}>
-                    {otherProfile.name}
-                  </Text>
+                  <Text style={styles.name}>{otherProfile.name}</Text>
 
-                  <Text
-                    style={styles.message}
-                    numberOfLines={1}
-                  >
-                    {lastMessage?.body ??
-                      "No messages yet"}
+                  <Text style={styles.message} numberOfLines={1}>
+                    {lastMessage?.body ?? "No messages yet"}
                   </Text>
                 </View>
+
+                {item.unread_count > 0 && (
+                  <View
+                    style={{
+                      backgroundColor: "#FF375F",
+                      borderRadius: 12,
+                      minWidth: 22,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontSize: 12,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {item.unread_count}
+                    </Text>
+                  </View>
+                )}
               </View>
             </TouchableOpacity>
           );
@@ -159,9 +172,7 @@ export default function Messages() {
         ListEmptyComponent={
           <View style={{ paddingTop: 60, alignItems: "center" }}>
             <Text style={{ color: "#9CA3AF" }}>
-              {tab === "direct"
-                ? "No chats yet 💬"
-                : "No band chats yet 🎸"}
+              {tab === "direct" ? "No chats yet 💬" : "No band chats yet 🎸"}
             </Text>
           </View>
         }

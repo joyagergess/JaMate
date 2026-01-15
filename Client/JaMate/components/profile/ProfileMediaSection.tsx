@@ -7,6 +7,7 @@ import {
   Platform,
   ActivityIndicator,
   Text,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -19,7 +20,9 @@ import { pickFromGallery, recordFromCamera } from "../../utils/mediaPicker";
 import { useUploadProfileMedia } from "../../hooks/profile/useUploadProfileMedia";
 import { useDeleteProfileMedia } from "../../hooks/profile/useDeleteProfileMedia";
 
-const { width } = Dimensions.get("window");
+/* ------------------ LAYOUT ------------------ */
+
+const { width, height } = Dimensions.get("window");
 
 const GAP = 20;
 const MAX = 4;
@@ -27,27 +30,41 @@ const COLUMNS = 2;
 const CARD_WIDTH = (width - GAP * 3) / COLUMNS;
 const CARD_HEIGHT = CARD_WIDTH * 1.2;
 
+/* ------------------ TYPES ------------------ */
+
 type Props = {
   media: ProfileMedia[];
-  onUploaded: () => void;
+  onUploaded?: () => void;
+  readOnly?: boolean;
 };
 
-export function ProfileMediaSection({ media, onUploaded }: Props) {
+/* ------------------ COMPONENT ------------------ */
+
+export function ProfileMediaSection({
+  media,
+  onUploaded,
+  readOnly = false,
+}: Props) {
   const upload = useUploadProfileMedia();
   const remove = useDeleteProfileMedia();
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const gridMedia = media.filter((m) => m.order_index !== 0);
+  /* 🔥 ONLY REAL MEDIA WHEN READ-ONLY */
+  const gridMedia = media
+    .filter((m) => m.order_index !== 0)
+    .sort((a, b) => a.order_index - b.order_index);
 
-  const slots: (ProfileMedia | undefined)[] = [
-    ...gridMedia.slice(0, MAX),
-    ...Array(Math.max(0, MAX - gridMedia.length)).fill(undefined),
-  ];
+  const slots: ProfileMedia[] = readOnly
+    ? gridMedia
+    : gridMedia.slice(0, MAX);
+
+  /* ------------------ PICKER (EDIT MODE ONLY) ------------------ */
 
   const openPicker = () => {
+    if (readOnly) return;
     if (upload.isPending || remove.isPending) return;
 
     if (Platform.OS === "ios") {
@@ -71,6 +88,7 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
   };
 
   const handleAdd = async (source: "camera" | "gallery") => {
+    if (readOnly) return;
     if (gridMedia.length >= MAX) return;
 
     const picked =
@@ -89,7 +107,7 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
         size: picked.size,
       } as any,
       {
-        onSuccess: onUploaded,
+        onSuccess: () => onUploaded?.(),
         onError: () =>
           Alert.alert("Upload failed", "Please try again."),
       }
@@ -97,7 +115,7 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
   };
 
   const confirmDelete = (id: number) => {
-    if (upload.isPending || remove.isPending) return;
+    if (readOnly) return;
 
     Alert.alert("Remove media", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
@@ -106,17 +124,18 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
         style: "destructive",
         onPress: () =>
           remove.mutate(id, {
-            onSuccess: onUploaded,
-            onError: () =>
-              Alert.alert("Delete failed", "Could not remove media."),
+            onSuccess: () => onUploaded?.(),
           }),
       },
     ]);
   };
 
+  /* ------------------ RENDER ------------------ */
+
   return (
     <>
-      {gridMedia.length > 0 && (
+      {/* ❌ PREVIEW FEED ONLY FOR OWN PROFILE */}
+      {!readOnly && gridMedia.length > 0 && (
         <TouchableOpacity
           onPress={() => setPreviewIndex(0)}
           style={{
@@ -135,6 +154,7 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
         </TouchableOpacity>
       )}
 
+      {/* GRID */}
       <View
         style={{
           flexDirection: "row",
@@ -143,23 +163,22 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
           paddingHorizontal: GAP,
         }}
       >
-        {slots.map((item, index) => (
+        {slots.map((item) => (
           <View
-            key={index}
-            style={{
-              width: CARD_WIDTH,
-              height: CARD_HEIGHT,
-            }}
+            key={item.id}
+            style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
           >
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => {
-                if (!item) {
-                  openPicker();
-                } else if (item.media_type === "video") {
+                if (item.media_type === "video") {
                   setVideoUrl(item.url);
                 } else {
-                  setPreviewIndex(index);
+                  readOnly
+                    ? setImageUrl(item.url)
+                    : setPreviewIndex(
+                        gridMedia.findIndex((m) => m.id === item.id)
+                      );
                 }
               }}
               style={{
@@ -169,66 +188,44 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
                 overflow: "hidden",
               }}
             >
-              {item ? (
-                item.media_type === "image" ? (
-                  <Image
-                    source={{ uri: item.url }}
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                ) : (
-                  <>
-                    {item.thumbnail_url ? (
-                      <Image
-                        source={{ uri: item.thumbnail_url }}
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    ) : (
-                      <View
-                        style={{
-                          flex: 1,
-                          backgroundColor: "#000",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Ionicons
-                          name="play-circle"
-                          size={48}
-                          color="#fff"
-                        />
-                      </View>
-                    )}
-
-                    <View
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Ionicons
-                        name="play-circle"
-                        size={42}
-                        color="#fff"
-                      />
-                    </View>
-                  </>
-                )
-              ) : (
-                <View
-                  style={{
-                    flex: 1,
-                    borderWidth: 2,
-                    borderStyle: "dashed",
-                    borderColor: "#6D5DF6",
-                    borderRadius: 20,
-                  }}
+              {item.media_type === "image" && (
+                <Image
+                  source={{ uri: item.url }}
+                  style={{ width: "100%", height: "100%" }}
                 />
+              )}
+
+              {item.media_type === "video" && (
+                <>
+                  {item.thumbnail_url ? (
+                    <Image
+                      source={{ uri: item.thumbnail_url }}
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  ) : (
+                    <View style={{ flex: 1, backgroundColor: "#000" }} />
+                  )}
+
+                  <View
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Ionicons
+                      name="play-circle"
+                      size={42}
+                      color="#fff"
+                    />
+                  </View>
+                </>
               )}
             </TouchableOpacity>
 
-            {item && (
+            {/* ❌ DELETE ONLY FOR OWN PROFILE */}
+            {!readOnly && (
               <TouchableOpacity
                 onPress={() => confirmDelete(item.id)}
                 style={{
@@ -241,7 +238,6 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
                   backgroundColor: "rgba(0,0,0,0.7)",
                   justifyContent: "center",
                   alignItems: "center",
-                  zIndex: 20,
                 }}
               >
                 {remove.isPending ? (
@@ -251,46 +247,63 @@ export function ProfileMediaSection({ media, onUploaded }: Props) {
                 )}
               </TouchableOpacity>
             )}
-
-            {!item && (
-              <TouchableOpacity
-                onPress={openPicker}
-                style={{
-                  position: "absolute",
-                  bottom: -14,
-                  right: -14,
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: "#6D5DF6",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 6,
-                }}
-              >
-                {upload.isPending ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Ionicons name="add" size={20} color="#fff" />
-                )}
-              </TouchableOpacity>
-            )}
           </View>
         ))}
+
+        {/* ➕ ADD SLOT ONLY FOR OWN PROFILE */}
+        {!readOnly && gridMedia.length < MAX && (
+          <TouchableOpacity
+            onPress={openPicker}
+            style={{
+              width: CARD_WIDTH,
+              height: CARD_HEIGHT,
+              borderWidth: 2,
+              borderStyle: "dashed",
+              borderColor: "#6D5DF6",
+              borderRadius: 20,
+            }}
+          />
+        )}
       </View>
 
+      {/* IMAGE VIEWER */}
+      <Modal visible={!!imageUrl} transparent>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: "#000",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          activeOpacity={1}
+          onPress={() => setImageUrl(null)}
+        >
+          {imageUrl && (
+            <Image
+              source={{ uri: imageUrl }}
+              style={{ width, height }}
+              resizeMode="contain"
+            />
+          )}
+        </TouchableOpacity>
+      </Modal>
+
+      {/* VIDEO VIEWER */}
       <VideoPreviewModal
         visible={!!videoUrl}
         videoUrl={videoUrl}
         onClose={() => setVideoUrl(null)}
       />
 
-      <FeedPreviewModal
-        visible={previewIndex !== null}
-        media={gridMedia}
-        startIndex={previewIndex ?? 0}
-        onClose={() => setPreviewIndex(null)}
-      />
+      {/* FEED PREVIEW (OWN PROFILE ONLY) */}
+      {!readOnly && (
+        <FeedPreviewModal
+          visible={previewIndex !== null}
+          media={gridMedia}
+          startIndex={previewIndex ?? 0}
+          onClose={() => setPreviewIndex(null)}
+        />
+      )}
     </>
   );
 }

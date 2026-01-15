@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
+import { ProfileMedia } from "./useProfileMedia";
 
-export function useMessages(conversationId: number) {
+export function useProfileMediaById(profileId: number) {
   return useQuery({
-    queryKey: ["messages", conversationId],
+    queryKey: ["profile", profileId, "media"],
+    enabled: !!profileId,
     queryFn: async () => {
       const res = await apiClient.get(
-        `/conversations/${conversationId}/messages`
+        `/profile/${profileId}/media`
       );
       return res.data.data;
     },
