@@ -72,6 +72,14 @@ collapsedInstruments: {
     flexDirection: "row",
     gap: 6,
   },
+  videoLoader: {
+  ...StyleSheet.absoluteFillObject,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "#000",
+  zIndex: 2,
+},
+
 
   progressBar: {
     flex: 1,

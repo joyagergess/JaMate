@@ -32,15 +32,18 @@ const SWIPE_OUT = width * 1.2;
 const DROP_ZONE_Y = height - 160;
 
 export default function HomeScreen() {
+  const [feedIndex, setFeedIndex] = useState(0);
+
   const skipOpacity = useRef(new Animated.Value(0.6)).current;
   const jamOpacity = useRef(new Animated.Value(0.6)).current;
 
-  const { data: feed, isLoading } = useFeed();
+  const { data: feed, isLoading, refetch } = useFeed();
   const swipe = useSwipe();
 
   const [token, setToken] = useState<string | null>(null);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
 
   /* ------------------ ANIMATIONS ------------------ */
 
@@ -70,6 +73,12 @@ export default function HomeScreen() {
       { rotate },
     ],
   };
+  useEffect(() => {
+    if (feed && feedIndex >= 15) {
+      refetch();
+      setFeedIndex(0);
+    }
+  }, [feedIndex]);
 
   /* ------------------ BUTTON ANIMATION ------------------ */
 
@@ -154,6 +163,8 @@ export default function HomeScreen() {
       animateButtons(null);
 
       swipe.mutate({ profile_id: profileId, direction });
+
+      setFeedIndex((i) => i + 1);
       setMediaIndex(0);
     });
   };
@@ -211,7 +222,7 @@ export default function HomeScreen() {
     SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
   }, []);
 
-  const item: FeedItem | null = feed?.[0] ?? null;
+  const item: FeedItem | null = feed?.[feedIndex] ?? null;
   const profile = item?.profile ?? null;
 
   useEffect(() => {
@@ -255,16 +266,27 @@ export default function HomeScreen() {
           {current.type === "image" ? (
             <Image source={{ uri: current.url }} style={styles.media} />
           ) : (
-            <Video
-              source={{
-                uri: current.url,
-                headers: { Authorization: `Bearer ${token}` },
-              }}
-              style={styles.media}
-              resizeMode={ResizeMode.COVER}
-              shouldPlay
-              isLooping
-            />
+            <View style={styles.media}>
+              {videoLoading && (
+                <View style={styles.videoLoader}>
+                  <Text style={{ color: "#fff" }}>Loading…</Text>
+                </View>
+              )}
+
+              <Video
+                source={{
+                  uri: current.url,
+                  headers: { Authorization: `Bearer ${token}` },
+                }}
+                style={StyleSheet.absoluteFill}
+                resizeMode={ResizeMode.COVER}
+                shouldPlay
+                isLooping
+                onLoadStart={() => setVideoLoading(true)}
+                onReadyForDisplay={() => setVideoLoading(false)}
+                onError={() => setVideoLoading(false)}
+              />
+            </View>
           )}
 
           {/* TAP ZONES */}
