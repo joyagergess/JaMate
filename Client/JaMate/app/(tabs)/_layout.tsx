@@ -1,13 +1,17 @@
 import { Tabs } from "expo-router";
-import { Image } from "react-native";
+import { Image, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useMatches } from "../../hooks/matches/useMatches";
 
 const TAB_BG = "#0B0E13";
 const ACTIVE = "#FFFFFF";
 const INACTIVE = "rgba(255,255,255,0.5)";
 const ICON_SIZE = 22;
 
+
 export default function TabsLayout() {
+    const { data: matches } = useMatches();
+    const hasNewMatch = matches && matches.length > 0;
   return (
     <Tabs
       screenOptions={{
@@ -44,17 +48,32 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Matches */}
+      
       <Tabs.Screen
         name="matches"
         options={{
           title: "Matches",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="people-outline"
-              size={size ?? ICON_SIZE}
-              color={color}
-            />
+            <View>
+              <Ionicons
+                name="people-outline"
+                size={size ?? 22}
+                color={color}
+              />
+              {hasNewMatch && (
+                <View
+                  style={{
+                    position: "absolute",
+                    right: -6,
+                    top: -4,
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: "#FF375F",
+                  }}
+                />
+              )}
+            </View>
           ),
         }}
       />

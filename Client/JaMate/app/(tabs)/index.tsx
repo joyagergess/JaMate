@@ -1,227 +1,449 @@
 import {
   View,
   Text,
-  Dimensions,
-  TouchableOpacity,
   Image,
+  TouchableOpacity,
   StatusBar,
+  Animated,
+  Pressable,
+  PanResponder,
+  Dimensions,
+  StyleSheet,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as SecureStore from "expo-secure-store";
+import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
 
+import { LinearGradient } from "expo-linear-gradient";
+
+import { calculateAge } from "../../utils/date";
 import { useFeed } from "../../hooks/feed/useFeed";
 import { useSwipe } from "../../hooks/feed/useSwipe";
-import { ProfileMedia } from "../../hooks/profile/useProfileMedia";
+import { FeedItem } from "../../types/feed";
+import { AUTH_TOKEN_KEY } from "../../constants/auth";
+import { styles } from "../../styles/homeFeed.styles";
 
 const { width, height } = Dimensions.get("window");
 
+const ROTATION = 12;
+const SWIPE_OUT = width * 1.2;
+const DROP_ZONE_Y = height - 160;
+
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
+  const [feedIndex, setFeedIndex] = useState(0);
 
-  const { data: feed, isLoading } = useFeed();
+  const skipOpacity = useRef(new Animated.Value(0.6)).current;
+  const jamOpacity = useRef(new Animated.Value(0.6)).current;
+
+  const { data: feed, isLoading, refetch } = useFeed();
   const swipe = useSwipe();
+const [showMatchModal, setShowMatchModal] = useState(false);
 
+  const [token, setToken] = useState<string | null>(null);
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [collapsed, setCollapsed] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
 
-  if (isLoading || !feed?.length) return null;
+  /* ------------------ ANIMATIONS ------------------ */
 
-  const profile = feed[0];
-  const media = profile.media as ProfileMedia[];
+  const position = useRef(new Animated.ValueXY()).current;
+  const skipScale = useRef(new Animated.Value(1)).current;
+  const jamScale = useRef(new Animated.Value(1)).current;
+
+  const animatedHeight = useRef(new Animated.Value(1)).current;
+  const animatedOpacity = useRef(new Animated.Value(1)).current;
+const router = useRouter();
+
+  /* ------------------ STABLE REFS ------------------ */
+
+  const activeProfileIdRef = useRef<number | null>(null);
+  const hoveredRef = useRef<"skip" | "jam" | null>(null);
+
+  /* ------------------ ROTATION ------------------ */
+
+  const rotate = position.x.interpolate({
+    inputRange: [-width / 2, 0, width / 2],
+    outputRange: [`-${ROTATION}deg`, "0deg", `${ROTATION}deg`],
+  });
+
+  const cardStyle = {
+    transform: [
+      { translateX: position.x },
+      { translateY: position.y },
+      { rotate },
+    ],
+  };
+  useEffect(() => {
+    if (feed && feedIndex >= 15) {
+      refetch();
+      setFeedIndex(0);
+    }
+  }, [feedIndex]);
+
+  /* ------------------ BUTTON ANIMATION ------------------ */
+
+  const animateButtons = (target: "skip" | "jam" | null) => {
+    Animated.parallel([
+      Animated.spring(skipScale, {
+        toValue: target === "skip" ? 1.35 : 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      Animated.spring(jamScale, {
+        toValue: target === "jam" ? 1.35 : 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      Animated.timing(skipOpacity, {
+        toValue: target === "skip" ? 1 : 0.6,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(jamOpacity, {
+        toValue: target === "jam" ? 1 : 0.6,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  /* ------------------ INFO TOGGLE ------------------ */
+
+  const toggleInfo = () => {
+    const toValue = collapsed ? 1 : 0;
+
+    Animated.parallel([
+      Animated.timing(animatedHeight, {
+        toValue,
+        duration: 220,
+        useNativeDriver: false,
+      }),
+      Animated.timing(animatedOpacity, {
+        toValue,
+        duration: 160,
+        useNativeDriver: false,
+      }),
+    ]).start();
+
+    setCollapsed(!collapsed);
+  };
+
+  /* ------------------ RESET ------------------ */
+
+  const resetCard = () => {
+    Animated.parallel([
+      Animated.spring(position, {
+        toValue: { x: 0, y: 0 },
+        useNativeDriver: false,
+      }),
+      Animated.spring(skipScale, { toValue: 1, useNativeDriver: true }),
+      Animated.spring(jamScale, { toValue: 1, useNativeDriver: true }),
+    ]).start();
+  };
+
+  /* ------------------ SWIPE ------------------ */
+
+  const forceSwipe = (direction: "skip" | "jam") => {
+    const profileId = activeProfileIdRef.current;
+
+    if (!profileId) {
+      resetCard();
+      return;
+    }
+
+    Animated.timing(position, {
+      toValue: {
+        x: direction === "jam" ? SWIPE_OUT : -SWIPE_OUT,
+        y: 0,
+      },
+      duration: 220,
+      useNativeDriver: false,
+    }).start(() => {
+      position.setValue({ x: 0, y: 0 });
+      animateButtons(null);
+
+swipe.mutate(
+  { profile_id: profileId, direction },
+  {
+    onSuccess: (data) => {
+      if (data.matched) {
+        // 🎉 MATCH FOUND
+        setShowMatchModal(true);
+      }
+    },
+  }
+);
+
+      setFeedIndex((i) => i + 1);
+      setMediaIndex(0);
+    });
+  };
+
+  /* ------------------ PAN RESPONDER ------------------ */
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+
+      onMoveShouldSetPanResponder: (_, g) => {
+        return Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5;
+      },
+
+      onPanResponderMove: (_, g) => {
+        position.setValue({ x: g.dx, y: g.dy });
+
+        if (g.moveY > DROP_ZONE_Y) {
+          if (g.moveX < width / 2) {
+            hoveredRef.current = "skip";
+            animateButtons("skip");
+          } else {
+            hoveredRef.current = "jam";
+            animateButtons("jam");
+          }
+        } else {
+          hoveredRef.current = null;
+          animateButtons(null);
+        }
+      },
+
+      onPanResponderRelease: () => {
+        if (!activeProfileIdRef.current) {
+          resetCard();
+          hoveredRef.current = null;
+          return;
+        }
+
+        if (hoveredRef.current === "skip") {
+          forceSwipe("skip");
+        } else if (hoveredRef.current === "jam") {
+          forceSwipe("jam");
+        } else {
+          resetCard();
+        }
+
+        hoveredRef.current = null;
+      },
+    })
+  ).current;
+
+  /* ------------------ EFFECTS ------------------ */
+
+  useEffect(() => {
+    SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
+  }, []);
+
+  const item: FeedItem | null = feed?.[feedIndex] ?? null;
+  const profile = item?.profile ?? null;
+
+  useEffect(() => {
+    activeProfileIdRef.current = profile?.id ?? null;
+  }, [profile?.id]);
+
+  const media = useMemo(() => {
+    if (!profile) return [];
+    return profile.media.filter((m) => m.order !== 0);
+  }, [profile?.id]);
+
   const current = media[mediaIndex];
 
   const nextMedia = () => {
-    if (mediaIndex < media.length - 1) {
-      setMediaIndex(mediaIndex + 1);
-    }
+    if (mediaIndex < media.length - 1) setMediaIndex((i) => i + 1);
   };
 
   const prevMedia = () => {
-    if (mediaIndex > 0) {
-      setMediaIndex(mediaIndex - 1);
-    }
+    if (mediaIndex > 0) setMediaIndex((i) => i - 1);
   };
 
-  const handleSkip = () => {
-    swipe.mutate({
-      swiped_profile_id: profile.id,
-      direction: "skip",
-    });
-    setMediaIndex(0);
-  };
+  if (isLoading || !token || !profile || !current) {
+    return (
+      <SafeAreaView style={styles.loading}>
+        <Text style={{ color: "#fff" }}>Loading…</Text>
+      </SafeAreaView>
+    );
+  }
 
-  const handleJam = () => {
-    swipe.mutate({
-      swiped_profile_id: profile.id,
-      direction: "like",
-    });
-    setMediaIndex(0);
-  };
+  /* ------------------ RENDER ------------------ */
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
+    <SafeAreaView style={styles.screen}>
       <StatusBar hidden />
 
-      {/* MEDIA */}
-      {current.media_type === "image" ? (
-        <Image
-          source={{ uri: current.url }}
-          style={{ width, height }}
-          resizeMode="cover"
-        />
-      ) : (
-        <Video
-          source={{ uri: current.url }}
-          style={{ width, height }}
-          resizeMode={ResizeMode.COVER}
-          shouldPlay
-          isLooping
-        />
-      )}
-
-      {/* TAP ZONES */}
-      <View
-        style={{
-          position: "absolute",
-          inset: 0,
-          flexDirection: "row",
-        }}
-      >
-        <TouchableOpacity
-          style={{ width: "50%" }}
-          onPress={prevMedia}
-        />
-        <TouchableOpacity
-          style={{ width: "50%" }}
-          onPress={nextMedia}
-        />
-      </View>
-
-      {/* MEDIA PROGRESS */}
-      <View
-        style={{
-          position: "absolute",
-          top: insets.top + 8,
-          left: 12,
-          right: 12,
-          flexDirection: "row",
-          gap: 6,
-        }}
-      >
-        {media.map((_, i) => (
-          <View
-            key={i}
-            style={{
-              flex: 1,
-              height: 3,
-              borderRadius: 3,
-              backgroundColor:
-                i <= mediaIndex
-                  ? "#fff"
-                  : "rgba(255,255,255,0.3)",
-            }}
-          />
-        ))}
-      </View>
-
-      {/* PROFILE INFO */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 140,
-          left: 20,
-          right: 20,
-        }}
-      >
-        <Text style={{ color: "#fff", fontSize: 24, fontWeight: "700" }}>
-          {profile.name} — {profile.age}
-        </Text>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 6,
-            gap: 6,
-          }}
+      <View style={styles.card}>
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[StyleSheet.absoluteFillObject, cardStyle]}
         >
-          <Ionicons name="location" size={14} color="#ccc" />
-          <Text style={{ color: "#ccc" }}>{profile.location}</Text>
-        </View>
+          {current.type === "image" ? (
+            <Image source={{ uri: current.url }} style={styles.media} />
+          ) : (
+            <View style={styles.media}>
+              {videoLoading && (
+                <View style={styles.videoLoader}>
+                  <Text style={{ color: "#fff" }}>Loading…</Text>
+                </View>
+              )}
 
-        <Text style={{ color: "#aaa", marginTop: 6 }}>
-          {profile.instruments.map((i) => i.name).join(" · ")}
-        </Text>
-
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-          {profile.genres.map((g) => (
-            <View
-              key={g.id}
-              style={{
-                paddingHorizontal: 14,
-                paddingVertical: 6,
-                borderRadius: 16,
-                backgroundColor: "rgba(255,255,255,0.15)",
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 12 }}>
-                {g.name}
-              </Text>
+              <Video
+                source={{
+                  uri: current.url,
+                  headers: { Authorization: `Bearer ${token}` },
+                }}
+                style={StyleSheet.absoluteFill}
+                resizeMode={ResizeMode.COVER}
+                shouldPlay
+                isLooping
+                onLoadStart={() => setVideoLoading(true)}
+                onReadyForDisplay={() => setVideoLoading(false)}
+                onError={() => setVideoLoading(false)}
+              />
             </View>
-          ))}
-        </View>
+          )}
 
-        <Text style={{ color: "#aaa", marginTop: 10 }}>
-          Looking for jam sessions / Forming a band
-        </Text>
+          {/* TAP ZONES */}
+          <View style={styles.tapZones}>
+            <TouchableOpacity style={styles.tapZone} onPress={prevMedia} />
+            <TouchableOpacity style={styles.tapZone} onPress={nextMedia} />
+          </View>
+
+          {/* PROGRESS */}
+          <View style={styles.progressContainer}>
+            {media.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.progressBar,
+                  {
+                    backgroundColor:
+                      i <= mediaIndex ? "#fff" : "rgba(255,255,255,0.3)",
+                  },
+                ]}
+              />
+            ))}
+          </View>
+
+          {/* INFO */}
+          <Pressable style={styles.infoWrapper} onPress={toggleInfo}>
+            <BlurView intensity={18} tint="dark" style={styles.blurBox}>
+              <LinearGradient
+                colors={["rgba(0,0,0,0.08)", "rgba(0,0,0,0.35)"]}
+                style={StyleSheet.absoluteFillObject}
+              />
+
+              <Text style={styles.name}>
+                {profile.name}
+                {profile.birth_date && (
+                  <Text style={styles.age}>
+                    {" "}
+                    - {calculateAge(profile.birth_date)}
+                  </Text>
+                )}
+              </Text>
+
+              <Animated.View
+                style={{
+                  opacity: animatedOpacity,
+                  maxHeight: animatedHeight.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 500],
+                  }),
+                  overflow: "hidden",
+                  marginTop: 6,
+                }}
+              >
+                {profile.location && (
+                  <Text style={styles.metaText}>📍 {profile.location}</Text>
+                )}
+
+                <Text style={styles.skillLine}>
+                  {profile.instruments.map((i) => i.name).join(" · ")}
+                  {profile.experience_level && (
+                    <> - {profile.experience_level}</>
+                  )}
+                </Text>
+
+                <View style={styles.genresRow}>
+                  {profile.genres.map((g) => (
+                    <View key={g.id} style={styles.genreChip}>
+                      <Text style={styles.genreText}>{g.name}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {profile.objectives.length > 0 && (
+                  <Text style={styles.objectivesText}>
+                    Looking for{" "}
+                    {profile.objectives
+                      .map((o) => o.name.toLowerCase())
+                      .join(" / ")}
+                  </Text>
+                )}
+
+                {profile.bio && (
+                  <Text style={styles.objectivesText} numberOfLines={4}>
+                    {profile.bio}
+                  </Text>
+                )}
+              </Animated.View>
+            </BlurView>
+          </Pressable>
+        </Animated.View>
       </View>
+{showMatchModal && (
+  <Animated.View style={styles.matchOverlay}>
+    <Text style={styles.matchTitle}>It’s a Jam! 🎶</Text>
 
-      {/* ACTION BUTTONS */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: insets.bottom + 40,
-          left: 20,
-          right: 20,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <TouchableOpacity
-          onPress={handleSkip}
+    <TouchableOpacity
+      onPress={() => {
+        setShowMatchModal(false);
+        router.push("/matches");
+      }}
+    >
+      <Text style={styles.matchButtonText}>View Match</Text>
+    </TouchableOpacity>
+  </Animated.View>
+)}
+
+
+      {/* ACTIONS / DROP ZONES */}
+      <View style={styles.actions}>
+        <Animated.View
           style={{
-            paddingHorizontal: 28,
-            paddingVertical: 14,
-            borderRadius: 30,
-            backgroundColor: "#111",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
+            transform: [{ scale: skipScale }],
+            opacity: skipOpacity,
           }}
         >
-          <Ionicons name="close" size={20} color="#fff" />
-          <Text style={{ color: "#fff" }}>Skip</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.skipBtn}
+            onPress={() => forceSwipe("skip")}
+          >
+            <Ionicons name="close" size={20} color="#fff" />
+            <Text style={styles.btnText}>Skip</Text>
+          </TouchableOpacity>
+        </Animated.View>
 
-        <TouchableOpacity
-          onPress={handleJam}
+        <Animated.View
           style={{
-            paddingHorizontal: 32,
-            paddingVertical: 14,
-            borderRadius: 30,
-            backgroundColor: "#6D5DF6",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
+            transform: [{ scale: jamScale }],
+            opacity: jamOpacity,
           }}
         >
-          <Ionicons name="musical-notes" size={20} color="#fff" />
-          <Text style={{ color: "#fff", fontWeight: "600" }}>
-            Jam
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.jamBtn}
+            onPress={() => forceSwipe("jam")}
+          >
+            <Ionicons name="musical-notes" size={20} color="#fff" />
+            <Text style={styles.btnTextBold}>Jam</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
-    </View>
+    </SafeAreaView>
+    
   );
+  
 }
