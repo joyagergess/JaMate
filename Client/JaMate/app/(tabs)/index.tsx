@@ -16,6 +16,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
+
 import { LinearGradient } from "expo-linear-gradient";
 
 import { calculateAge } from "../../utils/date";
@@ -39,6 +41,7 @@ export default function HomeScreen() {
 
   const { data: feed, isLoading, refetch } = useFeed();
   const swipe = useSwipe();
+const [showMatchModal, setShowMatchModal] = useState(false);
 
   const [token, setToken] = useState<string | null>(null);
   const [mediaIndex, setMediaIndex] = useState(0);
@@ -53,6 +56,7 @@ export default function HomeScreen() {
 
   const animatedHeight = useRef(new Animated.Value(1)).current;
   const animatedOpacity = useRef(new Animated.Value(1)).current;
+const router = useRouter();
 
   /* ------------------ STABLE REFS ------------------ */
 
@@ -162,7 +166,17 @@ export default function HomeScreen() {
       position.setValue({ x: 0, y: 0 });
       animateButtons(null);
 
-      swipe.mutate({ profile_id: profileId, direction });
+swipe.mutate(
+  { profile_id: profileId, direction },
+  {
+    onSuccess: (data) => {
+      if (data.matched) {
+        // 🎉 MATCH FOUND
+        setShowMatchModal(true);
+      }
+    },
+  }
+);
 
       setFeedIndex((i) => i + 1);
       setMediaIndex(0);
@@ -378,6 +392,21 @@ export default function HomeScreen() {
           </Pressable>
         </Animated.View>
       </View>
+{showMatchModal && (
+  <Animated.View style={styles.matchOverlay}>
+    <Text style={styles.matchTitle}>It’s a Jam! 🎶</Text>
+
+    <TouchableOpacity
+      onPress={() => {
+        setShowMatchModal(false);
+        router.push("/matches");
+      }}
+    >
+      <Text style={styles.matchButtonText}>View Match</Text>
+    </TouchableOpacity>
+  </Animated.View>
+)}
+
 
       {/* ACTIONS / DROP ZONES */}
       <View style={styles.actions}>
@@ -414,5 +443,7 @@ export default function HomeScreen() {
         </Animated.View>
       </View>
     </SafeAreaView>
+    
   );
+  
 }

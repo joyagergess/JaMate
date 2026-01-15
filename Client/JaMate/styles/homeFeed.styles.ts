@@ -20,6 +20,34 @@ skillLine: {
   fontSize: 14,
   marginTop: 4,
 },
+matchOverlay: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: "rgba(0,0,0,0.85)",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 999,
+},
+
+matchTitle: {
+  color: "#fff",
+  fontSize: 32,
+  fontWeight: "800",
+  marginBottom: 24,
+},
+
+matchButton: {
+  backgroundColor: "#6D5DF6",
+  paddingHorizontal: 28,
+  paddingVertical: 14,
+  borderRadius: 30,
+},
+
+matchButtonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "600",
+},
+
 
 metaText: {
   color: "#ccc",
