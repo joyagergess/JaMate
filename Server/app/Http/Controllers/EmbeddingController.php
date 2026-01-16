@@ -16,9 +16,9 @@ class EmbeddingController extends Controller
                 'processed' => $processed,
             ]);
         } catch (\Throwable $e) {
-
             return response()->json([
-                'error' => 'Embedding generation failed',
+                'error' => $e->getMessage(),
+                'class' => get_class($e),
             ], 500);
         }
     }

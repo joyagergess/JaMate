@@ -45,10 +45,11 @@ class BandSuggestionRepository
             ->whereHas(
                 'suggestion',
                 fn($q) =>
-                $q->where('created_at', '>', now()->subDays(self::COOLDOWN_DAYS))
+                $q->where('expires_at', '>', now())
             )
             ->exists();
     }
+
 
     public function availableSlots(Profile $profile): int
     {
@@ -66,6 +67,12 @@ class BandSuggestionRepository
     public function storeSuggestion(Collection $group): void
     {
         DB::transaction(function () use ($group) {
+
+            foreach ($group as $profile) {
+                if (! $this->hasAvailableSlot($profile)) {
+                    return;
+                }
+            }
 
             if ($this->exists($group)) return;
 
@@ -96,6 +103,7 @@ class BandSuggestionRepository
         });
     }
 
+
     protected function exists(Collection $profiles): bool
     {
         $ids = $profiles
@@ -107,9 +115,26 @@ class BandSuggestionRepository
         $array = 'ARRAY[' . implode(',', $ids) . ']::bigint[]';
 
         return DB::table('band_suggestion_members')
-            ->selectRaw('1') 
+            ->selectRaw('1')
             ->groupBy('band_suggestion_id')
             ->havingRaw("array_agg(profile_id ORDER BY profile_id) = {$array}")
             ->exists();
+    }
+    protected function hasAvailableSlot(Profile $profile): bool
+    {
+        $lockedRows = BandSuggestion::query()
+            ->select('band_suggestions.id')
+            ->join(
+                'band_suggestion_members',
+                'band_suggestions.id',
+                '=',
+                'band_suggestion_members.band_suggestion_id'
+            )
+            ->where('band_suggestions.status', 'pending')
+            ->where('band_suggestion_members.profile_id', $profile->id)
+            ->lockForUpdate()
+            ->get();
+
+        return $lockedRows->count() < self::MAX_ACTIVE;
     }
 }

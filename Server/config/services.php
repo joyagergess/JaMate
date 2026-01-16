@@ -42,7 +42,7 @@ return [
 
         'embedding_model' => env(
             'OPENAI_EMBEDDING_MODEL',
-            'text-embedding-3-small'
+            'text-embedding-3-large'
         ),
 
         'chat_model' => env(

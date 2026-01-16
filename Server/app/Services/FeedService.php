@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Models\Profile;
 use App\Models\Swipe;
 use Illuminate\Support\Collection;
-   use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class FeedService
 {
@@ -90,18 +91,22 @@ class FeedService
     }
 
 
-protected function candidatePool(Profile $me): Collection
-{
-    $ids = DB::select(
-        <<<SQL
+    protected function candidatePool(Profile $me): Collection
+    {
+        $ids = DB::select(
+            <<<SQL
         SELECT p.id
         FROM profiles p
         WHERE p.id != :me_id
           AND p.embedding_dirty = FALSE
+
           AND EXISTS (
-              SELECT 1 FROM profile_media pm
+              SELECT 1
+              FROM profile_media pm
               WHERE pm.profile_id = p.id
+                AND pm.order_index > 0
           )
+
           AND NOT EXISTS (
               SELECT 1 FROM swipes s
               WHERE s.swiped_profile_id = p.id
@@ -119,22 +124,25 @@ protected function candidatePool(Profile $me): Collection
           )
         LIMIT :limit
         SQL,
-        [
-            'me_id' => $me->id,
-            'limit' => self::MAX_CANDIDATES,
-        ]
-    );
+            [
+                'me_id' => $me->id,
+                'limit' => self::MAX_CANDIDATES,
+            ]
+        );
 
-    return Profile::whereIn('id', collect($ids)->pluck('id'))
-        ->with([
-            'instruments:id,name',
-            'genres:id,name',
-            'objectives:id,name',
-            'embedding:profile_id,embedding',
-            'media:id,profile_id,media_type,media_url,order_index',
-        ])
-        ->get();
-}
+        return Profile::whereIn('id', collect($ids)->pluck('id'))
+            ->with([
+                'media' => function ($q) {
+                    $q->where('order_index', '>', 0)
+                        ->orderBy('order_index');
+                },
+                'instruments:id,name',
+                'genres:id,name',
+                'objectives:id,name',
+                'embedding:profile_id,embedding',
+            ])
+            ->get();
+    }
 
 
     protected function relationalScore(Profile $candidate, Collection $myInstrumentIds,   Collection $myGenreIds,  Collection $myObjectiveIds, Profile $me): int
@@ -187,9 +195,9 @@ protected function candidatePool(Profile $me): Collection
         return $final->values()->all();
     }
 
+
     protected function transformProfile(Profile $profile): array
     {
-        // Shaping profile data for API response
         return [
             'id' => $profile->id,
             'name' => $profile->name,
@@ -200,16 +208,17 @@ protected function candidatePool(Profile $me): Collection
             'experience_level' => $profile->experience_level,
 
             'instruments' => $profile->instruments,
-
             'genres' => $profile->genres,
-
             'objectives' => $profile->objectives,
 
             'media' => $profile->media->map(fn($m) => [
-                'id' => $m->id,
-                'type' => $m->media_type,
-                'url' => $m->media_url,
+                'id'    => $m->id,
+                'type'  => $m->media_type,
                 'order' => $m->order_index,
+
+                'url' => $m->media_type === 'video'
+                    ? URL::to("/api/v0.1/media/{$m->media_url}")
+                    : URL::to("/storage/{$m->media_url}"),
             ])->values(),
         ];
     }

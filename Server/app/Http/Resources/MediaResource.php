@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class MediaResource extends JsonResource
 {
@@ -13,9 +12,16 @@ class MediaResource extends JsonResource
         return [
             'id'          => $this->id,
             'media_type'  => $this->media_type,
-            'url'         => Storage::disk('public')->url($this->media_url),
             'order_index' => $this->order_index,
-            'created_at'  => $this->created_at,
+
+         
+            'url' => $this->media_type === 'video'
+                ? secure_url('/api/v0.1/media/' . $this->media_url)
+                : secure_url('/storage/' . $this->media_url),
+
+            'thumbnail_url' => $this->media_type === 'video' && $this->thumbnail_url
+                ? secure_url('/storage/' . $this->thumbnail_url)
+                : null,
         ];
     }
 }

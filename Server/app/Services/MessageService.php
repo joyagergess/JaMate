@@ -19,6 +19,7 @@ class MessageService
         $this->ensureParticipant($conversation, $profile);
 
         $query = $conversation->messages()
+            ->with(['senderProfile:id,name'])
             ->orderByDesc('sent_at')
             ->orderByDesc('id')
             ->limit($limit);
