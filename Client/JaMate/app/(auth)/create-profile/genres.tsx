@@ -1,174 +1,95 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 
 import { createProfileStyles as styles } from "../../../styles/create-profile.styles";
 import { AppButton } from "../../../components/ui/AppButton";
 import { SelectablePill } from "../../../components/ui/SelectablePill";
+import { StepIndicator } from "../../../components/ui/StepIndicator";
+import { CreateProfileLayout } from "../../../components/ui/CreateProfileLayout";
+import { SearchablePickerModal } from "../../../components/ui/SearchablePickerModal";
 import { useCreateProfile } from "../../../context/CreateProfileContext";
 
-const TOTAL_STEPS = 5;
-const CURRENT_STEP = 4;
+import { ALL_GENRES } from "../../../constants/genres";
+import { orderBySelected } from "../../../utils/orderBySelected";
+
+/* ===================== CONSTANTS ===================== */
+
 const MAX_GENRES = 3;
+const PREVIEW_COUNT = 6;
 
-const GENRES = [
-  "Pop",
-  "Rock",
-  "Alternative",
-  "Indie",
-  "Metal",
-  "Punk",
-  "Hard Rock",
-
-  "Hip Hop",
-  "Rap",
-  "Trap",
-  "R&B",
-  "Soul",
-  "Funk",
-
-  "Jazz",
-  "Blues",
-  "Classical",
-  "Opera",
-
-  "Electronic",
-  "EDM",
-  "House",
-  "Techno",
-  "Trance",
-  "Dubstep",
-  "Drum & Bass",
-  "Ambient",
-
-  "Reggae",
-  "Dancehall",
-  "Ska",
-
-  "Folk",
-  "Traditional",
-  "Country",
-  "Bluegrass",
-
-  "Latin",
-  "Afro",
-  "Afrobeats",
-  "Salsa",
-  "Bachata",
-  "Reggaeton",
-
-  "Gospel",
-  "Worship",
-
-  "Soundtrack",
-  "Cinematic",
-  "Experimental",
-];
+/* ===================== SCREEN ===================== */
 
 export default function CreateProfileGenresScreen() {
   const router = useRouter();
   const { data, update } = useCreateProfile();
 
   const selected = data.genres ?? [];
+  const [showPicker, setShowPicker] = useState(false);
 
-  const toggleGenre = (genre: string) => {
-    if (selected.includes(genre)) {
-      update({
-        genres: selected.filter((g) => g !== genre),
-      });
-      return;
-    }
-
-    if (selected.length >= MAX_GENRES) return;
-
-    update({
-      genres: [...selected, genre],
-    });
-  };
-
-  const canContinue = selected.length > 0;
+  /** Selected genres first */
+  const orderedGenres = useMemo(
+    () => orderBySelected(ALL_GENRES, selected),
+    [selected]
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-
-        <StepIndicator />
+    <>
+      <CreateProfileLayout
+        footer={
+          <AppButton
+            title="Next"
+            disabled={selected.length === 0}
+            onPress={() => router.push("/create-profile/objectives")}
+          />
+        }
+      >
+        <StepIndicator current={6} />
 
         <Text style={styles.title}>What genre(s) do you play?</Text>
         <Text style={styles.subtitle}>
           Select up to {MAX_GENRES} genres
         </Text>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ marginTop: 20 }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-            }}
-          >
-            {GENRES.map((genre) => (
+        <ScrollView style={{ marginTop: 16 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            {orderedGenres.slice(0, PREVIEW_COUNT).map((genre) => (
               <SelectablePill
                 key={genre}
                 label={genre}
                 selected={selected.includes(genre)}
-                onPress={() => toggleGenre(genre)}
+                onPress={() =>
+                  update({
+                    genres: selected.includes(genre)
+                      ? selected.filter((g) => g !== genre)
+                      : selected.length < MAX_GENRES
+                      ? [...selected, genre]
+                      : selected,
+                  })
+                }
               />
             ))}
+
+            {/* MORE */}
+            <SelectablePill
+              label="More"
+              selected={false}
+              onPress={() => setShowPicker(true)}
+            />
           </View>
         </ScrollView>
-      </View>
+      </CreateProfileLayout>
 
-      {/* Footer */}
-      <View style={styles.footer}>
-        <AppButton
-          title="Next"
-          disabled={!canContinue}
-          onPress={() => {
-            router.push("/create-profile/objectives");
-          }}
-        />
-      </View>
-    </SafeAreaView>
-  );
-}
-
-
-function StepIndicator() {
-  return (
-    <View style={{ marginBottom: 20 }}>
-      <Text style={{ color: "#9CA3AF", fontSize: 13 }}>
-        Step {CURRENT_STEP} of {TOTAL_STEPS}
-      </Text>
-
-      <View
-        style={{
-          height: 3,
-          backgroundColor: "rgba(255,255,255,0.15)",
-          borderRadius: 2,
-          marginTop: 8,
-        }}
-      >
-        <View
-          style={{
-            width: `${(CURRENT_STEP / TOTAL_STEPS) * 100}%`,
-            height: "100%",
-            backgroundColor: "#6D5DF6",
-            borderRadius: 2,
-          }}
-        />
-      </View>
-    </View>
+      {/* ===== SEARCH MODAL ===== */}
+      <SearchablePickerModal
+        visible={showPicker}
+        title="Select genres"
+        items={ALL_GENRES}
+        selected={selected}
+        max={MAX_GENRES}
+        onChange={(items) => update({ genres: items })}
+        onClose={() => setShowPicker(false)}
+      />
+    </>
   );
 }

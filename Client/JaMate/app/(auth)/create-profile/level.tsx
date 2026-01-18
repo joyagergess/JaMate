@@ -11,10 +11,10 @@ const LEVELS = [
   { key: "beginner", label: "Beginner" },
   { key: "intermediate", label: "Intermediate" },
   { key: "advanced", label: "Advanced" },
-  { key: "professional", label: "Professional" },
+  { key: "pro", label: "Professional" },
 ] as const;
 
-type LevelKey = typeof LEVELS[number]["key"];
+type LevelKey = (typeof LEVELS)[number]["key"];
 
 export default function CreateProfileLevelScreen() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function CreateProfileLevelScreen() {
         />
       }
     >
-      <StepIndicator current={5} total={5} />
+      <StepIndicator current={4} />
 
       <Text style={styles.title}>What is your level?</Text>
       <Text style={styles.subtitle}>

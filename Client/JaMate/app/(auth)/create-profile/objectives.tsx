@@ -32,7 +32,7 @@ export default function CreateProfileObjectivesScreen() {
         />
       }
     >
-      <StepIndicator current={5} total={5} />
+      <StepIndicator current={7} />
 
       <Text style={styles.title}>What are you looking for?</Text>
       <Text style={styles.subtitle}>Select up to 3 objectives</Text>

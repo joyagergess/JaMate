@@ -5,7 +5,7 @@ export type ConversationItem = {
   id: number;
   type: "direct" | "band";
   unread_count: number;
-
+  name: string | null;
   participants: {
     profile: {
       id: number;

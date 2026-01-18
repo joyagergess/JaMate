@@ -2,11 +2,17 @@ import { createContext, useContext, useState } from "react";
 
 export type ProfileMedia = {
   id: number;
-  localUri: string;
+
+  uri: string;
+
   type: "image" | "video";
   mimeType: string;
-  size:number;
+  size: number;
+
+  order_index: number;
+  duration?: number;
 };
+
 
 export type CreateProfileData = {
   name?: string;
@@ -17,7 +23,7 @@ export type CreateProfileData = {
   videos: ProfileMedia[];
   genres?: string[];
   objectives?: string[];
-  level?: "beginner" | "intermediate" | "advanced" | "professional";
+  level?: "beginner" | "intermediate" | "advanced" | "pro";
   bio?: string;
 };
 

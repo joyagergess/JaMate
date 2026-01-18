@@ -52,20 +52,25 @@ export function ProfileMediaSection({
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  /* 🔥 ONLY REAL MEDIA WHEN READ-ONLY */
+  const isUploading = upload.isPending;
+
+  /* 🔥 REAL MEDIA ONLY */
   const gridMedia = media
     .filter((m) => m.order_index !== 0)
     .sort((a, b) => a.order_index - b.order_index);
 
-  const slots: ProfileMedia[] = readOnly
+  const slots: (ProfileMedia | "loading")[] = readOnly
     ? gridMedia
-    : gridMedia.slice(0, MAX);
+    : [
+        ...gridMedia.slice(0, MAX),
+        ...(isUploading && gridMedia.length < MAX ? ["loading"] : []),
+      ];
 
-  /* ------------------ PICKER (EDIT MODE ONLY) ------------------ */
 
   const openPicker = () => {
     if (readOnly) return;
     if (upload.isPending || remove.isPending) return;
+    if (gridMedia.length >= MAX) return;
 
     if (Platform.OS === "ios") {
       ActionSheetIOS.showActionSheetWithOptions(
@@ -89,7 +94,7 @@ export function ProfileMediaSection({
 
   const handleAdd = async (source: "camera" | "gallery") => {
     if (readOnly) return;
-    if (gridMedia.length >= MAX) return;
+    if (gridMedia.length >= MAX || upload.isPending) return;
 
     const picked =
       source === "camera"
@@ -134,7 +139,7 @@ export function ProfileMediaSection({
 
   return (
     <>
-      {/* ❌ PREVIEW FEED ONLY FOR OWN PROFILE */}
+      {/* PREVIEW FEED (OWN PROFILE ONLY) */}
       {!readOnly && gridMedia.length > 0 && (
         <TouchableOpacity
           onPress={() => setPreviewIndex(0)}
@@ -163,95 +168,119 @@ export function ProfileMediaSection({
           paddingHorizontal: GAP,
         }}
       >
-        {slots.map((item) => (
-          <View
-            key={item.id}
-            style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
-          >
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => {
-                if (item.media_type === "video") {
-                  setVideoUrl(item.url);
-                } else {
-                  readOnly
-                    ? setImageUrl(item.url)
-                    : setPreviewIndex(
-                        gridMedia.findIndex((m) => m.id === item.id)
-                      );
-                }
-              }}
-              style={{
-                flex: 1,
-                borderRadius: 20,
-                backgroundColor: "rgba(255,255,255,0.03)",
-                overflow: "hidden",
-              }}
-            >
-              {item.media_type === "image" && (
-                <Image
-                  source={{ uri: item.url }}
-                  style={{ width: "100%", height: "100%" }}
-                />
-              )}
-
-              {item.media_type === "video" && (
-                <>
-                  {item.thumbnail_url ? (
-                    <Image
-                      source={{ uri: item.thumbnail_url }}
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  ) : (
-                    <View style={{ flex: 1, backgroundColor: "#000" }} />
-                  )}
-
-                  <View
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Ionicons
-                      name="play-circle"
-                      size={42}
-                      color="#fff"
-                    />
-                  </View>
-                </>
-              )}
-            </TouchableOpacity>
-
-            {/* ❌ DELETE ONLY FOR OWN PROFILE */}
-            {!readOnly && (
-              <TouchableOpacity
-                onPress={() => confirmDelete(item.id)}
+        {slots.map((item, index) => {
+          /* ⏳ LOADING SLOT */
+          if (item === "loading") {
+            return (
+              <View
+                key="loading"
                 style={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  width: 28,
-                  height: 28,
-                  borderRadius: 14,
-                  backgroundColor: "rgba(0,0,0,0.7)",
+                  width: CARD_WIDTH,
+                  height: CARD_HEIGHT,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(255,255,255,0.05)",
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                {remove.isPending ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="close" size={14} color="#fff" />
+                <ActivityIndicator color="#6D5DF6" />
+              </View>
+            );
+          }
+
+          /* 🎞 REAL MEDIA SLOT */
+          return (
+            <View
+              key={item.id}
+              style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+            >
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => {
+                  if (item.media_type === "video") {
+                    setVideoUrl(item.url);
+                  } else {
+                    readOnly
+                      ? setImageUrl(item.url)
+                      : setPreviewIndex(
+                          gridMedia.findIndex(
+                            (m) => m.id === item.id
+                          )
+                        );
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(255,255,255,0.03)",
+                  overflow: "hidden",
+                }}
+              >
+                {item.media_type === "image" && (
+                  <Image
+                    source={{ uri: item.url }}
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                )}
+
+                {item.media_type === "video" && (
+                  <>
+                    {item.thumbnail_url ? (
+                      <Image
+                        source={{ uri: item.thumbnail_url }}
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    ) : (
+                      <View style={{ flex: 1, backgroundColor: "#000" }} />
+                    )}
+
+                    <View
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Ionicons
+                        name="play-circle"
+                        size={42}
+                        color="#fff"
+                      />
+                    </View>
+                  </>
                 )}
               </TouchableOpacity>
-            )}
-          </View>
-        ))}
 
-        {/* ➕ ADD SLOT ONLY FOR OWN PROFILE */}
-        {!readOnly && gridMedia.length < MAX && (
+              {/* ❌ DELETE */}
+              {!readOnly && (
+                <TouchableOpacity
+                  onPress={() => confirmDelete(item.id)}
+                  style={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    backgroundColor: "rgba(0,0,0,0.7)",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {remove.isPending ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Ionicons name="close" size={14} color="#fff" />
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          );
+        })}
+
+        {/* ➕ ADD SLOT */}
+        {!readOnly && gridMedia.length < MAX && !isUploading && (
           <TouchableOpacity
             onPress={openPicker}
             style={{
@@ -261,8 +290,12 @@ export function ProfileMediaSection({
               borderStyle: "dashed",
               borderColor: "#6D5DF6",
               borderRadius: 20,
+              justifyContent: "center",
+              alignItems: "center",
             }}
-          />
+          >
+            <Ionicons name="add" size={32} color="#6D5DF6" />
+          </TouchableOpacity>
         )}
       </View>
 
@@ -295,7 +328,7 @@ export function ProfileMediaSection({
         onClose={() => setVideoUrl(null)}
       />
 
-      {/* FEED PREVIEW (OWN PROFILE ONLY) */}
+      {/* FEED PREVIEW */}
       {!readOnly && (
         <FeedPreviewModal
           visible={previewIndex !== null}

@@ -7,15 +7,16 @@ import {
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react"; // ✅ ADDED useCallback
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router"; // ✅ ADDED useFocusEffect
 import { Spinner } from "../../components/ui/Spinner";
 
 import { useFeed } from "../../hooks/feed/useFeed";
 import { useSwipe } from "../../hooks/feed/useSwipe";
+import { useProfile } from "../../hooks/profile/useProfile"; // ✅ ADDED
 import { FeedItem } from "../../types/feed";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { styles } from "../../styles/homeFeed.styles";
@@ -34,8 +35,29 @@ export default function HomeScreen() {
   const [showMatchModal, setShowMatchModal] = useState(false);
 
   const { data: feed, isLoading, refetch } = useFeed();
+  const { data: me, refetch: refetchProfile } = useProfile(); // ✅ ADDED
   const swipe = useSwipe();
   const router = useRouter();
+
+  /* ------------------ 🔄 REFRESH ON OPEN ------------------ */
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+      refetchProfile();
+      setFeedIndex(0);
+    }, [])
+  );
+
+  /* ------------------ 🚨 MEDIA CHECK (ADDED) ------------------ */
+
+  /**
+   * Block feed if:
+   * - user has exactly ONE media
+   * - and it is ONLY the profile picture (order_index === 0)
+   */
+  const onlyHasProfilePicture =
+    me?.media?.length === 1 && me.media[0].order_index === 0;
 
   /* ------------------ ANIMATIONS ------------------ */
 
@@ -175,7 +197,52 @@ export default function HomeScreen() {
     );
   }
 
-  /* ------------------ RENDER ------------------ */
+  /* ------------------ 🚫 BLOCK FEED (ADDED) ------------------ */
+
+  if (onlyHasProfilePicture) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <StatusBar hidden />
+
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 32,
+          }}
+        >
+          <Ionicons name="images-outline" size={72} color="#6D5DF6" />
+
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 22,
+              fontWeight: "600",
+              marginTop: 20,
+              textAlign: "center",
+            }}
+          >
+            Upload media to continue
+          </Text>
+
+          <Text
+            style={{
+              color: "#9CA3AF",
+              fontSize: 14,
+              marginTop: 10,
+              textAlign: "center",
+            }}
+          >
+            Add photos or videos so others can see your vibe.
+          </Text>
+
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  /* ------------------ RENDER (UNCHANGED) ------------------ */
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -202,7 +269,6 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* ACTIONS */}
       <View style={styles.actions}>
         <Animated.View
           style={{ transform: [{ scale: skipScale }], opacity: skipOpacity }}

@@ -8,6 +8,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { createProfileStyles as styles } from "../../../styles/create-profile.styles";
 import { useCreateProfile } from "../../../context/CreateProfileContext";
 import { AppButton } from "../../../components/ui/AppButton";
+import { StepIndicator } from "@/components/ui/StepIndicator";
 
 const TOTAL_STEPS = 5;
 const CURRENT_STEP = 3;
@@ -42,7 +43,7 @@ export default function CreateProfileBirthdayScreen() {
           </TouchableOpacity>
         </View>
 
-        <StepIndicator />
+        <StepIndicator current={3} />
 
         <Text style={styles.title}>Your birthday?</Text>
 
@@ -100,44 +101,12 @@ export default function CreateProfileBirthdayScreen() {
       </View>
 
       <View style={styles.footer}>
-        <AppButton
-          title="Next"
-          disabled={!isValid}
-          onPress={handleNext}
-        />
+        <AppButton title="Next" disabled={!isValid} onPress={handleNext} />
       </View>
     </SafeAreaView>
   );
 }
 
-
-function StepIndicator() {
-  return (
-    <View style={{ marginBottom: 24 }}>
-      <Text style={{ color: "#9CA3AF", fontSize: 13 }}>
-        Step {CURRENT_STEP} of {TOTAL_STEPS}
-      </Text>
-
-      <View
-        style={{
-          height: 3,
-          backgroundColor: "rgba(255,255,255,0.15)",
-          borderRadius: 2,
-          marginTop: 8,
-        }}
-      >
-        <View
-          style={{
-            width: `${(CURRENT_STEP / TOTAL_STEPS) * 100}%`,
-            height: "100%",
-            backgroundColor: "#6D5DF6",
-            borderRadius: 2,
-          }}
-        />
-      </View>
-    </View>
-  );
-}
 
 function formatDate(date: Date) {
   const d = date.getDate().toString().padStart(2, "0");
