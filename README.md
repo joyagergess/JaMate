@@ -1,9 +1,8 @@
 <img src="./readme/title1.svg"/>
 
 ## License
-
-This project is licensed under the **MIT License**.  
-See the [LICENSE](LICENSE) file for full license text.
+Licensed under the MIT License.  
+See the [LICENSE](LICENSE) file for more information.
 
 <br><br>
 <br><br>
@@ -11,9 +10,8 @@ See the [LICENSE](LICENSE) file for full license text.
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
 
-> Description here.
+> JaMate is a platform that smartly matches musicians in a Tinder-style experience to jam together, helps form bands, and understands short recording snippets (mood, key, tempo, etc.) to generate adaptive backing tracks for jamming.
 >
-> Description here.
 
 <br><br>
 
