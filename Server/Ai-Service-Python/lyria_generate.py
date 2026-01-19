@@ -12,7 +12,6 @@ def generate_music(prompt: str, duration: int = 15) -> tuple[str, int]:
             "prompt": prompt,
         }
     )
-
     audio_bytes = None
 
     if hasattr(output, "read"):

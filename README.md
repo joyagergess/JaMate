@@ -4,6 +4,9 @@
 
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
+## License
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 
 > Description here.
 >
