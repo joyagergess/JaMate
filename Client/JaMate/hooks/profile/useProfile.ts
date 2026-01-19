@@ -14,10 +14,16 @@ export type Profile = {
   location?: string | null;
 
   avatar_url?: string;
-
+  media: ProfileMedia[];
   genres: { id: number; name: string }[];
   objectives: { id: number; name: string }[];
   instruments: { id: number; name: string }[];
+};
+export type ProfileMedia = {
+  id: number;
+  type: "image" | "video";
+  url: string;
+  order_index: number;
 };
 
 export function useProfile() {

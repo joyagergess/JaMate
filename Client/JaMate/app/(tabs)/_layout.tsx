@@ -1,8 +1,14 @@
 import { Tabs } from "expo-router";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useConversations } from "../../hooks/messages/useConversations";
+import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 
+import { useConversations } from "../../hooks/messages/useConversations";
+import { useAiBackingJob } from "../../hooks/tracks/useAiBackingJob";
+import { AiReadyModal } from "../../components/tracks/AiReadyModal";
+import { useAiBacking } from "@/context/AiBackingContext";
 
 const TAB_BG = "#0B0E13";
 const ACTIVE = "#6C63FF";
@@ -10,113 +16,133 @@ const INACTIVE = "rgba(255,255,255,0.5)";
 const ICON_SIZE = 22;
 const DOT_COLOR = "#FF375F";
 
-
 export default function TabsLayout() {
   const { data: conversations } = useConversations();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { jobId, setJobId } = useAiBacking();
+
+  const { data: aiJob } = useAiBackingJob(jobId);
+  const [aiReadyVisible, setAiReadyVisible] = useState(false);
+
+  useEffect(() => {
+    if (aiJob?.status === "done") {
+      setAiReadyVisible(true);
+      setJobId(null);
+
+      queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
+    }
+  }, [aiJob]);
 
   const hasUnreadMessages =
     conversations?.some((c) => c.unread_count > 0) ?? false;
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: TAB_BG,
-          borderTopWidth: 0,
-          height: 88,
-          paddingTop: 8,
-          paddingBottom: 18,
-        },
-        tabBarActiveTintColor: ACTIVE,
-        tabBarInactiveTintColor: INACTIVE,
-        tabBarLabelStyle: {
-          fontSize: 11,
-          marginTop: 2,
-        },
-      }}
-    >
-      {/* Home */}
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="home-outline"
-              size={size ?? ICON_SIZE}
-              color={color}
-            />
-          ),
+    <>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: TAB_BG,
+            borderTopWidth: 0,
+            height: 88,
+            paddingTop: 8,
+            paddingBottom: 18,
+          },
+          tabBarActiveTintColor: ACTIVE,
+          tabBarInactiveTintColor: INACTIVE,
+          tabBarLabelStyle: {
+            fontSize: 11,
+            marginTop: 2,
+          },
         }}
-      />
-
-      {/* Matches */}
-      <Tabs.Screen
-        name="matches"
-        options={{
-          title: "Matches",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="people-outline"
-              size={size ?? ICON_SIZE}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      {/* Tracks */}
-      <Tabs.Screen
-        name="tracks"
-        options={{
-          title: "Tracks",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="musical-notes-outline"
-              size={size ?? ICON_SIZE}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      {/* Messages */}
-      <Tabs.Screen
-        name="messages"
-        options={{
-          title: "Messages",
-          tabBarIcon: ({ color, size }) => (
-            <View>
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, size }) => (
               <Ionicons
-                name="chatbubble-outline"
+                name="home-outline"
                 size={size ?? ICON_SIZE}
                 color={color}
               />
-              {hasUnreadMessages && <RedDot />}
-            </View>
-          ),
-        }}
-      />
+            ),
+          }}
+        />
 
-      {/* Profile */}
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="person-outline"
-              size={size ?? ICON_SIZE}
-              color={color}
-            />
-          ),
+        <Tabs.Screen
+          name="matches"
+          options={{
+            title: "Matches",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons
+                name="people-outline"
+                size={size ?? ICON_SIZE}
+                color={color}
+              />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="tracks"
+          options={{
+            title: "Tracks",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons
+                name="musical-notes-outline"
+                size={size ?? ICON_SIZE}
+                color={color}
+              />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="messages"
+          options={{
+            title: "Messages",
+            tabBarIcon: ({ color, size }) => (
+              <View>
+                <Ionicons
+                  name="chatbubble-outline"
+                  size={size ?? ICON_SIZE}
+                  color={color}
+                />
+                {hasUnreadMessages && <RedDot />}
+              </View>
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons
+                name="person-outline"
+                size={size ?? ICON_SIZE}
+                color={color}
+              />
+            ),
+          }}
+        />
+      </Tabs>
+
+      <AiReadyModal
+        visible={aiReadyVisible}
+        onClose={() => setAiReadyVisible(false)}
+        onViewTrack={() => {
+          setAiReadyVisible(false);
+          router.push("/tracks?tab=ai");
         }}
       />
-    </Tabs>
+    </>
   );
 }
-
 
 function RedDot() {
   return (

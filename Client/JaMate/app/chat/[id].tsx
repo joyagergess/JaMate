@@ -49,7 +49,6 @@ export default function ChatScreen() {
   const [text, setText] = useState("");
   const listRef = useRef<FlatList<Message>>(null);
 
-  /* ------------------ MARK AS READ (CRITICAL) ------------------ */
 
   useEffect(() => {
     if (!conversationId || !me) return;
@@ -61,13 +60,11 @@ export default function ChatScreen() {
     });
   }, [conversationId, me, queryClient]);
 
-  /* ------------------ AUTO SCROLL ------------------ */
 
   useEffect(() => {
     listRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
-  /* ------------------ REALTIME LISTENER ------------------ */
 
   useEffect(() => {
     if (!conversationId || !me) return;
@@ -97,13 +94,11 @@ export default function ChatScreen() {
     };
   }, [conversationId, me, queryClient]);
 
-  /* ------------------ CONVERSATION ------------------ */
 
   const conversation = useMemo(() => {
     return conversations?.find((c) => c.id === conversationId);
   }, [conversations, conversationId]);
 
-  /* ------------------ OTHER PROFILE ------------------ */
 
   const otherProfile = useMemo(() => {
     if (!conversation || !me) return null;
@@ -122,7 +117,6 @@ export default function ChatScreen() {
 
   const avatarUrl = buildImageUrl(avatarPath);
 
-  /* ------------------ LOADING ------------------ */
 
   if (isLoading || !me) {
   return (
@@ -140,7 +134,6 @@ export default function ChatScreen() {
 }
 
 
-  /* ------------------ SEND ------------------ */
 
   const onSend = () => {
     if (!text.trim()) return;
@@ -148,7 +141,6 @@ export default function ChatScreen() {
     setText("");
   };
 
-  /* ------------------ RENDER ------------------ */
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -197,7 +189,6 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* MESSAGES */}
         <FlatList
           ref={listRef}
           data={messages}
@@ -231,7 +222,6 @@ export default function ChatScreen() {
           }}
         />
 
-        {/* INPUT */}
         <View style={styles.inputBar}>
           <TextInput
             value={text}

@@ -7,16 +7,16 @@ import {
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import { useEffect, useRef, useState, useCallback } from "react"; // ✅ ADDED useCallback
+import { useEffect, useRef, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useFocusEffect } from "expo-router"; // ✅ ADDED useFocusEffect
+import { useRouter, useFocusEffect } from "expo-router";
 import { Spinner } from "../../components/ui/Spinner";
 
 import { useFeed } from "../../hooks/feed/useFeed";
 import { useSwipe } from "../../hooks/feed/useSwipe";
-import { useProfile } from "../../hooks/profile/useProfile"; // ✅ ADDED
+import { useProfile } from "../../hooks/profile/useProfile";
 import { FeedItem } from "../../types/feed";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { styles } from "../../styles/homeFeed.styles";
@@ -35,31 +35,45 @@ export default function HomeScreen() {
   const [showMatchModal, setShowMatchModal] = useState(false);
 
   const { data: feed, isLoading, refetch } = useFeed();
-  const { data: me, refetch: refetchProfile } = useProfile(); // ✅ ADDED
+  const { data: me, refetch: refetchProfile } = useProfile();
   const swipe = useSwipe();
   const router = useRouter();
 
-  /* ------------------ 🔄 REFRESH ON OPEN ------------------ */
+  const hasPrefetchedRef = useRef(false);
+
 
   useFocusEffect(
     useCallback(() => {
       refetch();
       refetchProfile();
       setFeedIndex(0);
-    }, [])
+      hasPrefetchedRef.current = false;
+    }, []),
   );
 
-  /* ------------------ 🚨 MEDIA CHECK (ADDED) ------------------ */
+  /* PREFETCH AT 15 */
 
-  /**
-   * Block feed if:
-   * - user has exactly ONE media
-   * - and it is ONLY the profile picture (order_index === 0)
-   */
+  useEffect(() => {
+    if (feedIndex === 15 && !hasPrefetchedRef.current) {
+      hasPrefetchedRef.current = true;
+      refetch();
+    }
+  }, [feedIndex]);
+
+  /* FEED EXHAUSTION SAFETY  */
+
+  useEffect(() => {
+    if (feed && feedIndex >= feed.length && !isLoading) {
+      refetch().then(() => setFeedIndex(0));
+    }
+  }, [feedIndex, feed, isLoading]);
+
+  /*  MEDIA CHECK  */
+
   const onlyHasProfilePicture =
     me?.media?.length === 1 && me.media[0].order_index === 0;
 
-  /* ------------------ ANIMATIONS ------------------ */
+  /*  ANIMATIONS  */
 
   const position = useRef(new Animated.ValueXY()).current;
   const skipScale = useRef(new Animated.Value(1)).current;
@@ -83,7 +97,7 @@ export default function HomeScreen() {
     ],
   };
 
-  /* ------------------ HELPERS ------------------ */
+  /* -HELPERS */
 
   const animateButtons = (target: "skip" | "jam" | null) => {
     Animated.parallel([
@@ -135,7 +149,7 @@ export default function HomeScreen() {
           onSuccess: (data) => {
             if (data.matched) setShowMatchModal(true);
           },
-        }
+        },
       );
 
       setFeedIndex((i) => i + 1);
@@ -143,7 +157,7 @@ export default function HomeScreen() {
     });
   };
 
-  /* ------------------ PAN RESPONDER ------------------ */
+  /* PAN RESPONDER  */
 
   const panResponder = useRef(
     PanResponder.create({
@@ -168,10 +182,10 @@ export default function HomeScreen() {
         else resetCard();
         hoveredRef.current = null;
       },
-    })
+    }),
   ).current;
 
-  /* ------------------ DATA ------------------ */
+  /*  DATA  */
 
   useEffect(() => {
     SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
@@ -184,65 +198,52 @@ export default function HomeScreen() {
     activeProfileIdRef.current = profile?.id ?? null;
   }, [profile?.id]);
 
-  if (isLoading || !token || !profile) {
-    return (
-      <SafeAreaView
-        style={[
-          styles.loading,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <Spinner size={44} />
-      </SafeAreaView>
-    );
-  }
+  /* EMPTY FEED */
 
-  /* ------------------ 🚫 BLOCK FEED (ADDED) ------------------ */
-
-  if (onlyHasProfilePicture) {
+  if (!isLoading && feed && feed.length === 0) {
     return (
       <SafeAreaView style={styles.screen}>
         <StatusBar hidden />
-
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            paddingHorizontal: 32,
-          }}
-        >
-          <Ionicons name="images-outline" size={72} color="#6D5DF6" />
-
-          <Text
-            style={{
-              color: "#fff",
-              fontSize: 22,
-              fontWeight: "600",
-              marginTop: 20,
-              textAlign: "center",
-            }}
-          >
-            Upload media to continue
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Ionicons name="people-outline" size={72} color="#6D5DF6" />
+          <Text style={{ color: "#fff", fontSize: 22, marginTop: 20 }}>
+            No musicians available right now
           </Text>
-
-          <Text
-            style={{
-              color: "#9CA3AF",
-              fontSize: 14,
-              marginTop: 10,
-              textAlign: "center",
-            }}
-          >
-            Add photos or videos so others can see your vibe.
+          <Text style={{ color: "#9CA3AF", marginTop: 10 }}>
+            New musicians will appear soon 🎶
           </Text>
-
         </View>
       </SafeAreaView>
     );
   }
 
-  /* ------------------ RENDER (UNCHANGED) ------------------ */
+  /*  COLD START LOADING   */
+
+  if (!token || (!profile && isLoading)) {
+    return (
+      <SafeAreaView style={styles.loading}>
+        <Spinner size={44} />
+      </SafeAreaView>
+    );
+  }
+
+  /*  BLOCK FEED */
+
+  if (onlyHasProfilePicture) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <StatusBar hidden />
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Ionicons name="images-outline" size={72} color="#6D5DF6" />
+          <Text style={{ color: "#fff", fontSize: 22, marginTop: 20 }}>
+            Upload media to continue
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  /*  RENDER */
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -257,7 +258,7 @@ export default function HomeScreen() {
 
       {showMatchModal && (
         <Animated.View style={styles.matchOverlay}>
-          <Text style={styles.matchTitle}>It’s a Jam! 🎶</Text>
+          <Text style={styles.matchTitle}>It's a Jam! 🎶</Text>
           <TouchableOpacity
             onPress={() => {
               setShowMatchModal(false);
@@ -270,25 +271,15 @@ export default function HomeScreen() {
       )}
 
       <View style={styles.actions}>
-        <Animated.View
-          style={{ transform: [{ scale: skipScale }], opacity: skipOpacity }}
-        >
-          <TouchableOpacity
-            style={styles.skipBtn}
-            onPress={() => forceSwipe("skip")}
-          >
+        <Animated.View style={{ transform: [{ scale: skipScale }], opacity: skipOpacity }}>
+          <TouchableOpacity style={styles.skipBtn} onPress={() => forceSwipe("skip")}>
             <Ionicons name="close" size={20} color="#fff" />
             <Text style={styles.btnText}>Skip</Text>
           </TouchableOpacity>
         </Animated.View>
 
-        <Animated.View
-          style={{ transform: [{ scale: jamScale }], opacity: jamOpacity }}
-        >
-          <TouchableOpacity
-            style={styles.jamBtn}
-            onPress={() => forceSwipe("jam")}
-          >
+        <Animated.View style={{ transform: [{ scale: jamScale }], opacity: jamOpacity }}>
+          <TouchableOpacity style={styles.jamBtn} onPress={() => forceSwipe("jam")}>
             <Ionicons name="musical-notes" size={20} color="#fff" />
             <Text style={styles.btnTextBold}>Jam</Text>
           </TouchableOpacity>

@@ -25,7 +25,6 @@ import { ALL_GENRES } from "../constants/genres";
 import { ALL_INSTRUMENTS } from "../constants/instruments";
 import { orderBySelected } from "../utils/orderBySelected";
 
-/* ===================== CONSTANTS ===================== */
 
 const EXPERIENCE_LEVELS = [
   "Beginner",
@@ -47,7 +46,6 @@ const OBJECTIVES = [
   "Band members",
 ];
 
-/* ===================== SCREEN ===================== */
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -111,7 +109,6 @@ export default function EditProfileScreen() {
 
   if (!profile) return null;
 
-  /* ===================== SAVE ===================== */
   const pickAvatar = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -124,10 +121,8 @@ export default function EditProfileScreen() {
 
     const asset = res.assets[0];
 
-    // 👀 preview immediately
     setAvatarPreview(asset.uri);
 
-    // 🚀 upload (profile picture = media[0])
     updateAvatar.mutate({
       uri: asset.uri,
       mimeType: asset.mimeType ?? "image/jpeg",
@@ -360,7 +355,6 @@ export default function EditProfileScreen() {
   );
 }
 
-/* ===================== SMALL UI ===================== */
 
 function Title({ children }: any) {
   return (

@@ -39,7 +39,6 @@ export default function HomeCard({
   const animatedHeight = useRef(new Animated.Value(1)).current;
   const animatedOpacity = useRef(new Animated.Value(1)).current;
 
-  /* ------------------ MEDIA ------------------ */
 
   const media = useMemo(
     () => profile.media.filter((m: any) => m.order !== 0),
@@ -48,7 +47,6 @@ export default function HomeCard({
 
   const current = media[mediaIndex];
 
-  /* HARD GUARD */
   if (!current) {
     return (
       <View style={styles.card}>
@@ -61,14 +59,12 @@ export default function HomeCard({
     );
   }
 
-  /* ------------------ RESET ON PROFILE CHANGE ------------------ */
 
   useEffect(() => {
     setMediaIndex(0);
     setVideoLoading(true);
   }, [profile.id]);
 
-  /* ------------------ RESET ON MEDIA CHANGE ------------------ */
 
   useEffect(() => {
     if (current.type === "video") {
@@ -76,21 +72,17 @@ export default function HomeCard({
     }
   }, [mediaIndex]);
 
-  /* ------------------ PAUSE / RESUME ON TAB CHANGE ------------------ */
 
   useFocusEffect(
     useCallback(() => {
-      // 👉 TAB FOCUSED → PLAY
       videoRef.current?.playAsync().catch(() => {});
 
       return () => {
-        // 👉 TAB BLURRED → PAUSE
         videoRef.current?.pauseAsync().catch(() => {});
       };
     }, [current.url])
   );
 
-  /* ------------------ MEDIA NAVIGATION ------------------ */
 
   const nextMedia = () => {
     if (mediaIndex < media.length - 1) {
@@ -104,7 +96,6 @@ export default function HomeCard({
     }
   };
 
-  /* ------------------ INFO TOGGLE ------------------ */
 
   const toggleInfo = () => {
     const toValue = collapsed ? 1 : 0;
@@ -125,7 +116,6 @@ export default function HomeCard({
     setCollapsed(!collapsed);
   };
 
-  /* ------------------ RENDER ------------------ */
 
   return (
     <View style={styles.card}>
@@ -133,7 +123,6 @@ export default function HomeCard({
         {...panHandlers}
         style={[StyleSheet.absoluteFillObject, cardStyle]}
       >
-        {/* MEDIA */}
         {current.type === "image" ? (
           <Image source={{ uri: current.url }} style={styles.media} />
         ) : (
@@ -170,13 +159,11 @@ export default function HomeCard({
           </View>
         )}
 
-        {/* TAP ZONES */}
         <View style={styles.tapZones}>
           <TouchableOpacity style={styles.tapZone} onPress={prevMedia} />
           <TouchableOpacity style={styles.tapZone} onPress={nextMedia} />
         </View>
 
-        {/* PROGRESS */}
         <View style={styles.progressContainer}>
           {media.map((_: any, i: number) => (
             <View
@@ -194,7 +181,6 @@ export default function HomeCard({
           ))}
         </View>
 
-        {/* INFO */}
         <Pressable style={styles.infoWrapper} onPress={toggleInfo}>
           <BlurView intensity={18} tint="dark" style={styles.blurBox}>
             <LinearGradient

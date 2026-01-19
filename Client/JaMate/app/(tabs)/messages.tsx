@@ -37,7 +37,6 @@ export default function Messages() {
 
   return (
     <SafeAreaView style={styles.screen}>
-      {/* TABS */}
       <View style={styles.tabs}>
         <TouchableOpacity onPress={() => setTab("direct")}>
           <Text style={[styles.tabText, tab === "direct" && styles.tabActive]}>
@@ -52,7 +51,6 @@ export default function Messages() {
         </TouchableOpacity>
       </View>
 
-      {/* SEARCH */}
       <View style={styles.searchBox}>
         <TextInput
           placeholder="Search…"
@@ -64,7 +62,6 @@ export default function Messages() {
         <Ionicons name="search" size={18} color="#aaa" />
       </View>
 
-      {/* CONTENT */}
       {tab === "band" ? (
         <BandChatsList conversations={conversations ?? []} />
       ) : (

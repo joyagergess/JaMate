@@ -16,13 +16,11 @@ export default function ProtectedLayout() {
     const isAuthRoute = pathname.startsWith("/(auth)");
     const isProtectedRoute = pathname.startsWith("/(app)");
 
-    // 🔒 Only protect APP routes
     if (!isAuthenticated && isProtectedRoute) {
       router.replace("/(auth)/login");
       return;
     }
 
-    // 🚀 Authenticated but missing profile
     if (isAuthenticated && hasProfile === false && !isAuthRoute) {
       router.replace("/create-profile" as Href);
       return;

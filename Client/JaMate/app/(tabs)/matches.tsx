@@ -18,7 +18,6 @@ import { buildImageUrl } from "../../utils/media";
 
 import { BandSuggestionsDeck } from "../../components/bands/BandSuggestionsDeck";
 
-/* ------------------ TYPES ------------------ */
 
 type MatchMedia = {
   id: number;
@@ -39,7 +38,6 @@ type MatchItem = {
   };
 };
 
-/* ------------------ COMPONENT ------------------ */
 
 export default function Matches() {
   const { data: matches, isLoading } = useMatches();
@@ -47,7 +45,6 @@ export default function Matches() {
   const [tab, setTab] = useState<"matches" | "bands">("matches");
   const [search, setSearch] = useState("");
 
-  /* ------------------ LOADING ------------------ */
   if (isLoading) {
     return (
       <SafeAreaView
@@ -63,7 +60,6 @@ export default function Matches() {
 
   const safeMatches = (matches ?? []) as MatchItem[];
 
-  /* ------------------ SEARCH FILTER ------------------ */
 
   const filteredMatches = useMemo(() => {
     if (!search.trim()) return safeMatches;
@@ -74,11 +70,9 @@ export default function Matches() {
     );
   }, [safeMatches, search]);
 
-  /* ------------------ RENDER ------------------ */
 
   return (
     <SafeAreaView style={styles.screen}>
-      {/* ------------------ TABS ------------------ */}
       <View style={styles.tabs}>
         <TouchableOpacity onPress={() => setTab("matches")}>
           <Text style={[styles.tabText, tab === "matches" && styles.tabActive]}>
@@ -93,7 +87,6 @@ export default function Matches() {
         </TouchableOpacity>
       </View>
 
-      {/* ------------------ SEARCH (MATCHES ONLY) ------------------ */}
       {tab === "matches" && (
         <View style={styles.searchBox}>
           <TextInput
@@ -107,7 +100,6 @@ export default function Matches() {
         </View>
       )}
 
-      {/* ------------------ CONTENT ------------------ */}
       {tab === "matches" ? (
         <FlatList
           data={filteredMatches}
@@ -123,7 +115,6 @@ export default function Matches() {
 
             return (
               <View style={styles.card}>
-                {/* AVATAR */}
                 <Image
                   source={
                     avatarUrl
@@ -133,7 +124,6 @@ export default function Matches() {
                   style={styles.avatar}
                 />
 
-                {/* INFO */}
                 <View style={styles.info}>
                   <Text style={styles.name}>{item.profile.name}</Text>
                   <Text style={styles.sub}>
@@ -141,7 +131,6 @@ export default function Matches() {
                   </Text>
                 </View>
 
-                {/* ACTIONS */}
                 <View style={styles.actions}>
                   <TouchableOpacity
                     style={styles.chatBtn}

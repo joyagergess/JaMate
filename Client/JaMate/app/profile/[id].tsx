@@ -48,7 +48,6 @@ export default function ProfileByIdScreen() {
       style={{ flex: 1, backgroundColor: "#0B0E13" }}
       contentContainerStyle={{ paddingBottom: 160 }}
     >
-      {/* BACK BUTTON */}
       <TouchableOpacity
         onPress={() => router.replace("/matches")}
         style={{

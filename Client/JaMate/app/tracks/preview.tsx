@@ -9,25 +9,26 @@ import { useUploadTrack } from "../../hooks/tracks/useUploadTrack";
 
 export default function TrackPreview() {
   const router = useRouter();
-  const { uri } = useLocalSearchParams<{ uri: string }>();
+
+  const { uri, duration } = useLocalSearchParams<{
+    uri: string;
+    duration?: string;
+  }>();
 
   const uploadTrack = useUploadTrack();
-
   const soundRef = useRef<Audio.Sound | null>(null);
+
+  const initialDurationMs = duration ? Number(duration) * 1000 : 0;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0 → 1
-  const [durationMs, setDurationMs] = useState(0);
-
-  /* ------------------ CLEANUP ------------------ */
+  const [durationMs, setDurationMs] = useState(initialDurationMs);
 
   useEffect(() => {
     return () => {
       soundRef.current?.unloadAsync();
     };
   }, []);
-
-  /* ------------------ LOAD SOUND (ONCE) ------------------ */
 
   const loadSound = async () => {
     if (!uri) return;
@@ -38,13 +39,11 @@ export default function TrackPreview() {
         shouldPlay: false,
         progressUpdateIntervalMillis: 50,
       },
-      onPlaybackStatusUpdate
+      onPlaybackStatusUpdate,
     );
 
     soundRef.current = sound;
   };
-
-  /* ------------------ PLAYBACK STATUS ------------------ */
 
   const onPlaybackStatusUpdate = (status: any) => {
     if (!status.isLoaded) return;
@@ -59,8 +58,6 @@ export default function TrackPreview() {
       setProgress(1);
     }
   };
-
-  /* ------------------ PLAY / PAUSE ------------------ */
 
   const togglePlay = async () => {
     await Audio.setAudioModeAsync({
@@ -87,7 +84,6 @@ export default function TrackPreview() {
     }
   };
 
-
   const replay = async () => {
     if (!soundRef.current) return;
 
@@ -96,14 +92,15 @@ export default function TrackPreview() {
     setIsPlaying(true);
   };
 
-
   const handleConfirm = () => {
-    if (!uri || durationMs <= 0) return;
+    if (!uri) return;
+
+    const finalDurationSeconds = Math.max(1, Math.round(durationMs / 1000));
 
     uploadTrack.mutate(
       {
         uri,
-        duration: Math.round(durationMs / 1000),
+        duration: finalDurationSeconds,
         trackType: "snippet",
       },
       {
@@ -113,37 +110,27 @@ export default function TrackPreview() {
         onError: (error: any) => {
           console.log("UPLOAD ERROR:", error);
 
-          if (error?.response) {
-            console.log("STATUS:", error.response.status);
-            console.log("DATA:", error.response.data);
-          }
-
           Alert.alert(
             "Upload failed",
-            error?.response?.data?.message ?? "Check console logs"
+            error?.response?.data?.message ?? "Check console logs",
           );
         },
-      }
+      },
     );
   };
 
   const isUploading = uploadTrack.isPending;
 
-  /* ------------------ UI ------------------ */
-
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        {/* LEFT ICON */}
         <View style={styles.icon}>
           <Ionicons name="musical-notes" size={20} color="#7C7CFF" />
         </View>
 
-        {/* CENTER */}
         <View style={styles.center}>
           <Text style={styles.title}>Snippet</Text>
 
-          {/* PROGRESS BAR */}
           <View style={styles.progressBar}>
             <View
               style={[
@@ -154,7 +141,6 @@ export default function TrackPreview() {
           </View>
         </View>
 
-        {/* CONTROLS */}
         <TouchableOpacity
           onPress={progress === 1 ? replay : togglePlay}
           disabled={isUploading}
@@ -167,9 +153,16 @@ export default function TrackPreview() {
         </TouchableOpacity>
       </View>
 
-      {/* ACTIONS */}
       <View style={styles.actions}>
-        <TouchableOpacity onPress={() => router.back()} disabled={isUploading}>
+        <TouchableOpacity
+          onPress={() =>
+            router.replace({
+              pathname: "/tracks",
+              params: { tab: "record" },
+            })
+          }
+          disabled={isUploading}
+        >
           <Text style={styles.link}>Re-record</Text>
         </TouchableOpacity>
 

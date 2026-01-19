@@ -82,7 +82,6 @@ export default function ProfileScreen() {
         onMediaUploaded={refetchMedia}
       />
 
-      {/* LOGOUT BUTTON */}
       <View style={{ paddingHorizontal: 20, marginTop: 32 }}>
         <TouchableOpacity
           onPress={logout}
