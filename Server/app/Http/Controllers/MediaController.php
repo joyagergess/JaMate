@@ -2,19 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Services\MediaService;
 
 class MediaController extends Controller
 {
-    public function stream(string $path): BinaryFileResponse
+    public function stream(string $path, MediaService $mediaService)
     {
-        $fullPath = storage_path('app/public/' . $path);
-
-        abort_unless(file_exists($fullPath), 404);
-
-        return response()->file($fullPath, [
-            'Content-Type'  => 'video/mp4',
-            'Accept-Ranges' => 'bytes',
-        ]);
+        return $mediaService->stream($path);
     }
 }

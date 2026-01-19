@@ -106,12 +106,11 @@ class SwipeService
         ]);
     }
 
-  protected function swipeResponse(bool $matched, ?int $conversationId = null): array
-{
-    return [
-        'matched' => $matched,
-        'conversation_id' => $conversationId,
-    ];
-}
-
+    protected function swipeResponse(bool $matched, ?int $conversationId = null): array
+    {
+        return [
+            'matched' => $matched,
+            'conversation_id' => $conversationId,
+        ];
+    }
 }

@@ -12,7 +12,9 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\BandSuggestionController;
 use App\Http\Controllers\MediaController;
-
+use App\Http\Controllers\TrackController;
+use App\Http\Controllers\AiBackingJobController;
+use App\Http\Controllers\TrackAiController;
 
 Route::prefix('v0.1')->group(function () {
 
@@ -87,4 +89,29 @@ Route::prefix('v0.1')->group(function () {
         Route::post('suggestions/{suggestion}/accept', [BandSuggestionController::class, 'accept']);
         Route::post('suggestions/{suggestion}/reject', [BandSuggestionController::class, 'reject']);
     });
+    Route::post('/tracks/{track}/generate-backing', [
+        TrackAiController::class,
+        'generateBacking'
+    ]);
+
+    Route::middleware('auth:api')->post('/tracks', [TrackController::class, 'store']);
+    Route::middleware('auth:api')->get('/tracks', [TrackController::class, 'index']);
+    Route::get(
+        '/media/{path}',
+        [MediaController::class, 'stream']
+    )->where('path', '.*');
+
+    Route::middleware('auth:api')->get(
+        '/ai-backing-jobs/{job}',
+        [AiBackingJobController::class, 'show']
+    );
+    Route::middleware('auth:api')->delete(
+        '/tracks/{track}',
+        [TrackController::class, 'destroy']
+    );
+    Route::middleware('auth:api')->patch(
+    '/tracks/{track}/title',
+    [TrackController::class, 'updateTitle']
+);
+
 });

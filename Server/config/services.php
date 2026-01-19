@@ -50,6 +50,9 @@ return [
             'gpt-4o-mini'
         ),
     ],
+    'ai_music' => [
+        'url' => env('AI_MUSIC_SERVICE_URL', 'http://localhost:8001'),
+    ],
 
 
 ];

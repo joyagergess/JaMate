@@ -108,10 +108,14 @@ class FeedService
           )
 
           AND NOT EXISTS (
-              SELECT 1 FROM swipes s
+              SELECT 1
+              FROM swipes s
               WHERE s.swiped_profile_id = p.id
                 AND s.swiper_profile_id = :me_id
+                AND s.direction = 'skip'
+                AND s.created_at > NOW() - INTERVAL '7 days'
           )
+
           AND NOT EXISTS (
               SELECT 1 FROM matches m
               WHERE (m.profile_one_id = p.id AND m.profile_two_id = :me_id)
