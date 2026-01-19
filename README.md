@@ -27,10 +27,8 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### Figma design
 
-<img src="./readme/figma.svg"/>
+[View the Figma design](https://www.figma.com/design/H7B9SAWOytn5TBotlrf1b1/JaMate-figma?node-id=0-1&t=lbNFucGi3OifQOTE-1)
 
-
-<br><br>
 
 <!-- Project Highlights -->
 <img src="./readme/title4.svg"/>
@@ -41,7 +39,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 - Adaptive backing track generation: Uses machine learning to analyze short recording snippets (mood, key, tempo,etc..) , and generate backing tracks that adapt to the musician’s sound.
 
-- Band suggestions: Uses scheduled workflows and similarity scoring to periodically evaluate embeddings and recommend potential band formations over time.
+- Band suggestions: Uses scheduled workflows, AI and similarity scoring to periodically evaluate embeddings and recommend potential band formations over time.
 
 
 <br><br>
