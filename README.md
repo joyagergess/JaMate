@@ -19,12 +19,15 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### Entity Relationship Diagram
 
-<img src="./readme/diagram(2).svg"/>
+<img src="./readme/diagram(1).svg"/>
 
 ### System design
 
 <img src="./readme/System-design 1.svg"/>
 
+### Figma design
+
+<img src="./readme/figma.svg"/>
 
 
 <br><br>
@@ -32,9 +35,14 @@ See the [LICENSE](LICENSE) file for more information.
 <!-- Project Highlights -->
 <img src="./readme/title4.svg"/>
 
-### Add Title Here
+### Interesting feature
 
-- List the sexy features.
+- Musician matching: Builds a personalized discovery feed by embedding user profiles, musical preferences, and activity, to surface the most relevant matches.
+
+- Adaptive backing track generation: Uses machine learning to analyze short recording snippets (mood, key, tempo,etc..) , and generate backing tracks that adapt to the musician’s sound.
+
+- Band suggestions: Uses scheduled workflows and similarity scoring to periodically evaluate embeddings and recommend potential band formations over time.
+
 
 <br><br>
 
