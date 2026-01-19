@@ -29,6 +29,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 [View the Figma design](https://www.figma.com/design/H7B9SAWOytn5TBotlrf1b1/JaMate-figma?node-id=0-1&t=lbNFucGi3OifQOTE-1)
 
+<br><br>
 
 <!-- Project Highlights -->
 <img src="./readme/title4.svg"/>
@@ -37,7 +38,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 - Musician matching: Builds a personalized discovery feed by embedding user profiles, musical preferences, and activity, to surface the most relevant matches.
 
-- Adaptive backing track generation: Uses machine learning to analyze short recording snippets (mood, key, tempo,etc..) , and generate backing tracks that adapt to the musician’s sound.
+- Adaptive backing track generation: Uses pre-trained machine learning  models to analyze short recording snippets (mood, key, tempo,etc..) , and generate backing tracks that adapt to the musician’s sound.
 
 - Band suggestions: Uses scheduled workflows, AI and similarity scoring to periodically evaluate embeddings and recommend potential band formations over time.
 
@@ -76,6 +77,13 @@ See the [LICENSE](LICENSE) file for more information.
 
 <br><br>
 
+### Query optimization for performance
+
+| Old version | Better version |
+|--------|------------|
+| ![](./readme/old.svg) | ![](./readme/new.svg) |
+
+- Refactored a complex Eloquent query into a raw SQL query to minimize joins, reduce execution cost, and speed up candidate selection.
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
 
