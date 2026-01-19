@@ -11,7 +11,10 @@ use App\Http\Controllers\MatchController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\BandSuggestionController;
-
+use App\Http\Controllers\MediaController;
+use App\Http\Controllers\TrackController;
+use App\Http\Controllers\AiBackingJobController;
+use App\Http\Controllers\TrackAiController;
 
 Route::prefix('v0.1')->group(function () {
 
@@ -32,6 +35,9 @@ Route::prefix('v0.1')->group(function () {
         Route::get('/get', [ProfileController::class, 'get']);
         Route::post('/create', [ProfileController::class, 'create']);
         Route::post('/update', [ProfileController::class, 'update']);
+        Route::get('/{profile}', [ProfileController::class, 'show']);
+        Route::get('/{profile}/media', [ProfileMediaController::class, 'show']);
+        Route::post('/avatar/update', [ProfileMediaController::class, 'updateAvatar']);
     });
 
     Route::middleware('auth:api')->prefix('profile/media')->group(function () {
@@ -41,13 +47,17 @@ Route::prefix('v0.1')->group(function () {
         Route::delete('/destroy/{media}', [ProfileMediaController::class, 'destroy']);
         Route::post('reorder', [ProfileMediaController::class, 'reorder']);
     });
+    Route::middleware('auth:api')->get(
+        '/profile/{profile}/media',
+        [ProfileMediaController::class, 'show']
+    );
 
     Route::middleware('auth:api')->group(function () {
         Route::get('/feed', [FeedController::class, 'index']);
         Route::get('/feed/next', [FeedController::class, 'next']);
         Route::post('/feed/swipe', [FeedController::class, 'swipe']);
     });
-    
+
     Route::prefix('internal')->middleware('internal.auth')->group(function () {
         Route::post('/embeddings/generate', [EmbeddingController::class, 'generate']);
         Route::post('/bands/generate', [BandSuggestionController::class, 'generate']);
@@ -57,7 +67,18 @@ Route::prefix('v0.1')->group(function () {
         Route::get('/get', [MatchController::class, 'index']);
     });
 
+    Route::middleware('auth:api')->get(
+        '/media/{path}',
+        [MediaController::class, 'stream']
+    )->where('path', '.*');
+
+
     Route::middleware('auth:api')->prefix('conversations')->group(function () {
+        Route::post(
+            '/{conversation}/read',
+            [ConversationController::class, 'markAsRead']
+        );
+        Route::post('/{conversation}/rename', [ConversationController::class, 'rename']);
         Route::get('/', [ConversationController::class, 'index']);
         Route::get('/{conversation}/messages', [MessageController::class, 'index']);
         Route::post('/{conversation}/messages', [MessageController::class, 'store']);
@@ -68,5 +89,29 @@ Route::prefix('v0.1')->group(function () {
         Route::post('suggestions/{suggestion}/accept', [BandSuggestionController::class, 'accept']);
         Route::post('suggestions/{suggestion}/reject', [BandSuggestionController::class, 'reject']);
     });
+    Route::post('/tracks/{track}/generate-backing', [
+        TrackAiController::class,
+        'generateBacking'
+    ]);
+
+    Route::middleware('auth:api')->post('/tracks', [TrackController::class, 'store']);
+    Route::middleware('auth:api')->get('/tracks', [TrackController::class, 'index']);
+    Route::get(
+        '/media/{path}',
+        [MediaController::class, 'stream']
+    )->where('path', '.*');
+
+    Route::middleware('auth:api')->get(
+        '/ai-backing-jobs/{job}',
+        [AiBackingJobController::class, 'show']
+    );
+    Route::middleware('auth:api')->delete(
+        '/tracks/{track}',
+        [TrackController::class, 'destroy']
+    );
+    Route::middleware('auth:api')->patch(
+    '/tracks/{track}/title',
+    [TrackController::class, 'updateTitle']
+);
 
 });

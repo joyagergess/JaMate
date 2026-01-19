@@ -106,11 +106,10 @@ class SwipeService
         ]);
     }
 
-    protected function swipeResponse(bool $matched,  ?int $conversationId = null): array
+    protected function swipeResponse(bool $matched, ?int $conversationId = null): array
     {
         return [
-            'status' => 'jammed',
-            'match' => $matched,
+            'matched' => $matched,
             'conversation_id' => $conversationId,
         ];
     }

@@ -1,31 +1,27 @@
 import {
   View,
   Text,
-  Image,
-  TouchableOpacity,
   StatusBar,
   Animated,
-  Pressable,
   PanResponder,
   Dimensions,
-  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
-import { Video, ResizeMode } from "expo-av";
-import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
-import { BlurView } from "expo-blur";
-import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter, useFocusEffect } from "expo-router";
+import { Spinner } from "../../components/ui/Spinner";
 
-import { LinearGradient } from "expo-linear-gradient";
-
-import { calculateAge } from "../../utils/date";
 import { useFeed } from "../../hooks/feed/useFeed";
 import { useSwipe } from "../../hooks/feed/useSwipe";
+import { useProfile } from "../../hooks/profile/useProfile";
 import { FeedItem } from "../../types/feed";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { styles } from "../../styles/homeFeed.styles";
+
+import HomeCard from "../../components/feed/HomeCard";
 
 const { width, height } = Dimensions.get("window");
 
@@ -35,35 +31,58 @@ const DROP_ZONE_Y = height - 160;
 
 export default function HomeScreen() {
   const [feedIndex, setFeedIndex] = useState(0);
-
-  const skipOpacity = useRef(new Animated.Value(0.6)).current;
-  const jamOpacity = useRef(new Animated.Value(0.6)).current;
+  const [token, setToken] = useState<string | null>(null);
+  const [showMatchModal, setShowMatchModal] = useState(false);
 
   const { data: feed, isLoading, refetch } = useFeed();
+  const { data: me, refetch: refetchProfile } = useProfile();
   const swipe = useSwipe();
-const [showMatchModal, setShowMatchModal] = useState(false);
+  const router = useRouter();
 
-  const [token, setToken] = useState<string | null>(null);
-  const [mediaIndex, setMediaIndex] = useState(0);
-  const [collapsed, setCollapsed] = useState(false);
-  const [videoLoading, setVideoLoading] = useState(false);
+  const hasPrefetchedRef = useRef(false);
 
-  /* ------------------ ANIMATIONS ------------------ */
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+      refetchProfile();
+      setFeedIndex(0);
+      hasPrefetchedRef.current = false;
+    }, []),
+  );
+
+  /* PREFETCH AT 15 */
+
+  useEffect(() => {
+    if (feedIndex === 15 && !hasPrefetchedRef.current) {
+      hasPrefetchedRef.current = true;
+      refetch();
+    }
+  }, [feedIndex]);
+
+  /* FEED EXHAUSTION SAFETY  */
+
+  useEffect(() => {
+    if (feed && feedIndex >= feed.length && !isLoading) {
+      refetch().then(() => setFeedIndex(0));
+    }
+  }, [feedIndex, feed, isLoading]);
+
+  /*  MEDIA CHECK  */
+
+  const onlyHasProfilePicture =
+    me?.media?.length === 1 && me.media[0].order_index === 0;
+
+  /*  ANIMATIONS  */
 
   const position = useRef(new Animated.ValueXY()).current;
   const skipScale = useRef(new Animated.Value(1)).current;
   const jamScale = useRef(new Animated.Value(1)).current;
-
-  const animatedHeight = useRef(new Animated.Value(1)).current;
-  const animatedOpacity = useRef(new Animated.Value(1)).current;
-const router = useRouter();
-
-  /* ------------------ STABLE REFS ------------------ */
+  const skipOpacity = useRef(new Animated.Value(0.6)).current;
+  const jamOpacity = useRef(new Animated.Value(0.6)).current;
 
   const activeProfileIdRef = useRef<number | null>(null);
   const hoveredRef = useRef<"skip" | "jam" | null>(null);
-
-  /* ------------------ ROTATION ------------------ */
 
   const rotate = position.x.interpolate({
     inputRange: [-width / 2, 0, width / 2],
@@ -77,14 +96,8 @@ const router = useRouter();
       { rotate },
     ],
   };
-  useEffect(() => {
-    if (feed && feedIndex >= 15) {
-      refetch();
-      setFeedIndex(0);
-    }
-  }, [feedIndex]);
 
-  /* ------------------ BUTTON ANIMATION ------------------ */
+  /* -HELPERS */
 
   const animateButtons = (target: "skip" | "jam" | null) => {
     Animated.parallel([
@@ -111,99 +124,53 @@ const router = useRouter();
     ]).start();
   };
 
-  /* ------------------ INFO TOGGLE ------------------ */
-
-  const toggleInfo = () => {
-    const toValue = collapsed ? 1 : 0;
-
-    Animated.parallel([
-      Animated.timing(animatedHeight, {
-        toValue,
-        duration: 220,
-        useNativeDriver: false,
-      }),
-      Animated.timing(animatedOpacity, {
-        toValue,
-        duration: 160,
-        useNativeDriver: false,
-      }),
-    ]).start();
-
-    setCollapsed(!collapsed);
-  };
-
-  /* ------------------ RESET ------------------ */
-
   const resetCard = () => {
-    Animated.parallel([
-      Animated.spring(position, {
-        toValue: { x: 0, y: 0 },
-        useNativeDriver: false,
-      }),
-      Animated.spring(skipScale, { toValue: 1, useNativeDriver: true }),
-      Animated.spring(jamScale, { toValue: 1, useNativeDriver: true }),
-    ]).start();
+    Animated.spring(position, {
+      toValue: { x: 0, y: 0 },
+      useNativeDriver: false,
+    }).start();
+    animateButtons(null);
   };
-
-  /* ------------------ SWIPE ------------------ */
 
   const forceSwipe = (direction: "skip" | "jam") => {
     const profileId = activeProfileIdRef.current;
-
-    if (!profileId) {
-      resetCard();
-      return;
-    }
+    if (!profileId) return resetCard();
 
     Animated.timing(position, {
-      toValue: {
-        x: direction === "jam" ? SWIPE_OUT : -SWIPE_OUT,
-        y: 0,
-      },
+      toValue: { x: direction === "jam" ? SWIPE_OUT : -SWIPE_OUT, y: 0 },
       duration: 220,
       useNativeDriver: false,
     }).start(() => {
       position.setValue({ x: 0, y: 0 });
-      animateButtons(null);
 
-swipe.mutate(
-  { profile_id: profileId, direction },
-  {
-    onSuccess: (data) => {
-      if (data.matched) {
-        // 🎉 MATCH FOUND
-        setShowMatchModal(true);
-      }
-    },
-  }
-);
+      swipe.mutate(
+        { profile_id: profileId, direction },
+        {
+          onSuccess: (data) => {
+            if (data.matched) setShowMatchModal(true);
+          },
+        },
+      );
 
       setFeedIndex((i) => i + 1);
-      setMediaIndex(0);
+      animateButtons(null);
     });
   };
 
-  /* ------------------ PAN RESPONDER ------------------ */
+  /* PAN RESPONDER  */
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-
-      onMoveShouldSetPanResponder: (_, g) => {
-        return Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5;
-      },
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5,
 
       onPanResponderMove: (_, g) => {
         position.setValue({ x: g.dx, y: g.dy });
 
         if (g.moveY > DROP_ZONE_Y) {
-          if (g.moveX < width / 2) {
-            hoveredRef.current = "skip";
-            animateButtons("skip");
-          } else {
-            hoveredRef.current = "jam";
-            animateButtons("jam");
-          }
+          const dir = g.moveX < width / 2 ? "skip" : "jam";
+          hoveredRef.current = dir;
+          animateButtons(dir);
         } else {
           hoveredRef.current = null;
           animateButtons(null);
@@ -211,26 +178,14 @@ swipe.mutate(
       },
 
       onPanResponderRelease: () => {
-        if (!activeProfileIdRef.current) {
-          resetCard();
-          hoveredRef.current = null;
-          return;
-        }
-
-        if (hoveredRef.current === "skip") {
-          forceSwipe("skip");
-        } else if (hoveredRef.current === "jam") {
-          forceSwipe("jam");
-        } else {
-          resetCard();
-        }
-
+        if (hoveredRef.current) forceSwipe(hoveredRef.current);
+        else resetCard();
         hoveredRef.current = null;
       },
-    })
+    }),
   ).current;
 
-  /* ------------------ EFFECTS ------------------ */
+  /*  DATA  */
 
   useEffect(() => {
     SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
@@ -243,207 +198,93 @@ swipe.mutate(
     activeProfileIdRef.current = profile?.id ?? null;
   }, [profile?.id]);
 
-  const media = useMemo(() => {
-    if (!profile) return [];
-    return profile.media.filter((m) => m.order !== 0);
-  }, [profile?.id]);
+  /* EMPTY FEED */
 
-  const current = media[mediaIndex];
-
-  const nextMedia = () => {
-    if (mediaIndex < media.length - 1) setMediaIndex((i) => i + 1);
-  };
-
-  const prevMedia = () => {
-    if (mediaIndex > 0) setMediaIndex((i) => i - 1);
-  };
-
-  if (isLoading || !token || !profile || !current) {
+  if (!isLoading && feed && feed.length === 0) {
     return (
-      <SafeAreaView style={styles.loading}>
-        <Text style={{ color: "#fff" }}>Loading…</Text>
+      <SafeAreaView style={styles.screen}>
+        <StatusBar hidden />
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Ionicons name="people-outline" size={72} color="#6D5DF6" />
+          <Text style={{ color: "#fff", fontSize: 22, marginTop: 20 }}>
+            No musicians available right now
+          </Text>
+          <Text style={{ color: "#9CA3AF", marginTop: 10 }}>
+            New musicians will appear soon 🎶
+          </Text>
+        </View>
       </SafeAreaView>
     );
   }
 
-  /* ------------------ RENDER ------------------ */
+  /*  COLD START LOADING   */
+
+  if (!token || (!profile && isLoading)) {
+    return (
+      <SafeAreaView style={styles.loading}>
+        <Spinner size={44} />
+      </SafeAreaView>
+    );
+  }
+
+  /*  BLOCK FEED */
+
+  if (onlyHasProfilePicture) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <StatusBar hidden />
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Ionicons name="images-outline" size={72} color="#6D5DF6" />
+          <Text style={{ color: "#fff", fontSize: 22, marginTop: 20 }}>
+            Upload media to continue
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  /*  RENDER */
 
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar hidden />
 
-      <View style={styles.card}>
-        <Animated.View
-          {...panResponder.panHandlers}
-          style={[StyleSheet.absoluteFillObject, cardStyle]}
-        >
-          {current.type === "image" ? (
-            <Image source={{ uri: current.url }} style={styles.media} />
-          ) : (
-            <View style={styles.media}>
-              {videoLoading && (
-                <View style={styles.videoLoader}>
-                  <Text style={{ color: "#fff" }}>Loading…</Text>
-                </View>
-              )}
+      <HomeCard
+        profile={profile}
+        token={token}
+        panHandlers={panResponder.panHandlers}
+        cardStyle={cardStyle}
+      />
 
-              <Video
-                source={{
-                  uri: current.url,
-                  headers: { Authorization: `Bearer ${token}` },
-                }}
-                style={StyleSheet.absoluteFill}
-                resizeMode={ResizeMode.COVER}
-                shouldPlay
-                isLooping
-                onLoadStart={() => setVideoLoading(true)}
-                onReadyForDisplay={() => setVideoLoading(false)}
-                onError={() => setVideoLoading(false)}
-              />
-            </View>
-          )}
-
-          {/* TAP ZONES */}
-          <View style={styles.tapZones}>
-            <TouchableOpacity style={styles.tapZone} onPress={prevMedia} />
-            <TouchableOpacity style={styles.tapZone} onPress={nextMedia} />
-          </View>
-
-          {/* PROGRESS */}
-          <View style={styles.progressContainer}>
-            {media.map((_, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.progressBar,
-                  {
-                    backgroundColor:
-                      i <= mediaIndex ? "#fff" : "rgba(255,255,255,0.3)",
-                  },
-                ]}
-              />
-            ))}
-          </View>
-
-          {/* INFO */}
-          <Pressable style={styles.infoWrapper} onPress={toggleInfo}>
-            <BlurView intensity={18} tint="dark" style={styles.blurBox}>
-              <LinearGradient
-                colors={["rgba(0,0,0,0.08)", "rgba(0,0,0,0.35)"]}
-                style={StyleSheet.absoluteFillObject}
-              />
-
-              <Text style={styles.name}>
-                {profile.name}
-                {profile.birth_date && (
-                  <Text style={styles.age}>
-                    {" "}
-                    - {calculateAge(profile.birth_date)}
-                  </Text>
-                )}
-              </Text>
-
-              <Animated.View
-                style={{
-                  opacity: animatedOpacity,
-                  maxHeight: animatedHeight.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 500],
-                  }),
-                  overflow: "hidden",
-                  marginTop: 6,
-                }}
-              >
-                {profile.location && (
-                  <Text style={styles.metaText}>📍 {profile.location}</Text>
-                )}
-
-                <Text style={styles.skillLine}>
-                  {profile.instruments.map((i) => i.name).join(" · ")}
-                  {profile.experience_level && (
-                    <> - {profile.experience_level}</>
-                  )}
-                </Text>
-
-                <View style={styles.genresRow}>
-                  {profile.genres.map((g) => (
-                    <View key={g.id} style={styles.genreChip}>
-                      <Text style={styles.genreText}>{g.name}</Text>
-                    </View>
-                  ))}
-                </View>
-
-                {profile.objectives.length > 0 && (
-                  <Text style={styles.objectivesText}>
-                    Looking for{" "}
-                    {profile.objectives
-                      .map((o) => o.name.toLowerCase())
-                      .join(" / ")}
-                  </Text>
-                )}
-
-                {profile.bio && (
-                  <Text style={styles.objectivesText} numberOfLines={4}>
-                    {profile.bio}
-                  </Text>
-                )}
-              </Animated.View>
-            </BlurView>
-          </Pressable>
-        </Animated.View>
-      </View>
-{showMatchModal && (
-  <Animated.View style={styles.matchOverlay}>
-    <Text style={styles.matchTitle}>It’s a Jam! 🎶</Text>
-
-    <TouchableOpacity
-      onPress={() => {
-        setShowMatchModal(false);
-        router.push("/matches");
-      }}
-    >
-      <Text style={styles.matchButtonText}>View Match</Text>
-    </TouchableOpacity>
-  </Animated.View>
-)}
-
-
-      {/* ACTIONS / DROP ZONES */}
-      <View style={styles.actions}>
-        <Animated.View
-          style={{
-            transform: [{ scale: skipScale }],
-            opacity: skipOpacity,
-          }}
-        >
+      {showMatchModal && (
+        <Animated.View style={styles.matchOverlay}>
+          <Text style={styles.matchTitle}>It's a Jam! 🎶</Text>
           <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.skipBtn}
-            onPress={() => forceSwipe("skip")}
+            onPress={() => {
+              setShowMatchModal(false);
+              router.push("/matches");
+            }}
           >
+            <Text style={styles.matchButtonText}>View Match</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      <View style={styles.actions}>
+        <Animated.View style={{ transform: [{ scale: skipScale }], opacity: skipOpacity }}>
+          <TouchableOpacity style={styles.skipBtn} onPress={() => forceSwipe("skip")}>
             <Ionicons name="close" size={20} color="#fff" />
             <Text style={styles.btnText}>Skip</Text>
           </TouchableOpacity>
         </Animated.View>
 
-        <Animated.View
-          style={{
-            transform: [{ scale: jamScale }],
-            opacity: jamOpacity,
-          }}
-        >
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.jamBtn}
-            onPress={() => forceSwipe("jam")}
-          >
+        <Animated.View style={{ transform: [{ scale: jamScale }], opacity: jamOpacity }}>
+          <TouchableOpacity style={styles.jamBtn} onPress={() => forceSwipe("jam")}>
             <Ionicons name="musical-notes" size={20} color="#fff" />
             <Text style={styles.btnTextBold}>Jam</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
     </SafeAreaView>
-    
   );
-  
 }

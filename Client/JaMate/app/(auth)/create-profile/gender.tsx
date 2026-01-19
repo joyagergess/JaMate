@@ -13,7 +13,7 @@ const GENDERS = [
   { key: "female", label: "Female" },
 ] as const;
 
-type GenderKey = typeof GENDERS[number]["key"];
+type GenderKey = (typeof GENDERS)[number]["key"];
 
 export default function CreateProfileGenderScreen() {
   const router = useRouter();
@@ -31,12 +31,10 @@ export default function CreateProfileGenderScreen() {
         />
       }
     >
-      <StepIndicator current={2} total={8} />
+      <StepIndicator current={2} />
 
       <Text style={styles.title}>Your gender</Text>
-      <Text style={styles.subtitle}>
-        This helps personalize your profile.
-      </Text>
+      <Text style={styles.subtitle}>This helps personalize your profile.</Text>
 
       <View style={{ marginTop: 24 }}>
         {GENDERS.map((gender) => {

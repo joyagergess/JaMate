@@ -1,15 +1,17 @@
 import { View, Text } from "react-native";
+import { TOTAL_CREATE_PROFILE_STEPS } from "../../constants/createProfileSteps";
 
 type Props = {
-  current: number;
-  total: number;
+  current: number; // 1-based index
 };
 
-export function StepIndicator({ current, total }: Props) {
+export function StepIndicator({ current }: Props) {
+  const progress = (current / TOTAL_CREATE_PROFILE_STEPS) * 100;
+
   return (
-    <View style={{ marginBottom: 20 }}>
+    <View style={{ marginBottom: 24 }}>
       <Text style={{ color: "#9CA3AF", fontSize: 13 }}>
-        Step {current} of {total}
+        Step {current} of {TOTAL_CREATE_PROFILE_STEPS}
       </Text>
 
       <View
@@ -22,7 +24,7 @@ export function StepIndicator({ current, total }: Props) {
       >
         <View
           style={{
-            width: `${(current / total) * 100}%`,
+            width: `${progress}%`,
             height: "100%",
             backgroundColor: "#6D5DF6",
             borderRadius: 2,

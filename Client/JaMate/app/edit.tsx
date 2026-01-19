@@ -9,6 +9,9 @@ import {
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Image } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useUpdateAvatar } from "../hooks/profile/useUpdateAvatar";
 
 import { useProfile } from "../hooks/profile/useProfile";
 import { useUpdateProfile } from "../hooks/profile/useUpdateProfile";
@@ -16,14 +19,19 @@ import { useUpdateProfile } from "../hooks/profile/useUpdateProfile";
 import { SelectablePill } from "../components/ui/SelectablePill";
 import { AppButton } from "../components/ui/AppButton";
 import { SearchablePickerModal } from "../components/ui/SearchablePickerModal";
+import { useProfileMedia } from "../hooks/profile/useProfileMedia";
 
 import { ALL_GENRES } from "../constants/genres";
 import { ALL_INSTRUMENTS } from "../constants/instruments";
 import { orderBySelected } from "../utils/orderBySelected";
 
-/* ===================== CONSTANTS ===================== */
 
-const EXPERIENCE_LEVELS = ["Beginner", "Intermediate", "Advanced", "Pro"] as const;
+const EXPERIENCE_LEVELS = [
+  "Beginner",
+  "Intermediate",
+  "Advanced",
+  "Pro",
+] as const;
 const GENDERS = ["male", "female"] as const;
 
 const MAX_GENRES = 3;
@@ -38,12 +46,14 @@ const OBJECTIVES = [
   "Band members",
 ];
 
-/* ===================== SCREEN ===================== */
 
 export default function EditProfileScreen() {
   const router = useRouter();
   const { data: profile, isLoading } = useProfile();
   const { mutate, isPending } = useUpdateProfile();
+  const updateAvatar = useUpdateAvatar();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const { data: media } = useProfileMedia();
 
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -84,6 +94,9 @@ export default function EditProfileScreen() {
     setGenres(profile.genres.map((g: any) => g.name));
     setInstruments(profile.instruments.map((i: any) => i.name));
     setObjectives(profile.objectives.map((o: any) => o.name));
+    if (media && media.length > 0 && media[0]?.url) {
+      setAvatarPreview(media[0].url);
+    }
   }, [profile]);
 
   if (isLoading) {
@@ -96,7 +109,25 @@ export default function EditProfileScreen() {
 
   if (!profile) return null;
 
-  /* ===================== SAVE ===================== */
+  const pickAvatar = async () => {
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+
+    if (res.canceled) return;
+
+    const asset = res.assets[0];
+
+    setAvatarPreview(asset.uri);
+
+    updateAvatar.mutate({
+      uri: asset.uri,
+      mimeType: asset.mimeType ?? "image/jpeg",
+    });
+  };
 
   const onSave = () => {
     mutate(
@@ -119,18 +150,41 @@ export default function EditProfileScreen() {
     );
   };
 
-
   return (
     <>
       <ScrollView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
         <View style={{ padding: 24 }}>
           <Title>Edit Profile</Title>
+          <View style={{ alignItems: "center", marginBottom: 32 }}>
+            <TouchableOpacity onPress={pickAvatar}>
+              <Image
+                source={
+                  avatarPreview
+                    ? { uri: avatarPreview }
+                    : require("../assets/images/unknow.jpg")
+                }
+                style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: 60,
+                  backgroundColor: "#111827",
+                }}
+              />
+              <Text style={{ color: "#6D5DF6", marginTop: 10 }}>
+                Edit profile picture
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <Label>Name</Label>
           <Input value={name} onChangeText={setName} placeholder="Your name" />
 
           <Label>Username</Label>
-          <Input value={username} onChangeText={setUsername} placeholder="Username" />
+          <Input
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Username"
+          />
 
           <Label>Bio</Label>
           <Input
@@ -142,10 +196,17 @@ export default function EditProfileScreen() {
           />
 
           <Label>Location</Label>
-          <Input value={location} onChangeText={setLocation} placeholder="City, country" />
+          <Input
+            value={location}
+            onChangeText={setLocation}
+            placeholder="City, country"
+          />
 
           <Label>Birth date</Label>
-          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={inputStyle}>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
+            style={inputStyle}
+          >
             <Text style={{ color: "#fff" }}>
               {birthDate.toISOString().split("T")[0]}
             </Text>
@@ -228,7 +289,11 @@ export default function EditProfileScreen() {
                   }
                 />
               ))}
-              <SelectablePill label="More" selected={false} onPress={() => setShowGenres(true)} />
+              <SelectablePill
+                label="More"
+                selected={false}
+                onPress={() => setShowGenres(true)}
+              />
             </Row>
           </Section>
 
@@ -248,7 +313,11 @@ export default function EditProfileScreen() {
                   }
                 />
               ))}
-              <SelectablePill label="More" selected={false} onPress={() => setShowInstruments(true)} />
+              <SelectablePill
+                label="More"
+                selected={false}
+                onPress={() => setShowInstruments(true)}
+              />
             </Row>
           </Section>
 
@@ -286,11 +355,17 @@ export default function EditProfileScreen() {
   );
 }
 
-/* ===================== SMALL UI ===================== */
 
 function Title({ children }: any) {
   return (
-    <Text style={{ color: "#fff", fontSize: 24, fontWeight: "700", marginBottom: 24 }}>
+    <Text
+      style={{
+        color: "#fff",
+        fontSize: 24,
+        fontWeight: "700",
+        marginBottom: 24,
+      }}
+    >
       {children}
     </Text>
   );
@@ -310,16 +385,11 @@ function Input(props: any) {
   return (
     <TextInput
       {...props}
-      style={[
-        inputStyle,
-        { color: "#FFFFFF" }, 
-      ]}
-      placeholderTextColor="#6B7280" 
+      style={[inputStyle, { color: "#FFFFFF" }]}
+      placeholderTextColor="#6B7280"
     />
   );
 }
-
-
 
 function Section({ title, children }: any) {
   return (
@@ -334,7 +404,13 @@ function Section({ title, children }: any) {
 
 function Row({ children, wrap }: any) {
   return (
-    <View style={{ flexDirection: "row", flexWrap: wrap ? "wrap" : "nowrap", gap: 10 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        flexWrap: wrap ? "wrap" : "nowrap",
+        gap: 10,
+      }}
+    >
       {children}
     </View>
   );

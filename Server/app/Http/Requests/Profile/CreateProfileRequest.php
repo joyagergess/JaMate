@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
+
 class CreateProfileRequest extends FormRequest
 {
     public function rules(): array
@@ -17,7 +18,7 @@ class CreateProfileRequest extends FormRequest
 
             'instruments' => 'required|array|min:1',
             'instruments.*.name' => 'required|string|max:100',
-            'instruments.*.level' => 'required|in:begininer,intermediate,advanced,pro',
+            'instruments.*.level' => 'required|in:beginner,intermediate,advanced,pro',
 
             'genres' => 'required|array|min:1',
             'genres.*' => 'required|string|max:100',

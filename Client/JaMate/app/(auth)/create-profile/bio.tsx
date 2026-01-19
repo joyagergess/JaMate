@@ -36,11 +36,10 @@ export default function CreateProfileBioScreen() {
       bio,
     };
 
-
     submitProfile.mutate(finalPayload, {
       onSuccess: () => {
         console.log(" PROFILE CREATED");
-        router.replace("/(tabs)"); 
+        router.replace("/(tabs)");
       },
       onError: (error: any) => {
         console.log(" PROFILE CREATION FAILED", error);
@@ -75,12 +74,13 @@ export default function CreateProfileBioScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 160 }}
           >
-            <StepIndicator current={8} total={8} />
+            <StepIndicator current={9} />
 
             <View style={{ marginBottom: 20 }}>
               <Text style={styles.title}>Tell us about you</Text>
               <Text style={styles.subtitle}>
-                Share a short bio so others know your vibe, style, and experience.
+                Share a short bio so others know your vibe, style, and
+                experience.
               </Text>
             </View>
 

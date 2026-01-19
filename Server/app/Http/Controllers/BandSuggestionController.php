@@ -42,7 +42,11 @@ class BandSuggestionController extends Controller
             $request->user()->profile
         );
 
-        return $this->successResponse(null, 'Band suggestion accepted');
+        return $this->successResponse([
+            'suggestion_id' => $suggestionId,
+            'profile_id' => $request->user()->profile->id,
+            'decision' => 'accepted'
+        ]);
     }
 
     public function reject(Request $request, int $suggestionId)

@@ -42,13 +42,16 @@ return [
 
         'embedding_model' => env(
             'OPENAI_EMBEDDING_MODEL',
-            'text-embedding-3-small'
+            'text-embedding-3-large'
         ),
 
         'chat_model' => env(
             'OPENAI_CHAT_MODEL',
             'gpt-4o-mini'
         ),
+    ],
+    'ai_music' => [
+        'url' => env('AI_MUSIC_SERVICE_URL', 'http://localhost:8001'),
     ],
 
 

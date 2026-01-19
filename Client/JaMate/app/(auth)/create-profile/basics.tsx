@@ -16,6 +16,7 @@ import { useState } from "react";
 
 import { createProfileStyles as styles } from "../../../styles/create-profile.styles";
 import { AppButton } from "../../../components/ui/AppButton";
+import { StepIndicator } from "@/components/ui/StepIndicator";
 
 export default function CreateProfileBasicsScreen() {
   const { data, update } = useCreateProfile();
@@ -44,6 +45,7 @@ export default function CreateProfileBasicsScreen() {
                   onPress={() => router.back()}
                 />
               </View>
+              <StepIndicator current={1} />
 
               <Text style={styles.title}>What's your name?</Text>
 

@@ -6,6 +6,7 @@ use App\Http\Requests\Profile\CreateProfileRequest;
 use App\Services\ProfileService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Models\Profile;
 
 class ProfileController extends Controller
 {
@@ -51,5 +52,16 @@ class ProfileController extends Controller
         } catch (HttpException $e) {
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
+    }
+    public function show(Profile $profile)
+    {
+        return $this->successResponse(
+            $profile->load([
+                'instruments',
+                'genres',
+                'objectives',
+            ]),
+            'Profile fetched successfully'
+        );
     }
 }

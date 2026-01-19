@@ -10,6 +10,9 @@ type Props = {
   onAdd: () => void;
   onRemove: () => void;
   onPreview: () => void;
+  rounded?: boolean;
+  resizeMode?: "cover" | "contain";
+  centerEmpty?: boolean;
 };
 
 export function MediaSlot({ media, onAdd, onRemove, onPreview }: Props) {
@@ -17,10 +20,7 @@ export function MediaSlot({ media, onAdd, onRemove, onPreview }: Props) {
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={media ? onPreview : onAdd}
-      style={[
-        mediaGridStyles.slot,
-        media && mediaGridStyles.filled,
-      ]}
+      style={[mediaGridStyles.slot, media && mediaGridStyles.filled]}
     >
       {media ? (
         <>
@@ -39,10 +39,7 @@ export function MediaSlot({ media, onAdd, onRemove, onPreview }: Props) {
           )}
 
           {/* Remove */}
-          <TouchableOpacity
-            onPress={onRemove}
-            style={mediaGridStyles.remove}
-          >
+          <TouchableOpacity onPress={onRemove} style={mediaGridStyles.remove}>
             <Ionicons name="close" size={14} color="#fff" />
           </TouchableOpacity>
         </>

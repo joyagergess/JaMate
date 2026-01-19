@@ -1,0 +1,53 @@
+{
+  "tempo_bpm": 78.1,
+  "key": "E minor",
+  "key_confidence": 0.778,
+  "chord_progression": [
+    "Em",
+    "C",
+    "G",
+    "D"
+  ],
+  "genres": [
+    {
+      "label": "blues guitar shuffle",
+      "confidence": 0.356
+    },
+    {
+      "label": "rock guitar instrumental",
+      "confidence": 0.328
+    },
+    {
+      "label": "jazz instrumental groove",
+      "confidence": 0.316
+    }
+  ],
+  "moods": [
+    {
+      "label": "energetic driving rhythm",
+      "confidence": 0.355
+    },
+    {
+      "label": "dark moody instrumental",
+      "confidence": 0.353
+    },
+    {
+      "label": "smooth laid back feel",
+      "confidence": 0.292
+    }
+  ],
+  "instruments": [
+    {
+      "label": "acoustic guitar",
+      "confidence": 0.292
+    },
+    {
+      "label": "bass guitar",
+      "confidence": 0.286
+    },
+    {
+      "label": "electric guitar",
+      "confidence": 0.226
+    }
+  ]
+}

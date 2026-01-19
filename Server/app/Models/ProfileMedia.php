@@ -17,6 +17,7 @@ class ProfileMedia extends Model
     protected $fillable = [
         'profile_id',
         'media_type',
+        'thumbnail_url',
         'media_url',
         'order_index',
     ];

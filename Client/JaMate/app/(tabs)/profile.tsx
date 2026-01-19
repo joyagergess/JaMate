@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
+import { Spinner } from "../../components/ui/Spinner";
 
 import { useProfile } from "../../hooks/profile/useProfile";
 import { useProfileMedia } from "../../hooks/profile/useProfileMedia";
@@ -39,12 +40,11 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await apiClient.post("/auth/logout");
-            } catch {
-            }
+            } catch {}
 
             await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
 
-            router.replace("/login"); 
+            router.replace("/login");
           },
         },
       ],
@@ -54,8 +54,15 @@ export default function ProfileScreen() {
 
   if (loadingProfile || loadingMedia) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator color="#fff" />
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#0B0E13",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spinner size={42} />
       </View>
     );
   }
@@ -75,7 +82,6 @@ export default function ProfileScreen() {
         onMediaUploaded={refetchMedia}
       />
 
-      {/* LOGOUT BUTTON */}
       <View style={{ paddingHorizontal: 20, marginTop: 32 }}>
         <TouchableOpacity
           onPress={logout}

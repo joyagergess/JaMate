@@ -119,11 +119,12 @@ class ProfileService
 
     private function relationChanged(Profile $profile, string $relation, array $incoming): bool
     {
-        $current = $profile->$relation->pluck('name')->sort()->values();
-        $incoming = collect($incoming)->sort()->values();
+        $current = $profile->$relation->pluck('name')->sort()->values()->toArray();
+        $incoming = collect($incoming)->sort()->values()->toArray();
 
-        return !$current->equals($incoming);
+        return $current !== $incoming;
     }
+
 
     private function syncByName(Profile $profile, string $modelClass, string $relation, array $names): void
     {
@@ -133,7 +134,7 @@ class ProfileService
         }
 
         $normalized = collect($names)
-            ->map(fn ($n) => ucfirst(strtolower(trim($n))))
+            ->map(fn($n) => ucfirst(strtolower(trim($n))))
             ->unique()
             ->values();
 
@@ -142,7 +143,7 @@ class ProfileService
 
         if ($missing->isNotEmpty()) {
             $modelClass::insert(
-                $missing->map(fn ($name) => ['name' => $name])->all()
+                $missing->map(fn($name) => ['name' => $name])->all()
             );
         }
 

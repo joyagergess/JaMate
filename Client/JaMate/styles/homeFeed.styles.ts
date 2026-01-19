@@ -211,25 +211,27 @@ collapsedInstruments: {
     justifyContent: "space-between",
   },
 
-  skipBtn: {
-    paddingHorizontal: 26,
-    paddingVertical: 14,
-    borderRadius: 30,
-    backgroundColor: "#111",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
+skipBtn: {
+  paddingHorizontal: 26,
+  paddingVertical: 14,
+  borderRadius: 30,
+  backgroundColor: "#000",
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+  
+},
 
-  jamBtn: {
-    paddingHorizontal: 30,
-    paddingVertical: 14,
-    borderRadius: 30,
-    backgroundColor: "#6D5DF6",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
+
+jamBtn: {
+  paddingHorizontal: 30,
+  paddingVertical: 14,
+  borderRadius: 30,
+  backgroundColor: "#6D5DF6", 
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+},
 
   btnText: {
     color: "#fff",

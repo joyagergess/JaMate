@@ -23,13 +23,13 @@ class Message extends Model
     ];
 
     protected $casts = [
-        'type'    => 'string',   
+        'type'    => 'string',
         'sent_at' => 'datetime',
     ];
 
     public $timestamps = false;
 
-  
+
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
@@ -39,6 +39,11 @@ class Message extends Model
     {
         return $this->belongsTo(Profile::class, 'sender_profile_id');
     }
+    public function senderProfile()
+    {
+        return $this->belongsTo(Profile::class, 'sender_profile_id');
+    }
+
 
     public function track()
     {
