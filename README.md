@@ -5,7 +5,6 @@ Licensed under the MIT License.
 See the [LICENSE](LICENSE) file for more information.
 
 <br><br>
-<br><br>
 
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
@@ -18,9 +17,10 @@ See the [LICENSE](LICENSE) file for more information.
 <!-- System Design -->
 <img src="./readme/title3.svg"/>
 
-### Add Title Here
+### Entity Relationship Diagram
 
-- To be decided on later on.
+<img src="./readme/diagram.svg"/>
+
 
 <br><br>
 
