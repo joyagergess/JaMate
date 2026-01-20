@@ -1,42 +1,42 @@
-name: Backend CD (Laravel Deploy)
+# name: Backend CD (Laravel Deploy)
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - "Server/**"
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - "Server/**"
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            set -e
-
-            echo "🚀 Starting deployment"
-
-            cd /var/www/html/JaMate/Server
-
-            echo "Pulling latest code"
-            git pull origin main
-
-            echo " Installing dependencies"
-            composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
-
-            echo "🗄 Running migrations"
-            php artisan migrate --force
-
-            echo " Clearing caches"
-            php artisan optimize:clear
-
-            echo " Deployment finished"
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#
+#       - name: Deploy to server via SSH
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.SSH_HOST }}
+#           username: ${{ secrets.SSH_USER }}
+#           key: ${{ secrets.SSH_PRIVATE_KEY }}
+#           script: |
+#             set -e
+#
+#             echo "Starting deployment"
+#
+#             cd /var/www/html/JaMate/Server
+#
+#             echo "Pulling latest code"
+#             git pull origin main
+#
+#             echo " Installing dependencies"
+#             composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+#
+#             echo "🗄 Running migrations"
+#             php artisan migrate --force
+#
+#             echo " Clearing caches"
+#             php artisan optimize:clear
+#
+#             echo " Deployment finished"
