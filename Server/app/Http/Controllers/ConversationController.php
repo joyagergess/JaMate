@@ -18,7 +18,7 @@ class ConversationController extends Controller
 
         return $this->successResponse(
             $this->conversationService->listForProfile($profile)
-         );
+          );
     }
 
     public function markAsRead(
