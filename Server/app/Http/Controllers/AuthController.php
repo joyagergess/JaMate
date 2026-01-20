@@ -21,7 +21,7 @@ class AuthController extends Controller
         return $this->successResponse(
             null,
             'Verification email sent',
-            201
+             201
         );
     }
 
