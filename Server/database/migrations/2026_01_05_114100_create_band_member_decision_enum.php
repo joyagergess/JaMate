@@ -7,19 +7,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('DROP TYPE IF EXISTS band_member_decision CASCADE');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('DROP TYPE IF EXISTS band_member_decision CASCADE');
 
-        DB::statement("
-            CREATE TYPE band_member_decision AS ENUM (
-                'pending',
-                'jam',
-                'decline'
-            )
-        ");
+            DB::statement("
+                CREATE TYPE band_member_decision AS ENUM (
+                    'pending',
+                    'jam',
+                    'decline'
+                )
+            ");
+        }
     }
 
     public function down(): void
     {
-        DB::statement('DROP TYPE IF EXISTS band_member_decision CASCADE');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('DROP TYPE IF EXISTS band_member_decision CASCADE');
+        }
     }
 };

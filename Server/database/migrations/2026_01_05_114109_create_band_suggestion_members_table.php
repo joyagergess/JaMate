@@ -20,7 +20,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('decision'); 
+            $table->string('decision')->default('pending');
 
             $table->timestamp('decided_at')->nullable();
 
@@ -28,18 +28,20 @@ return new class extends Migration
             $table->index('profile_id');
         });
 
-        DB::statement("
-            ALTER TABLE band_suggestion_members
-            ALTER COLUMN decision
-            TYPE band_member_decision
-            USING decision::band_member_decision
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE band_suggestion_members
+                ALTER COLUMN decision
+                TYPE band_member_decision
+                USING decision::band_member_decision
+            ");
 
-        DB::statement("
-            ALTER TABLE band_suggestion_members
-            ALTER COLUMN decision
-            SET DEFAULT 'pending'
-        ");
+            DB::statement("
+                ALTER TABLE band_suggestion_members
+                ALTER COLUMN decision
+                SET DEFAULT 'pending'
+            ");
+        }
     }
 
     public function down(): void

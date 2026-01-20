@@ -12,24 +12,31 @@ return new class extends Migration
         Schema::create('band_suggestions', function (Blueprint $table) {
             $table->id();
 
-            $table->jsonb('profile_ids');
-            $table->string('status'); 
+            if (DB::getDriverName() === 'pgsql') {
+                $table->jsonb('profile_ids');
+            } else {
+                $table->json('profile_ids');
+            }
+
+            $table->string('status')->default('pending');
 
             $table->timestamp('created_at')->useCurrent();
         });
 
-        DB::statement("
-            ALTER TABLE band_suggestions
-            ALTER COLUMN status
-            TYPE band_suggestion_status
-            USING status::band_suggestion_status
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE band_suggestions
+                ALTER COLUMN status
+                TYPE band_suggestion_status
+                USING status::band_suggestion_status
+            ");
 
-        DB::statement("
-            ALTER TABLE band_suggestions
-            ALTER COLUMN status
-            SET DEFAULT 'pending'
-        ");
+            DB::statement("
+                ALTER TABLE band_suggestions
+                ALTER COLUMN status
+                SET DEFAULT 'pending'
+            ");
+        }
     }
 
     public function down(): void

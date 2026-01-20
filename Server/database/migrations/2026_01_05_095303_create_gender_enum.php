@@ -7,18 +7,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('DROP TYPE IF EXISTS gender CASCADE');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('DROP TYPE IF EXISTS gender CASCADE');
 
-        DB::statement("
-            CREATE TYPE gender AS ENUM (
-                'male',
-                'female'
-            )
-        ");
+            DB::statement("
+                CREATE TYPE gender AS ENUM (
+                    'male',
+                    'female'
+                )
+            ");
+        }
     }
 
     public function down(): void
     {
-        DB::statement('DROP TYPE IF EXISTS gender CASCADE');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('DROP TYPE IF EXISTS gender CASCADE');
+        }
     }
 };

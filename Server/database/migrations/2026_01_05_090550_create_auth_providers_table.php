@@ -26,12 +26,14 @@ return new class extends Migration
             $table->index('user_id');
         });
 
-        DB::statement("
-            ALTER TABLE auth_providers
-            ALTER COLUMN provider
-            TYPE auth_provider_type
-            USING provider::auth_provider_type
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE auth_providers
+                ALTER COLUMN provider
+                TYPE auth_provider_type
+                USING provider::auth_provider_type
+            ");
+        }
     }
 
     public function down(): void

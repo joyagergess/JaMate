@@ -7,18 +7,22 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('DROP TYPE IF EXISTS track_visibility CASCADE');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('DROP TYPE IF EXISTS track_visibility CASCADE');
 
-        DB::statement("
-            CREATE TYPE track_visibility AS ENUM (
-                'public',
-                'private'
-            )
-        ");
+            DB::statement("
+                CREATE TYPE track_visibility AS ENUM (
+                    'public',
+                    'private'
+                )
+            ");
+        }
     }
 
     public function down(): void
     {
-        DB::statement('DROP TYPE IF EXISTS track_visibility CASCADE');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('DROP TYPE IF EXISTS track_visibility CASCADE');
+        }
     }
 };

@@ -113,7 +113,7 @@ class FeedService
               WHERE s.swiped_profile_id = p.id
                 AND s.swiper_profile_id = :me_id
                 AND s.direction = 'skip'
-                AND s.created_at > NOW() - INTERVAL '7 days'
+                AND s.created_at > :skip_after
           )
 
           AND NOT EXISTS (
@@ -223,7 +223,7 @@ class FeedService
                 'url' => $m->media_type === 'video'
                     ? URL::to("/api/v0.1/media/{$m->media_url}")
                     : URL::to("/storage/{$m->media_url}"),
-            ])->values(),
+            ])->values() ->all(),
         ];
     }
 }

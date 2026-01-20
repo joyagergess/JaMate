@@ -35,19 +35,21 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("
-            ALTER TABLE profiles
-            ALTER COLUMN gender
-            TYPE gender
-            USING gender::gender
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE profiles
+                ALTER COLUMN gender
+                TYPE gender
+                USING gender::gender
+            ");
 
-        DB::statement("
-            ALTER TABLE profiles
-            ALTER COLUMN experience_level
-            TYPE experience_level
-            USING experience_level::experience_level
-        ");
+            DB::statement("
+                ALTER TABLE profiles
+                ALTER COLUMN experience_level
+                TYPE experience_level
+                USING experience_level::experience_level
+            ");
+        }
     }
 
     public function down(): void

@@ -29,12 +29,14 @@ return new class extends Migration
             $table->index(['swiped_profile_id', 'direction']);
         });
 
-        DB::statement("
-            ALTER TABLE swipes
-            ALTER COLUMN direction
-            TYPE swipe_direction
-            USING direction::swipe_direction
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE swipes
+                ALTER COLUMN direction
+                TYPE swipe_direction
+                USING direction::swipe_direction
+            ");
+        }
     }
 
     public function down(): void

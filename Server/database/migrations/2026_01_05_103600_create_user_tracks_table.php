@@ -32,19 +32,21 @@ return new class extends Migration
             $table->index('visibility');
         });
 
-        DB::statement("
-            ALTER TABLE user_tracks
-            ALTER COLUMN track_type
-            TYPE track_type
-            USING track_type::track_type
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE user_tracks
+                ALTER COLUMN track_type
+                TYPE track_type
+                USING track_type::track_type
+            ");
 
-        DB::statement("
-            ALTER TABLE user_tracks
-            ALTER COLUMN visibility
-            TYPE track_visibility
-            USING visibility::track_visibility
-        ");
+            DB::statement("
+                ALTER TABLE user_tracks
+                ALTER COLUMN visibility
+                TYPE track_visibility
+                USING visibility::track_visibility
+            ");
+        }
     }
 
     public function down(): void
