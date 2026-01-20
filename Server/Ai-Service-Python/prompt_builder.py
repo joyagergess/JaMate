@@ -16,12 +16,6 @@ def groove_to_prompt(groove: str) -> str:
 
 def build_musicgen_prompt(analysis: dict) -> str:
 
-    energy = (
-        analysis["energy"]["energy_level"]
-        if isinstance(analysis.get("energy"), dict)
-        else analysis.get("energy", "")
-    )
-
     brightness = (
         analysis["brightness"]["brightness"]
         if isinstance(analysis.get("brightness"), dict)
@@ -35,7 +29,6 @@ def build_musicgen_prompt(analysis: dict) -> str:
         "in 4/4",
         groove_phrase,
         f"in {analysis['key']}",
-        energy,
         f"{brightness} tone",
         f"{analysis.get('style', '')} style",
         f"{analysis.get('emotion', '')} mood",
