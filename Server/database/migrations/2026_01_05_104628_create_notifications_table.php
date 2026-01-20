@@ -18,7 +18,12 @@ return new class extends Migration
 
             $table->string('type');
 
-            $table->jsonb('data')->nullable();
+            if (DB::getDriverName() === 'pgsql') {
+                $table->jsonb('data')->nullable();
+            } else {
+                $table->json('data')->nullable();
+            }
+
             $table->boolean('is_read')->default(false);
 
             $table->timestamp('created_at')->useCurrent();
@@ -26,12 +31,14 @@ return new class extends Migration
             $table->index(['profile_id', 'is_read']);
         });
 
-        DB::statement("
-            ALTER TABLE notifications
-            ALTER COLUMN type
-            TYPE notification_type
-            USING type::notification_type
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE notifications
+                ALTER COLUMN type
+                TYPE notification_type
+                USING type::notification_type
+            ");
+        }
     }
 
     public function down(): void

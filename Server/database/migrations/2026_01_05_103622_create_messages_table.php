@@ -37,12 +37,14 @@ return new class extends Migration
             $table->index('sender_profile_id');
         });
 
-        DB::statement("
-            ALTER TABLE messages
-            ALTER COLUMN type
-            TYPE message_type
-            USING type::message_type
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE messages
+                ALTER COLUMN type
+                TYPE message_type
+                USING type::message_type
+            ");
+        }
     }
 
     public function down(): void

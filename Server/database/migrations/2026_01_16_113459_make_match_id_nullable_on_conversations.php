@@ -7,17 +7,25 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
+        DB::statement("
             ALTER TABLE conversations
             ALTER COLUMN match_id DROP NOT NULL
-        ');
+        ");
     }
 
     public function down(): void
     {
-        DB::statement('
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
+        DB::statement("
             ALTER TABLE conversations
             ALTER COLUMN match_id SET NOT NULL
-        ');
+        ");
     }
 };

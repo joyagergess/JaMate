@@ -16,16 +16,17 @@ return new class extends Migration
 
             $table->string('name')->nullable();
 
-
             $table->timestamp('created_at')->useCurrent();
         });
 
-        DB::statement("
-            ALTER TABLE conversations
-            ALTER COLUMN type
-            TYPE conversation_type
-            USING type::conversation_type
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE conversations
+                ALTER COLUMN type
+                TYPE conversation_type
+                USING type::conversation_type
+            ");
+        }
     }
 
     public function down(): void

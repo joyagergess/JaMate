@@ -31,12 +31,14 @@ return new class extends Migration
             $table->index(['receiver_profile_id', 'status']);
         });
 
-        DB::statement("
-            ALTER TABLE jam_requests
-            ALTER COLUMN status
-            TYPE request_status
-            USING status::request_status
-        ");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("
+                ALTER TABLE jam_requests
+                ALTER COLUMN status
+                TYPE request_status
+                USING status::request_status
+            ");
+        }
     }
 
     public function down(): void

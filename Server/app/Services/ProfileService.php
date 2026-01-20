@@ -15,7 +15,7 @@ class ProfileService
     public function create(User $user, array $data): Profile
     {
         if ($user->profile) {
-            throw new HttpException(409, 'Profile already exists');
+            throw new HttpException(409, 'Profile already exists', null, [], 409);
         }
 
         return DB::transaction(function () use ($user, $data) {
@@ -46,7 +46,7 @@ class ProfileService
         $profile = $user->profile;
 
         if (!$profile) {
-            throw new HttpException(404, 'Profile not found');
+            throw new HttpException(404, 'Profile not found', null, [], 404);
         }
 
         return DB::transaction(function () use ($profile, $data) {
