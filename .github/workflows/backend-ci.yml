@@ -31,6 +31,7 @@ jobs:
         working-directory: Server
         run: |
           cp .env.ci .env
+          php artisan config:clear
           php artisan key:generate --env=testing
           php artisan migrate --force
 
