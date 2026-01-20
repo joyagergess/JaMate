@@ -12,7 +12,7 @@ class InstrumentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => ucfirst($this->faker->unique()->word()),
+             'name' => ucfirst($this->faker->unique()->word()),
         ];
     }
 }
