@@ -1,4 +1,3 @@
-
 name: Backend CI (Laravel)
 
 on:
@@ -14,24 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.2"
-          extensions: mbstring, pdo, pdo_pgsql
+          extensions: mbstring, pdo, pdo_sqlite
           coverage: none
 
-      - name: Install dependencies
+      - name: Install Composer dependencies
         working-directory: Server
-        run: composer install --no-interaction --prefer-dist
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Prepare environment
         working-directory: Server
         run: |
           cp .env.ci .env
-          php artisan key:generate
+          php artisan key:generate --env=testing
+          php artisan migrate --force
 
       - name: Run tests
         working-directory: Server
