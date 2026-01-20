@@ -9,7 +9,7 @@ export function GeneratingCard() {
         <Spinner size={18} />
         <View>
           <Text style={styles.name}>Generating backing track…</Text>
-          <Text style={styles.sub}>Downloading AI audio 🎧</Text>
+          <Text style={styles.sub}>Downloading AI audio </Text>
         </View>
       </View>
     </View>

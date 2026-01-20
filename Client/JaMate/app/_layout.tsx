@@ -6,7 +6,6 @@ import { StyleSheet } from "react-native";
 import { useState } from "react";
 
 import { AuthRefreshProvider } from "../context/AuthRefreshContext";
-import { AiBackingProvider } from "../context/AiBackingContext";
 
 import Toast from "react-native-toast-message";
 
@@ -18,10 +17,8 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthRefreshProvider>
-            <AiBackingProvider>
               <Slot />
               <Toast />
-            </AiBackingProvider>
           </AuthRefreshProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

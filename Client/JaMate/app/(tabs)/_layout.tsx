@@ -3,12 +3,8 @@ import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { useConversations } from "../../hooks/messages/useConversations";
-import { useAiBackingJob } from "../../hooks/tracks/useAiBackingJob";
-import { AiReadyModal } from "../../components/tracks/AiReadyModal";
-import { useAiBacking } from "@/context/AiBackingContext";
 
 const TAB_BG = "#0B0E13";
 const ACTIVE = "#6C63FF";
@@ -19,21 +15,7 @@ const DOT_COLOR = "#FF375F";
 export default function TabsLayout() {
   const { data: conversations } = useConversations();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
-  const { jobId, setJobId } = useAiBacking();
-
-  const { data: aiJob } = useAiBackingJob(jobId);
-  const [aiReadyVisible, setAiReadyVisible] = useState(false);
-
-  useEffect(() => {
-    if (aiJob?.status === "done") {
-      setAiReadyVisible(true);
-      setJobId(null);
-
-      queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
-    }
-  }, [aiJob]);
 
   const hasUnreadMessages =
     conversations?.some((c) => c.unread_count > 0) ?? false;
@@ -132,14 +114,6 @@ export default function TabsLayout() {
         />
       </Tabs>
 
-      <AiReadyModal
-        visible={aiReadyVisible}
-        onClose={() => setAiReadyVisible(false)}
-        onViewTrack={() => {
-          setAiReadyVisible(false);
-          router.push("/tracks?tab=ai");
-        }}
-      />
     </>
   );
 }

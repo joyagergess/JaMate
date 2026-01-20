@@ -20,7 +20,7 @@ export default function AuthLayout() {
     }
 
     if (hasProfile === false) {
-router.replace("/create-profile" as Href);
+    router.replace("/create-profile" as Href);
       return;
     }
 

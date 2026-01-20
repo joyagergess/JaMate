@@ -110,19 +110,7 @@ export default function RecordSnippet() {
         </TouchableOpacity>
       )}
 
-      {!recording && (
-        <TouchableOpacity
-          style={styles.myTracksBtn}
-          onPress={() => router.push("/tracks")}
-        >
-          <Ionicons
-            name="musical-notes-outline"
-            size={18}
-            color="#9CA3AF"
-          />
-          <Text style={styles.myTracksText}>My tracks</Text>
-        </TouchableOpacity>
-      )}
+      
     </View>
   );
 }

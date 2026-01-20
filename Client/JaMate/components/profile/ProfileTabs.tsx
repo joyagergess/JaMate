@@ -3,9 +3,10 @@ import { View, Text, TouchableOpacity } from "react-native";
 
 import { ProfileInfoSection } from "./ProfileInfoSection";
 import { ProfileMediaSection } from "./ProfileMediaSection";
+import { ProfileTracksSection } from "./ProfileTracksSection";
 import { ProfileMedia } from "../../hooks/profile/useProfileMedia";
 
-const tabs = ["Infos", "Media"] as const;
+const tabs = ["Infos", "Tracks", "Media"] as const;
 
 type Props = {
   profile: any;
@@ -53,6 +54,12 @@ export function ProfileTabs({
       <View style={{ marginTop: 24 }}>
         {active === "Infos" && (
           <ProfileInfoSection profile={profile} />
+        )}
+
+        {active === "Tracks" && (
+          <ProfileTracksSection
+            readOnly={readOnly}
+          />
         )}
 
         {active === "Media" && (

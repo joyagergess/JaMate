@@ -6,7 +6,9 @@ export function useMyTracks() {
     queryKey: ["my-tracks"],
     queryFn: async () => {
       const res = await apiClient.get("/tracks");
-      return res.data;
+
+      return res.data.data.tracks;
     },
+    initialData: [], 
   });
 }

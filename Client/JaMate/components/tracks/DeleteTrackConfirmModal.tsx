@@ -39,7 +39,6 @@ export function DeleteTrackConfirmModal({
             padding: 20,
           }}
         >
-          {/* ICON */}
           <View style={{ alignItems: "center", marginBottom: 12 }}>
             <Ionicons
               name="trash-outline"
@@ -48,7 +47,6 @@ export function DeleteTrackConfirmModal({
             />
           </View>
 
-          {/* TEXT */}
           <Text
             style={{
               color: "white",
@@ -72,7 +70,6 @@ export function DeleteTrackConfirmModal({
             This action cannot be undone.
           </Text>
 
-          {/* ACTIONS */}
           <View style={{ flexDirection: "row", gap: 12 }}>
             <TouchableOpacity
               onPress={onCancel}
