@@ -20,7 +20,6 @@ import { pickFromGallery, recordFromCamera } from "../../utils/mediaPicker";
 import { useUploadProfileMedia } from "../../hooks/profile/useUploadProfileMedia";
 import { useDeleteProfileMedia } from "../../hooks/profile/useDeleteProfileMedia";
 
-/* ------------------ LAYOUT ------------------ */
 
 const { width, height } = Dimensions.get("window");
 
@@ -30,7 +29,6 @@ const COLUMNS = 2;
 const CARD_WIDTH = (width - GAP * 3) / COLUMNS;
 const CARD_HEIGHT = CARD_WIDTH * 1.2;
 
-/* ------------------ TYPES ------------------ */
 
 type Props = {
   media: ProfileMedia[];
@@ -38,7 +36,6 @@ type Props = {
   readOnly?: boolean;
 };
 
-/* ------------------ COMPONENT ------------------ */
 
 export function ProfileMediaSection({
   media,
@@ -54,7 +51,6 @@ export function ProfileMediaSection({
 
   const isUploading = upload.isPending;
 
-  /* 🔥 REAL MEDIA ONLY */
   const gridMedia = media
     .filter((m) => m.order_index !== 0)
     .sort((a, b) => a.order_index - b.order_index);
@@ -135,11 +131,9 @@ export function ProfileMediaSection({
     ]);
   };
 
-  /* ------------------ RENDER ------------------ */
 
   return (
     <>
-      {/* PREVIEW FEED (OWN PROFILE ONLY) */}
       {!readOnly && gridMedia.length > 0 && (
         <TouchableOpacity
           onPress={() => setPreviewIndex(0)}
@@ -169,7 +163,6 @@ export function ProfileMediaSection({
         }}
       >
         {slots.map((item, index) => {
-          /* ⏳ LOADING SLOT */
           if (item === "loading") {
             return (
               <View
@@ -188,7 +181,6 @@ export function ProfileMediaSection({
             );
           }
 
-          /* 🎞 REAL MEDIA SLOT */
           return (
             <View
               key={item.id}
@@ -252,7 +244,6 @@ export function ProfileMediaSection({
                 )}
               </TouchableOpacity>
 
-              {/* ❌ DELETE */}
               {!readOnly && (
                 <TouchableOpacity
                   onPress={() => confirmDelete(item.id)}
@@ -279,7 +270,6 @@ export function ProfileMediaSection({
           );
         })}
 
-        {/* ➕ ADD SLOT */}
         {!readOnly && gridMedia.length < MAX && !isUploading && (
           <TouchableOpacity
             onPress={openPicker}
@@ -299,7 +289,6 @@ export function ProfileMediaSection({
         )}
       </View>
 
-      {/* IMAGE VIEWER */}
       <Modal visible={!!imageUrl} transparent>
         <TouchableOpacity
           style={{
@@ -321,14 +310,12 @@ export function ProfileMediaSection({
         </TouchableOpacity>
       </Modal>
 
-      {/* VIDEO VIEWER */}
       <VideoPreviewModal
         visible={!!videoUrl}
         videoUrl={videoUrl}
         onClose={() => setVideoUrl(null)}
       />
 
-      {/* FEED PREVIEW */}
       {!readOnly && (
         <FeedPreviewModal
           visible={previewIndex !== null}

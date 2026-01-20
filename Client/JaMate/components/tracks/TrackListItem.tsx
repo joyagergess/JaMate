@@ -50,10 +50,11 @@ export function TrackListItem({
           )}
         </TouchableOpacity>
 
-        {/* 🎵 INFO */}
         <View style={{ flex: 1 }}>
+          {/* TITLE */}
           <Text style={styles.name}>{item.title}</Text>
 
+          {/* SUBTITLE */}
           <Text style={styles.sub}>
             {isPlaying && remainingSeconds !== null
               ? `${remainingSeconds}s`
@@ -62,18 +63,7 @@ export function TrackListItem({
               : `${item.duration}s`}
           </Text>
 
-          {!!item.created_at && (
-            <Text
-              style={{
-                color: "#6B7280",
-                fontSize: 11,
-                marginTop: 2,
-              }}
-            >
-              {formatDate(item.created_at)}
-            </Text>
-          )}
-
+          {/* PROGRESS BAR */}
           <View
             style={{
               height: 4,
@@ -92,6 +82,19 @@ export function TrackListItem({
               }}
             />
           </View>
+
+          {/* CREATED AT (NOW UNDER PROGRESS BAR) */}
+          {!!item.created_at && (
+            <Text
+              style={{
+                color: "#6B7280",
+                fontSize: 11,
+                marginTop: 4,
+              }}
+            >
+              {formatDate(item.created_at)}
+            </Text>
+          )}
         </View>
 
         <View style={{ flexDirection: "row", gap: 12 }}>
@@ -127,7 +130,6 @@ export function TrackListItem({
             </TouchableOpacity>
           )}
 
-          {/* ⋮ MENU */}
           <TouchableOpacity onPress={onMenu} style={{ padding: 6 }}>
             <Ionicons
               name="ellipsis-vertical"

@@ -1,13 +1,19 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
 
 type AiBackingContextType = {
   jobId: number | null;
   setJobId: (id: number | null) => void;
 };
 
-const AiBackingContext = createContext<AiBackingContextType | null>(null);
+const AiBackingContext = createContext<AiBackingContextType | undefined>(
+  undefined
+);
 
-export function AiBackingProvider({ children }: { children: ReactNode }) {
+export function AiBackingProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [jobId, setJobId] = useState<number | null>(null);
 
   return (

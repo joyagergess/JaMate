@@ -2,6 +2,7 @@ import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMemo, useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Spinner } from "../../components/ui/Spinner";
 import { useMyTracks } from "../../hooks/tracks/useMyTracks";
@@ -21,24 +22,31 @@ import { useAudioPlayer } from "../../hooks/tracks/useAudioPlayer";
 import { TrackListItem } from "../../components/tracks/TrackListItem";
 import { GeneratingCard } from "../../components/tracks/GeneratingCard";
 
-import { useAiBacking } from "@/context/AiBackingContext";
+import { useAiBackingJob } from "@/hooks/tracks/useAiBackingJob";
 
 type Tab = "tracks" | "ai" | "record";
 
 export default function MyTracks() {
   const { tab: tabParam } = useLocalSearchParams<{ tab?: Tab }>();
+  const queryClient = useQueryClient();
 
   const { data: tracks, isLoading } = useMyTracks();
   const generateBacking = useGenerateBackingTrack();
   const deleteTrack = useDeleteTrack();
-  const { setJobId } = useAiBacking();
+
+  const [jobId, setJobId] = useState<number | null>(null);
+  const [jobHandled, setJobHandled] = useState(false);
+
+  const { data: aiJob } = useAiBackingJob(jobId);
 
   const [tab, setTab] = useState<Tab>("tracks");
   const [menuTrack, setMenuTrack] = useState<any | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<MenuAnchor | null>(null);
   const [editingTrack, setEditingTrack] = useState<any | null>(null);
   const [deletingTrack, setDeletingTrack] = useState<any | null>(null);
+
   const [isGeneratingUi, setIsGeneratingUi] = useState(false);
+  const [aiDoneVisible, setAiDoneVisible] = useState(false);
 
   const {
     togglePlay,
@@ -57,20 +65,42 @@ export default function MyTracks() {
 
   const originals = useMemo(
     () => tracks?.filter((t: any) => t.track_type !== "ai_generated") ?? [],
-    [tracks]
+    [tracks],
   );
 
   const aiTracks = useMemo(
     () => tracks?.filter((t: any) => t.track_type === "ai_generated") ?? [],
-    [tracks]
+    [tracks],
   );
+
+  useEffect(() => {
+    if (!jobId) return;
+    if (!aiJob) return;
+    if (aiJob.status !== "done") return;
+    if (jobHandled) return;
+
+    console.log("AI JOB DONE", aiJob);
+
+    setIsGeneratingUi(false);
+
+    queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
+
+    setAiDoneVisible(true);
+
+    setJobHandled(true);
+
+    setTimeout(() => {
+      setJobId(null);
+      setJobHandled(false);
+    }, 0);
+  }, [jobId, aiJob, jobHandled]);
 
   const openMenu = (event: any, track: any) => {
     event.currentTarget.measureInWindow(
       (x: number, y: number, width: number, height: number) => {
         setMenuAnchor({ x, y, width, height });
         setMenuTrack(track);
-      }
+      },
     );
   };
 
@@ -84,7 +114,6 @@ export default function MyTracks() {
 
   return (
     <SafeAreaView style={styles.screen}>
-      {/* TABS */}
       <View style={styles.tabs}>
         {["tracks", "ai", "record"].map((t) => (
           <TouchableOpacity key={t} onPress={() => setTab(t as Tab)}>
@@ -92,8 +121,8 @@ export default function MyTracks() {
               {t === "tracks"
                 ? "My Tracks"
                 : t === "ai"
-                ? "AI Backing Tracks"
-                : "Record"}
+                  ? "AI Backing Tracks"
+                  : "Record"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -127,8 +156,8 @@ export default function MyTracks() {
 
                       generateBacking.mutate(item.id, {
                         onSuccess: (data) => {
-                          setIsGeneratingUi(false);
-                          setJobId(data.job_id); 
+                          console.log(" generateBacking response =", data);
+                          setJobId(data.data.job_id);
                         },
                         onError: () => {
                           setIsGeneratingUi(false);
@@ -172,6 +201,49 @@ export default function MyTracks() {
             setDeletingTrack(null);
           }}
         />
+      )}
+
+      {aiDoneVisible && (
+        <View
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 24,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#111",
+              borderRadius: 12,
+              padding: 24,
+              width: "100%",
+              maxWidth: 340,
+            }}
+          >
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>
+               AI Track Ready
+            </Text>
+
+            <Text style={{ color: "rgba(255,255,255,0.7)", marginTop: 8 }}>
+              Your AI backing track has finished generating.
+            </Text>
+
+            <TouchableOpacity
+              style={{ marginTop: 16 }}
+              onPress={() => {
+                setAiDoneVisible(false);
+                setTab("ai");
+              }}
+            >
+              <Text style={{ color: "#6C63FF", fontWeight: "600" }}>
+                View AI Track
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
     </SafeAreaView>
   );
