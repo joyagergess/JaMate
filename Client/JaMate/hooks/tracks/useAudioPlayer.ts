@@ -44,21 +44,18 @@ export function useAudioPlayer() {
       playThroughEarpieceAndroid: false,
     });
 
-    // ⏸ PAUSE (do NOT reset anything)
     if (soundRef.current && isSameTrack && isPlaying) {
       await soundRef.current.pauseAsync();
       setIsPlaying(false);
       return;
     }
 
-    // ▶️ RESUME SAME TRACK
     if (soundRef.current && isSameTrack && !isPlaying) {
       await soundRef.current.playAsync();
       setIsPlaying(true);
       return;
     }
 
-    // 🔁 SWITCH TRACK
     if (soundRef.current && !isSameTrack) {
       await soundRef.current.unloadAsync();
       soundRef.current = null;
@@ -68,7 +65,6 @@ export function useAudioPlayer() {
       setRemainingSeconds(null);
     }
 
-    // ▶️ FIRST PLAY
     setLoadingTrackId(track.id);
 
     const { sound } = await Audio.Sound.createAsync(

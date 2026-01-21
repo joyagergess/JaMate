@@ -45,16 +45,14 @@ export function TrackListItem({
             <Ionicons
               name={isPlaying ? "pause" : "play"}
               size={22}
-              color={isAi ? "#16C784" : "#fff"}
+              color={isAi ? "#6C63FF" : "#fff"}
             />
           )}
         </TouchableOpacity>
 
         <View style={{ flex: 1 }}>
-          {/* TITLE */}
           <Text style={styles.name}>{item.title}</Text>
 
-          {/* SUBTITLE */}
           <Text style={styles.sub}>
             {isPlaying && remainingSeconds !== null
               ? `${remainingSeconds}s`
@@ -63,7 +61,6 @@ export function TrackListItem({
               : `${item.duration}s`}
           </Text>
 
-          {/* PROGRESS BAR */}
           <View
             style={{
               height: 4,
@@ -83,7 +80,6 @@ export function TrackListItem({
             />
           </View>
 
-          {/* CREATED AT (NOW UNDER PROGRESS BAR) */}
           {!!item.created_at && (
             <Text
               style={{
@@ -116,11 +112,11 @@ export function TrackListItem({
               <Ionicons
                 name="sparkles-outline"
                 size={12}
-                color="#16C784"
+                color="#6C63FF"
               />
               <Text
                 style={{
-                  color: "#16C784",
+                  color: "#6C63FF",
                   fontSize: 11,
                   fontWeight: "600",
                 }}
