@@ -39,11 +39,9 @@ export default function HomeCard({
   const animatedHeight = useRef(new Animated.Value(1)).current;
   const animatedOpacity = useRef(new Animated.Value(1)).current;
 
-
-  const media = useMemo(
-    () => profile.media.filter((m: any) => m.order !== 0),
-    [profile.id]
-  );
+  const media = useMemo(() => {
+    return profile?.media?.filter((m: any) => m.order !== 0) ?? [];
+  }, [profile?.media]);
 
   const current = media[mediaIndex];
 
@@ -59,19 +57,16 @@ export default function HomeCard({
     );
   }
 
-
   useEffect(() => {
     setMediaIndex(0);
     setVideoLoading(true);
   }, [profile.id]);
-
 
   useEffect(() => {
     if (current.type === "video") {
       setVideoLoading(true);
     }
   }, [mediaIndex]);
-
 
   useFocusEffect(
     useCallback(() => {
@@ -80,9 +75,8 @@ export default function HomeCard({
       return () => {
         videoRef.current?.pauseAsync().catch(() => {});
       };
-    }, [current.url])
+    }, [current.url]),
   );
-
 
   const nextMedia = () => {
     if (mediaIndex < media.length - 1) {
@@ -95,7 +89,6 @@ export default function HomeCard({
       setMediaIndex((i) => i - 1);
     }
   };
-
 
   const toggleInfo = () => {
     const toValue = collapsed ? 1 : 0;
@@ -115,7 +108,6 @@ export default function HomeCard({
 
     setCollapsed(!collapsed);
   };
-
 
   return (
     <View style={styles.card}>
@@ -145,11 +137,7 @@ export default function HomeCard({
               shouldPlay
               isLooping
               onPlaybackStatusUpdate={(status: AVPlaybackStatus) => {
-                if (
-                  status.isLoaded &&
-                  status.isPlaying &&
-                  videoLoading
-                ) {
+                if (status.isLoaded && status.isPlaying && videoLoading) {
                   setVideoLoading(false);
                 }
               }}
@@ -172,9 +160,7 @@ export default function HomeCard({
                 styles.progressBar,
                 {
                   backgroundColor:
-                    i <= mediaIndex
-                      ? "#fff"
-                      : "rgba(255,255,255,0.3)",
+                    i <= mediaIndex ? "#fff" : "rgba(255,255,255,0.3)",
                 },
               ]}
             />
@@ -215,9 +201,7 @@ export default function HomeCard({
 
               <Text style={styles.skillLine}>
                 {profile.instruments.map((i: any) => i.name).join(" · ")}
-                {profile.experience_level && (
-                  <> - {profile.experience_level}</>
-                )}
+                {profile.experience_level && <> - {profile.experience_level}</>}
               </Text>
 
               <View style={styles.genresRow}>

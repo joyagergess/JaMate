@@ -51,7 +51,6 @@ export default function HomeScreen() {
     }, []),
   );
 
-  /* PREFETCH AT 15 */
 
   useEffect(() => {
     if (feedIndex === 15 && !hasPrefetchedRef.current) {
@@ -60,7 +59,6 @@ export default function HomeScreen() {
     }
   }, [feedIndex]);
 
-  /* FEED EXHAUSTION SAFETY  */
 
   useEffect(() => {
     if (feed && feedIndex >= feed.length && !isLoading) {
@@ -68,12 +66,10 @@ export default function HomeScreen() {
     }
   }, [feedIndex, feed, isLoading]);
 
-  /*  MEDIA CHECK  */
 
   const onlyHasProfilePicture =
     me?.media?.length === 1 && me.media[0].order_index === 0;
 
-  /*  ANIMATIONS  */
 
   const position = useRef(new Animated.ValueXY()).current;
   const skipScale = useRef(new Animated.Value(1)).current;
@@ -97,7 +93,6 @@ export default function HomeScreen() {
     ],
   };
 
-  /* -HELPERS */
 
   const animateButtons = (target: "skip" | "jam" | null) => {
     Animated.parallel([
@@ -157,7 +152,6 @@ export default function HomeScreen() {
     });
   };
 
-  /* PAN RESPONDER  */
 
   const panResponder = useRef(
     PanResponder.create({
@@ -185,7 +179,6 @@ export default function HomeScreen() {
     }),
   ).current;
 
-  /*  DATA  */
 
   useEffect(() => {
     SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
@@ -198,7 +191,6 @@ export default function HomeScreen() {
     activeProfileIdRef.current = profile?.id ?? null;
   }, [profile?.id]);
 
-  /* EMPTY FEED */
 
   if (!isLoading && feed && feed.length === 0) {
     return (
@@ -217,7 +209,6 @@ export default function HomeScreen() {
     );
   }
 
-  /*  COLD START LOADING   */
 
   if (!token || (!profile && isLoading)) {
     return (
@@ -227,7 +218,6 @@ export default function HomeScreen() {
     );
   }
 
-  /*  BLOCK FEED */
 
   if (onlyHasProfilePicture) {
     return (
@@ -243,7 +233,7 @@ export default function HomeScreen() {
     );
   }
 
-  /*  RENDER */
+
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -258,7 +248,7 @@ export default function HomeScreen() {
 
       {showMatchModal && (
         <Animated.View style={styles.matchOverlay}>
-          <Text style={styles.matchTitle}>It's a Jam! 🎶</Text>
+          <Text style={styles.matchTitle}>It's a Jam! </Text>
           <TouchableOpacity
             onPress={() => {
               setShowMatchModal(false);

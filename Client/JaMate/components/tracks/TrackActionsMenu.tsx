@@ -43,13 +43,11 @@ export function TrackActionsMenu({
 
   return (
     <Modal transparent animationType="fade" visible>
-      {/* BACKDROP */}
       <TouchableOpacity
         activeOpacity={1}
         onPress={onClose}
         style={{ flex: 1 }}
       >
-        {/* MENU */}
         <View
           style={{
             position: "absolute",
@@ -67,7 +65,6 @@ export function TrackActionsMenu({
             overflow: "hidden",
           }}
         >
-          {/* EDIT */}
           <TouchableOpacity
             onPress={() => {
               onClose();
@@ -88,7 +85,6 @@ export function TrackActionsMenu({
 
           <View style={{ height: 1, backgroundColor: "#1F2937" }} />
 
-          {/* DELETE */}
           <TouchableOpacity
             onPress={() => {
               onClose();
