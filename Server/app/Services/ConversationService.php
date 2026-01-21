@@ -10,48 +10,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class ConversationService
 {
 
-    public function listForProfile(Profile $profile)
-    {
-        return Conversation::query()
-            ->whereHas(
-                'participants',
-                fn($q) =>
-                $q->where('profile_id', $profile->id)
-            )
-            ->with([
-                'participants.profile.media',
-                'messages' => fn($q) =>
-                $q->orderByDesc('sent_at')->limit(1),
-            ])
-            ->withCount([
-                'messages as unread_count' => function ($q) use ($profile) {
-                    $q->whereColumn(
-                        'messages.conversation_id',
-                        'conversations.id'
-                    )
-                        ->where('sender_profile_id', '!=', $profile->id)
-                        ->where('sent_at', '>', function ($sub) use ($profile) {
-                            $sub->select('last_read_at')
-                                ->from('conversation_participants')
-                                ->whereColumn(
-                                    'conversation_participants.conversation_id',
-                                    'messages.conversation_id'
-                                )
-                                ->where('profile_id', $profile->id);
-                        });
-                },
-            ])
-            ->orderByDesc(
-                Message::select('sent_at')
-                    ->whereColumn(
-                        'messages.conversation_id',
-                        'conversations.id'
-                    )
-                    ->latest()
-                    ->limit(1)
-            )
-            ->get();
-    }
+
     public function markAsRead(Conversation $conversation, Profile $profile): void
     {
         $conversation->participants()
@@ -83,5 +42,66 @@ class ConversationService
         ]);
 
         return $conversation->fresh();
+    }
+
+
+    public function listForProfile(Profile $profile)
+    {
+        return $this->baseQueryForProfile($profile)
+            ->with($this->relations())
+            ->withCount($this->unreadCount($profile))
+            ->orderByDesc($this->latestMessageSubquery())
+            ->get();
+    }
+
+    protected function baseQueryForProfile(Profile $profile)
+    {
+        return Conversation::query()
+            ->whereHas(
+                'participants',
+                fn($q) => $q->where('profile_id', $profile->id)
+            );
+    }
+
+    protected function relations(): array
+    {
+        return [
+            'participants.profile.media',
+            'messages' => fn($q) =>
+            $q->orderByDesc('sent_at')->limit(1),
+        ];
+    }
+
+    protected function unreadCount(Profile $profile): array
+    {
+        return [
+            'messages as unread_count' => function ($q) use ($profile) {
+                $q->whereColumn(
+                    'messages.conversation_id',
+                    'conversations.id'
+                )
+                    ->where('sender_profile_id', '!=', $profile->id)
+                    ->where('sent_at', '>', function ($sub) use ($profile) {
+                        $sub->select('last_read_at')
+                            ->from('conversation_participants')
+                            ->whereColumn(
+                                'conversation_participants.conversation_id',
+                                'messages.conversation_id'
+                            )
+                            ->where('profile_id', $profile->id);
+                    });
+            },
+        ];
+    }
+
+    protected function latestMessageSubquery()
+    {
+        return Message::select('sent_at')
+            ->whereColumn(
+                'messages.conversation_id',
+                'conversations.id'
+            )
+            ->latest()
+            ->limit(1);
     }
 }

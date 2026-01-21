@@ -16,14 +16,12 @@ class TrackUploadService
         int $duration,
         string $trackType = 'snippet'
     ): UserTrack {
-        // Use real temp file
         $tmpFullPath = str_replace('\\', '/', $audio->getRealPath());
 
         if (!file_exists($tmpFullPath)) {
             throw new \RuntimeException("Temp audio file not found: {$tmpFullPath}");
         }
 
-        // Output
         $finalPath = 'tracks/' . uniqid() . '.wav';
         $finalFullPath = str_replace(
             '\\',
@@ -35,7 +33,6 @@ class TrackUploadService
             mkdir(dirname($finalFullPath), 0777, true);
         }
 
-        // FFmpeg command (EXPLICIT PATH)
         $command = sprintf(
             '"%s" -y -i "%s" -ac 1 -ar 44100 "%s"',
             $this->ffmpegPath,

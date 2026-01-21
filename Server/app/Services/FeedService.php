@@ -130,6 +130,7 @@ class FeedService
         SQL,
             [
                 'me_id' => $me->id,
+                'skip_after'  => now()->subDays(7), 
                 'limit' => self::MAX_CANDIDATES,
             ]
         );
@@ -223,7 +224,7 @@ class FeedService
                 'url' => $m->media_type === 'video'
                     ? URL::to("/api/v0.1/media/{$m->media_url}")
                     : URL::to("/storage/{$m->media_url}"),
-            ])->values() ->all(),
+            ])->values() -> all(),
         ];
     }
 }
