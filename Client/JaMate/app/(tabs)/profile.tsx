@@ -82,30 +82,7 @@ export default function ProfileScreen() {
         onMediaUploaded={refetchMedia}
       />
 
-      <View style={{ paddingHorizontal: 20, marginTop: 32 }}>
-        <TouchableOpacity
-          onPress={logout}
-          style={{
-            height: 48,
-            borderRadius: 24,
-            backgroundColor: "rgba(255,0,0,0.12)",
-            justifyContent: "center",
-            alignItems: "center",
-            borderWidth: 1,
-            borderColor: "rgba(255,0,0,0.35)",
-          }}
-        >
-          <Text
-            style={{
-              color: "#FF5A5F",
-              fontSize: 15,
-              fontWeight: "600",
-            }}
-          >
-            Logout
-          </Text>
-        </TouchableOpacity>
-      </View>
+     
     </ScrollView>
   );
 }

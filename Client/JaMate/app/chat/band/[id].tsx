@@ -26,16 +26,12 @@ import { chatStyles as styles } from "../../../styles/chat.styles";
 import { echo } from "../../../lib/echo";
 import { Spinner } from "../../../components/ui/Spinner";
 
-/* ------------------ TYPES ------------------ */
-
 type Message = {
   id: number;
   body: string | null;
   sent_at: string;
   sender_profile_id: number;
 };
-
-/* ------------------ SCREEN ------------------ */
 
 export default function BandChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -46,9 +42,19 @@ export default function BandChatScreen() {
 
   const { data: me } = useProfile();
   const { data: conversations } = useConversations();
-  const { data: messages = [], isLoading } = useMessages(conversationId);
-  const sendMessage = useSendMessage(conversationId);
 
+
+  const {
+    data,
+    isLoading,
+  } = useMessages(conversationId);
+
+  const messages = useMemo(
+    () => data?.pages.flatMap((p) => p.data) ?? [],
+    [data]
+  );
+
+  const sendMessage = useSendMessage(conversationId);
   const rename = useRenameConversation(conversationId);
 
   const [text, setText] = useState("");
@@ -56,7 +62,6 @@ export default function BandChatScreen() {
   const [showRename, setShowRename] = useState(false);
   const [newName, setNewName] = useState("");
 
-  /* ------------------ CONVERSATION ------------------ */
 
   const conversation = useMemo(
     () => conversations?.find((c) => c.id === conversationId),
@@ -65,7 +70,6 @@ export default function BandChatScreen() {
 
   const participants = conversation?.participants ?? [];
 
-  /* ------------------ MARK AS READ ------------------ */
 
   useEffect(() => {
     if (!conversationId || !me) return;
@@ -74,13 +78,11 @@ export default function BandChatScreen() {
     queryClient.invalidateQueries({ queryKey: ["conversations"] });
   }, [conversationId, me, queryClient]);
 
-  /* ------------------ AUTOSCROLL ------------------ */
 
   useEffect(() => {
     listRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
-  /* ------------------ REALTIME ------------------ */
 
   useEffect(() => {
     if (!conversationId || !me) return;
@@ -90,9 +92,25 @@ export default function BandChatScreen() {
     channel.listen(".MessageSent", (e: { message: Message }) => {
       queryClient.setQueryData(
         ["messages", conversationId],
-        (old: Message[] = []) => {
-          if (old.some((m) => m.id === e.message.id)) return old;
-          return [...old, e.message];
+        (old: any) => {
+          if (!old) return old;
+
+          const firstPage = old.pages[0];
+
+          if (firstPage.data.some((m: any) => m.id === e.message.id)) {
+            return old;
+          }
+
+          return {
+            ...old,
+            pages: [
+              {
+                ...firstPage,
+                data: [...firstPage.data, e.message],
+              },
+              ...old.pages.slice(1),
+            ],
+          };
         }
       );
 
@@ -102,11 +120,10 @@ export default function BandChatScreen() {
     });
 
     return () => {
-      echo.leave(`private-conversation.${conversationId}`);
+      echo.leave(`conversation.${conversationId}`);
     };
   }, [conversationId, me, queryClient]);
 
-  /* ------------------ LOADING ------------------ */
 
   if (isLoading || !me || !conversation) {
     return (
@@ -123,20 +140,22 @@ export default function BandChatScreen() {
     );
   }
 
-  /* ------------------ HELPERS ------------------ */
 
   const getProfile = (id: number) =>
     participants.find((p) => p.profile.id === id)?.profile;
 
-  /* ------------------ SEND ------------------ */
 
   const onSend = () => {
     if (!text.trim()) return;
-    sendMessage.mutate(text);
+
+    sendMessage.mutate({
+      type: "text",
+      body: text,
+    });
+
     setText("");
   };
 
-  /* ------------------ RENDER ------------------ */
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -144,11 +163,11 @@ export default function BandChatScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace("/messages")}>
             <Ionicons name="chevron-back" size={24} color="#7C7CFF" />
           </TouchableOpacity>
+
           <TouchableOpacity
             style={{ flex: 1, marginLeft: 10 }}
             onPress={() =>
@@ -171,7 +190,6 @@ export default function BandChatScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* MESSAGES */}
         <FlatList
           ref={listRef}
           data={messages}
@@ -242,7 +260,6 @@ export default function BandChatScreen() {
           }}
         />
 
-        {/* INPUT */}
         <View style={styles.inputBar}>
           <TextInput
             value={text}
@@ -259,7 +276,6 @@ export default function BandChatScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      {/* ACTION SHEET */}
       <Modal transparent visible={showMenu} animationType="fade">
         <TouchableOpacity
           style={{

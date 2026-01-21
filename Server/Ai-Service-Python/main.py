@@ -1,5 +1,8 @@
 import warnings
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 warnings.filterwarnings("ignore")
 logging.getLogger("transformers").setLevel(logging.ERROR)

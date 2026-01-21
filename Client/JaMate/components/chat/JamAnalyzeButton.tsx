@@ -1,19 +1,16 @@
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity, Text, ActivityIndicator } from "react-native";
 
 type Props = {
   onPress: () => void;
+  loading?: boolean;
 };
 
-export function JamAnalyzeButton({ onPress }: Props) {
+export function JamAnalyzeButton({ onPress, loading }: Props) {
   return (
-    <View
-      style={{
-        alignItems: "center",
-        marginVertical: 8,
-      }}
-    >
+    <View style={{ alignItems: "center", marginVertical: 8 }}>
       <TouchableOpacity
         onPress={onPress}
+        disabled={loading}
         style={{
           backgroundColor: "#1F2937",
           borderRadius: 999,
@@ -21,8 +18,16 @@ export function JamAnalyzeButton({ onPress }: Props) {
           paddingVertical: 8,
           borderWidth: 1,
           borderColor: "#374151",
+          opacity: loading ? 0.6 : 1,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
         }}
       >
+        {loading && (
+          <ActivityIndicator size="small" color="#7C7CFF" />
+        )}
+
         <Text
           style={{
             color: "#7C7CFF",
@@ -30,7 +35,7 @@ export function JamAnalyzeButton({ onPress }: Props) {
             fontSize: 13,
           }}
         >
-          🎧 Analyze Jam Compatibility
+          {loading ? "Analyzing..." : "Analyze Jam Compatibility"}
         </Text>
       </TouchableOpacity>
     </View>

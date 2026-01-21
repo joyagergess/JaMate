@@ -1,4 +1,6 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+import type { Href } from "expo-router";
 import { buildImageUrl } from "../../utils/media";
 import type { BandSuggestionMember } from "../../hooks/bands/useBandSuggestions";
 
@@ -8,13 +10,15 @@ type Props = {
 };
 
 export function BandSuggestionCard({ members, status }: Props) {
+  const router = useRouter();
+
   const borderColor =
     status === "waiting"
-      ? "#FACC15" // soft yellow
+      ? "#FACC15"
       : status === "rejected"
-      ? "#7F1D1D" // deep red
+      ? "#7F1D1D"
       : status === "formed"
-      ? "#6C63FF" // deep green
+      ? "#6C63FF"
       : "rgba(255,255,255,0.08)";
 
   return (
@@ -36,7 +40,7 @@ export function BandSuggestionCard({ members, status }: Props) {
 
           const primary =
             media.find(
-              x => x.order === 0 || x.order_index === 0
+              (x: any) => x.order === 0 || x.order_index === 0
             ) ?? media[0];
 
           const avatarPath =
@@ -49,7 +53,17 @@ export function BandSuggestionCard({ members, status }: Props) {
             : null;
 
           return (
-            <View key={m.profile.id} style={{ alignItems: "center", width: 64 }}>
+            <TouchableOpacity
+              key={m.profile.id}
+              activeOpacity={0.7}
+              onPress={() => {
+                router.push({
+                  pathname: "/profile/[id]",
+                  params: { id: String(m.profile.id) },
+                } as unknown as Href);
+              }}
+              style={{ alignItems: "center", width: 64 }}
+            >
               <Image
                 source={
                   avatarUrl
@@ -63,6 +77,7 @@ export function BandSuggestionCard({ members, status }: Props) {
                   marginBottom: 6,
                 }}
               />
+
               <Text
                 style={{
                   color: "#fff",
@@ -73,7 +88,7 @@ export function BandSuggestionCard({ members, status }: Props) {
               >
                 {m.profile.name}
               </Text>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </View>

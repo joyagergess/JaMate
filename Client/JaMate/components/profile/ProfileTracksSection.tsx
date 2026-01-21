@@ -2,17 +2,23 @@ import { useMemo, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 
 import { Spinner } from "../../components/ui/Spinner";
-import { useMyTracks } from "../../hooks/tracks/useMyTracks";
 import { TrackListItem } from "../../components/tracks/TrackListItem";
+import { useTracksByProfileId } from "../../hooks/tracks/useTracksByProfileId";
 
 type Filter = "all" | "originals" | "ai";
 
-export function ProfileTracksSection() {
-  const { data: tracks, isLoading } = useMyTracks();
+type Props = {
+  profileId: number;
+};
+
+export function ProfileTracksSection({ profileId }: Props) {
+  const { data: tracks, isLoading } =
+    useTracksByProfileId(profileId);
+
   const [filter, setFilter] = useState<Filter>("all");
 
   const filteredTracks = useMemo(() => {
-    if (!tracks) return [];
+    if (!tracks || !tracks.length) return [];
 
     switch (filter) {
       case "originals":
@@ -65,7 +71,7 @@ export function ProfileTracksSection() {
       </View>
 
       {/* TRACKS */}
-      {!filteredTracks.length ? (
+      {filteredTracks.length === 0 ? (
         <View style={{ paddingHorizontal: 20 }}>
           <Text
             style={{
@@ -96,6 +102,7 @@ export function ProfileTracksSection() {
     </View>
   );
 }
+
 function FilterButton({
   label,
   active,

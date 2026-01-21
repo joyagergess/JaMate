@@ -44,7 +44,6 @@ def normalize_energy(e: Any) -> str | None:
 def key_mode(key: str) -> str:
     return "minor" if "minor" in key else "major"
 
-    # ---------------- ROMAN → REAL CHORDS ----------------
 
 ROMAN_TO_INTERVAL_MINOR = {
     "i": 0,
@@ -70,23 +69,3 @@ ROMAN_TO_INTERVAL_MAJOR = {
 def transpose_note(root: str, semitones: int) -> str:
     return NOTES[(NOTES.index(root) + semitones) % 12]
 
-
-def roman_to_chord(key: str, degree: str) -> str:
-    """
-    Example:
-      key = 'C minor'
-      degree = '♭VI'
-      → 'Ab'
-    """
-    tonic, mode = key.split()
-
-    if mode == "minor":
-        semitone = ROMAN_TO_INTERVAL_MINOR[degree]
-        root = transpose_note(tonic, semitone)
-        quality = "m" if degree.islower() else ""
-    else:
-        semitone = ROMAN_TO_INTERVAL_MAJOR[degree]
-        root = transpose_note(tonic, semitone)
-        quality = "" if degree.isupper() else "m"
-
-    return f"{root}{quality}"

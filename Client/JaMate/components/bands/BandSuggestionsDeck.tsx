@@ -70,10 +70,8 @@ export function BandSuggestionsDeck() {
 
         return (
           <View key={suggestion.id} style={{ marginBottom: 44 }}>
-            {/* CARD */}
             <BandSuggestionCard members={members} status={status} />
 
-            {/* STATUS TEXT */}
             {helperText && (
               <Text
                 style={{
@@ -98,13 +96,13 @@ export function BandSuggestionsDeck() {
                   paddingVertical: 8, 
                   borderRadius: 12,
                   borderWidth: 1,
-                  borderColor: "#16C784",
+                  borderColor: "#6C63FF",
                   backgroundColor: "rgba(22,199,132,0.08)",
                 }}
               >
                 <Text
                   style={{
-                    color: "#16C784",
+                    color: "#6C63FF",
                     fontSize: 13,
                     fontWeight: "600",
                     letterSpacing: 0.2,
@@ -115,7 +113,6 @@ export function BandSuggestionsDeck() {
               </TouchableOpacity>
             )}
 
-            {/* ACTIONS (ONLY IF USER HASN’T DECIDED) */}
             {suggestion.status === "pending" && myDecision === "pending" && (
               <View
                 style={{
@@ -145,7 +142,7 @@ export function BandSuggestionsDeck() {
                     marginLeft: 10,
                     paddingVertical: 12,
                     borderRadius: 14,
-                    backgroundColor: "#16C784",
+                    backgroundColor: "#6C63FF",
                     alignItems: "center",
                   }}
                 >

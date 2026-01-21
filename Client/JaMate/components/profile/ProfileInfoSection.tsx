@@ -1,6 +1,9 @@
 import { View, Text } from "react-native";
 import { calculateAge } from "../../utils/date";
 
+const LABEL_WIDTH = 150;
+const ROW_SPACING = 22; 
+
 function Chip({ label }: { label: string }) {
   return (
     <View
@@ -31,52 +34,79 @@ type Profile = {
 };
 
 export function ProfileInfoSection({ profile }: { profile: Profile }) {
-  const age =
-    profile.birth_date ? calculateAge(profile.birth_date) : null;
+  const age = profile.birth_date
+    ? calculateAge(profile.birth_date)
+    : null;
 
   return (
     <View style={{ paddingHorizontal: 24 }}>
-      
-      <InfoRow label="Name" value={profile.name} />
+      <InfoRowInline label="Name" value={profile.name} />
 
       {age !== null && (
-        <InfoRow label="Age" value={`${age} `} />
+        <InfoRowInline label="Age" value={`${age}`} />
       )}
- 
+
       {profile.gender && (
-        <InfoRow label="Gender" value={profile.gender} />
+        <InfoRowInline label="Gender" value={profile.gender} />
       )}
 
       {profile.experience_level && (
-        <InfoRow
+        <InfoRowInline
           label="Experience level"
           value={profile.experience_level}
         />
       )}
 
       {profile.location && (
-        <InfoRow label="Location" value={profile.location} />
+        <InfoRowInline label="Location" value={profile.location} />
       )}
 
-      <InfoChips label="Genres" items={profile.genres} />
-      <InfoChips label="Objectives" items={profile.objectives} />
-      <InfoChips label="Instruments" items={profile.instruments} />
+      <InfoChipsInline label="Genres" items={profile.genres} />
+      <InfoChipsInline label="Objectives" items={profile.objectives} />
+      <InfoChipsInline label="Instruments" items={profile.instruments} />
     </View>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+
+function InfoRowInline({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={{ color: "#9CA3AF", marginBottom: 4 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: ROW_SPACING,
+      }}
+    >
+      <Text
+        style={{
+          color: "#9CA3AF",
+          width: LABEL_WIDTH,
+        }}
+      >
         {label}
       </Text>
-      <Text style={{ color: "#fff" }}>{value}</Text>
+
+      <Text
+        style={{
+          color: "#fff",
+          flexShrink: 1,
+        }}
+      >
+        {value}
+      </Text>
     </View>
   );
 }
 
-function InfoChips({
+
+function InfoChipsInline({
   label,
   items,
 }: {
@@ -86,11 +116,30 @@ function InfoChips({
   if (!items || items.length === 0) return null;
 
   return (
-    <View style={{ marginBottom: 16 }}>
-      <Text style={{ color: "#9CA3AF", marginBottom: 8 }}>
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "flex-start",
+        marginBottom: ROW_SPACING,
+      }}
+    >
+      <Text
+        style={{
+          color: "#9CA3AF",
+          width: LABEL_WIDTH,
+          marginTop: 6,
+        }}
+      >
         {label}
       </Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          flexWrap: "wrap",
+        }}
+      >
         {items.map((i) => (
           <Chip key={i.id} label={i.name} />
         ))}

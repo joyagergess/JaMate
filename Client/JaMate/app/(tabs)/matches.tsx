@@ -163,7 +163,7 @@ export default function Matches() {
           ListEmptyComponent={
             <View style={{ paddingTop: 60, alignItems: "center" }}>
               <Text style={{ color: "#9CA3AF" }}>
-                No matches found 🎵
+                No matches found 
               </Text>
             </View>
           }

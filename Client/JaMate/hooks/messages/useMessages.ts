@@ -1,7 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { apiClient } from "@/api/client";
 
-/* ------------------ TYPES ------------------ */
 export type Message =
   | {
       id: number;
@@ -27,7 +26,6 @@ type MessagesPayload = {
   next_cursor: string | null;
 };
 
-/* ------------------ HOOK ------------------ */
 export function useMessages(conversationId: number) {
   return useInfiniteQuery<MessagesPayload>({
     queryKey: ["messages", conversationId],
@@ -44,7 +42,6 @@ export function useMessages(conversationId: number) {
         }
       );
 
-      // 🔥 THIS IS THE FIX
       return res.data.data;
     },
 
