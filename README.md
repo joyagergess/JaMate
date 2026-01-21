@@ -41,7 +41,7 @@ See the [LICENSE](LICENSE) file for more information.
 - Adaptive backing track generation: Uses pre-trained machine learning models to analyze short recording snippets (mood, key, tempo, etc.), analyze the compatibility of two tracks for jamming, and generate backing tracks that adapt to the musician’s sound.
 
 - Band suggestions: Uses scheduled workflows, AI and similarity scoring to periodically evaluate embeddings and recommend potential band formations over time.
-
+<img src="./readme/feature.png"/>
 
 <br><br>
 
@@ -67,7 +67,6 @@ See the [LICENSE](LICENSE) file for more information.
 <!-- Development & Testing -->
 <img src="./readme/title6.svg"/>
 
-### Add Title Here
 
 
 | Services                            | Validation                       | Testing                        |
@@ -84,6 +83,13 @@ See the [LICENSE](LICENSE) file for more information.
 | ![](./readme/old.svg) | ![](./readme/new.svg) |
 
 - Refactored a complex Eloquent query into a raw SQL query to minimize joins, reduce execution cost, and speed up candidate selection.
+
+<br><br>
+
+### Embedding-Driven Music Discovery & Band Formation Workflow
+<img src="./readme/feed.png"/>
+
+
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
 
