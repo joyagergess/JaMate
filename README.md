@@ -9,7 +9,7 @@ See the [LICENSE](LICENSE) file for more information.
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
 
-> JaMate is a platform that smartly matches musicians in a Tinder-style experience to jam together, helps form bands, and understands short recording snippets (mood, key, tempo, etc.) to generate adaptive backing tracks for jamming.
+> JaMate is a Tinder-style platform that smartly matches musicians to jam together, form bands, and collaborate. It understands short recording snippets (mood, key, tempo, energy , etc..) to analyze track-to-track compatibility and generate adaptive backing tracks for seamless jamming.
 >
 
 <br><br>
@@ -38,7 +38,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 - Musician matching: Builds a personalized discovery feed by embedding user profiles, musical preferences, and activity, to surface the most relevant matches.
 
-- Adaptive backing track generation: Uses pre-trained machine learning  models to analyze short recording snippets (mood, key, tempo,etc..) , and generate backing tracks that adapt to the musician’s sound.
+- Adaptive backing track generation: Uses pre-trained machine learning models to analyze short recording snippets (mood, key, tempo, etc.), analyze the compatibility of two tracks for jamming, and generate backing tracks that adapt to the musician’s sound.
 
 - Band suggestions: Uses scheduled workflows, AI and similarity scoring to periodically evaluate embeddings and recommend potential band formations over time.
 
@@ -72,7 +72,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 | Services                            | Validation                       | Testing                        |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) |
+| ![Landing](./readme/service.PNG) | ![fsdaf](./readme/validation.PNG) | ![fsdaf](./readme/test.PNG) |
 
 
 <br><br>
