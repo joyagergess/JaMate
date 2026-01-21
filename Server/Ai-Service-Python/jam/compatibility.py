@@ -35,7 +35,7 @@ class JamCompatibilityAnalyzer:
         elif RELATIVE_KEYS.get(a["key"]) == b["key"]:
             score += 18
             similarity += 18
-            reasons.append("✔ Relative key relationship")
+            reasons.append(" Relative key relationship")
         elif key_mode(a["key"]) == key_mode(b["key"]):
             score += 10
             similarity += 12
@@ -46,7 +46,7 @@ class JamCompatibilityAnalyzer:
         if a.get("groove") == b.get("groove"):
             score += 15
             similarity += 10
-            reasons.append("✔ Groove alignment")
+            reasons.append(" Groove alignment")
 
         energy_a = normalize_energy(a.get("energy"))
         energy_b = normalize_energy(b.get("energy"))
@@ -62,12 +62,12 @@ class JamCompatibilityAnalyzer:
         if a.get("style") == b.get("style"):
             score += 12
             similarity += 15
-            reasons.append("✔ Same musical style")
+            reasons.append("Same musical style")
 
         if a.get("emotion") == b.get("emotion"):
             score += 12
             similarity += 15
-            reasons.append("✔ Emotional alignment")
+            reasons.append("Emotional alignment")
 
         return {
             "compatibility_score": min(score, 100),

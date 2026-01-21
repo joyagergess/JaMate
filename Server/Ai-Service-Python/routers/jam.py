@@ -5,6 +5,8 @@ import os
 from analyzer import analyze_audio
 from jam.compatibility import JamCompatibilityAnalyzer
 from jam.arranger import JamArranger
+from jam.clap_service import analyze_with_clap
+from jam.gpt_interpreter import suggest_jam_with_gpt
 
 router = APIRouter(prefix="/jam", tags=["jam"])
 
@@ -28,6 +30,12 @@ async def analyze_jam(
         analysis_a = analyze_audio(path_a)
         analysis_b = analyze_audio(path_b)
 
+        clap_a = analyze_with_clap(path_a)
+        clap_b = analyze_with_clap(path_b)
+
+        analysis_a = {**analysis_a, **clap_a}
+        analysis_b = {**analysis_b, **clap_b}
+
         compat = JamCompatibilityAnalyzer().analyze(
             analysis_a,
             analysis_b
@@ -39,11 +47,18 @@ async def analyze_jam(
             compat["jam_strategies"]
         )
 
-        return {
+        base_result = {
             "track_a": analysis_a,
             "track_b": analysis_b,
             "compatibility": compat,
             "arrangement": arrangement,
+        }
+
+        gpt_suggestions = suggest_jam_with_gpt(base_result)
+
+        return {
+            **base_result,
+            "gpt_suggestions": gpt_suggestions,
         }
 
     finally:
