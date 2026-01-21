@@ -1,8 +1,6 @@
 
 def groove_to_prompt(groove: str) -> str:
-    """
-    Translate internal groove labels into language Lyria understands well.
-    """
+   
     mapping = {
         "straight groove": "tight straight groove with even subdivisions",
         "shuffle groove": "shuffle groove with swung eighth notes",

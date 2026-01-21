@@ -15,6 +15,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\AiBackingJobController;
 use App\Http\Controllers\TrackAiController;
+use App\Http\Controllers\JamController;
 
 Route::prefix('v0.1')->group(function () {
 
@@ -110,8 +111,11 @@ Route::prefix('v0.1')->group(function () {
         [TrackController::class, 'destroy']
     );
     Route::middleware('auth:api')->patch(
-    '/tracks/{track}/title',
-    [TrackController::class, 'updateTitle']
-);
-
+        '/tracks/{track}/title',
+        [TrackController::class, 'updateTitle']
+    );
+    Route::middleware('auth:api')->post(
+        '/jams/analyze',
+        [JamController::class, 'analyze']
+    );
 });

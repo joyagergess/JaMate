@@ -38,8 +38,10 @@ class MessageController extends Controller
         }
     }
 
-    public function store(SendMessageRequest $request, Conversation $conversation)
-    {
+    public function store(
+        SendMessageRequest $request,
+        Conversation $conversation
+    ) {
         $profile = $request->user()->profile;
 
         try {
@@ -50,7 +52,7 @@ class MessageController extends Controller
             );
 
             return $this->successResponse(
-                $message,
+                $this->messageService->transformSingleMessage($message),
                 'Message sent',
                 201
             );
