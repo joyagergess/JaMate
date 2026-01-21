@@ -1,5 +1,6 @@
 import json
 from openai import OpenAI
+from jam.gpt_prompt import SYSTEM_PROMPT
 
 client = OpenAI()
 
