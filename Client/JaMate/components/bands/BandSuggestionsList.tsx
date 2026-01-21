@@ -32,7 +32,7 @@ export function BandSuggestionsList() {
     return (
       <View style={{ paddingTop: 60, alignItems: "center" }}>
         <Text style={{ color: "#9CA3AF" }}>
-          No band suggestions yet 🎸
+          No band suggestions yet 
         </Text>
       </View>
     );
@@ -159,7 +159,7 @@ export function BandSuggestionsList() {
                     paddingVertical: 10,
                     paddingHorizontal: 18,
                     borderRadius: 14,
-                    backgroundColor: "#16C784",
+                    backgroundColor: "#6C63FF",
                   }}
                 >
                   <Text style={{ color: "#000", fontWeight: "700" }}>

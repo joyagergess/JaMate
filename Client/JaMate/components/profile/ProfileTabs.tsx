@@ -26,29 +26,50 @@ export function ProfileTabs({
 
   return (
     <View style={{ marginTop: 32 }}>
-      {/* Tabs */}
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-around",
+          borderBottomWidth: 1,
+          borderBottomColor: "rgba(255,255,255,0.08)",
         }}
       >
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            onPress={() => setActive(tab)}
-          >
-            <Text
+        {tabs.map((tab) => {
+          const isActive = active === tab;
+
+          return (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActive(tab)}
               style={{
-                color:
-                  active === tab ? "#6D5DF6" : "#9CA3AF",
-                fontWeight: "600",
+                flex: 1,
+                alignItems: "center",
+                paddingVertical: 12,
               }}
             >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={{
+                  color: isActive ? "#6D5DF6" : "#9CA3AF",
+                  fontWeight: "600",
+                }}
+              >
+                {tab}
+              </Text>
+
+              {isActive && (
+                <View
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    height: 2,
+                    width: "60%",
+                    backgroundColor: "#6D5DF6",
+                    borderRadius: 2,
+                  }}
+                />
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <View style={{ marginTop: 24 }}>
@@ -58,7 +79,7 @@ export function ProfileTabs({
 
         {active === "Tracks" && (
           <ProfileTracksSection
-            readOnly={readOnly}
+            profileId={profile.id}
           />
         )}
 

@@ -171,11 +171,6 @@ export default function RegisterScreen() {
           }}
         />
 
-        <AppButton
-          title="Sign in with google"
-          variant="secondary"
-          disabled={isPending}
-        />
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>

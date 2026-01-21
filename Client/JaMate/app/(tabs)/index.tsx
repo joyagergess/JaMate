@@ -202,7 +202,7 @@ export default function HomeScreen() {
             No musicians available right now
           </Text>
           <Text style={{ color: "#9CA3AF", marginTop: 10 }}>
-            New musicians will appear soon 🎶
+            New musicians will appear soon 
           </Text>
         </View>
       </SafeAreaView>

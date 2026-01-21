@@ -1,6 +1,10 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+
+import { apiClient } from "../../api/client";
+import { AUTH_TOKEN_KEY } from "../../constants/auth";
 
 type Media = {
   id: number;
@@ -15,28 +19,50 @@ type Props = {
     bio?: string | null;
   };
   media?: Media[];
-  readOnly?: boolean; 
+  readOnly?: boolean;
 };
 
 export function ProfileHeader({
   profile,
   media,
-  readOnly = false, 
+  readOnly = false,
 }: Props) {
   const avatarSource =
     media && media.length > 0 && media[0]?.url
       ? { uri: media[0].url }
       : require("../../assets/images/unknow.jpg");
 
+  const logout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await apiClient.post("/auth/logout");
+            } catch {}
+
+            await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+            router.replace("/login");
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <View style={{ alignItems: "center", paddingTop: 40 }}>
-      {/* SETTINGS ICON — ONLY FOR OWN PROFILE */}
       {!readOnly && (
         <TouchableOpacity
           style={{ position: "absolute", right: 24, top: 40 }}
-          onPress={() => router.push("/settings")}
+          onPress={logout}
         >
-          <Ionicons name="settings-outline" size={22} color="#fff" />
+          <Ionicons name="log-out-outline" size={22} color="#6C63FF" />
         </TouchableOpacity>
       )}
 
@@ -75,7 +101,6 @@ export function ProfileHeader({
         </Text>
       )}
 
-      {/* EDIT BUTTON — ONLY FOR OWN PROFILE */}
       {!readOnly && (
         <TouchableOpacity
           onPress={() => router.push("/edit")}

@@ -44,12 +44,13 @@ export default function LoginScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.push("/(auth)/register")}
         >
           <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
+      {/* CONTENT */}
       <View style={styles.content}>
         <Text style={styles.title}>Login</Text>
 
@@ -101,10 +102,22 @@ export default function LoginScreen() {
                 onError: (err: any) => {
                   setFormError(getLoginErrorMessage(err));
                 },
-              }
+              },
             );
           }}
         />
+
+        <View style={{ marginTop: 24, alignItems: "center" }}>
+          <Text style={{ color: "#9CA3AF" }}>
+            Don&apos;t have an account?{" "}
+            <Text
+              style={{ color: "#6C63FF", fontWeight: "600" }}
+              onPress={() => router.push("/(auth)/register")}
+            >
+              Sign up
+            </Text>
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );

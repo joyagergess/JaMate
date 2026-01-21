@@ -39,7 +39,7 @@ export function TrackListItem({
           {loading ? (
             <ActivityIndicator
               size="small"
-              color={isAi ? "#16C784" : "#fff"}
+              color={isAi ? "#6C63FF" : "#fff"}
             />
           ) : (
             <Ionicons
@@ -74,7 +74,7 @@ export function TrackListItem({
               style={{
                 height: "100%",
                 width: `${Math.min(progress * 100, 100)}%`,
-                backgroundColor: isAi ? "#16C784" : "#7C7CFF",
+                backgroundColor: isAi ? "#6C63FF" : "#7C7CFF",
                 opacity: isPlaying ? 1 : 0.6,
               }}
             />
