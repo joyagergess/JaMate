@@ -79,7 +79,6 @@ See the [LICENSE](LICENSE) file for more information.
 | <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/media.jpeg" width="260" /> | <img src="./readme/edit.gif" width="260" /> |
 
 
-
 <br><br>
 
 <!-- Development & Testing -->
@@ -108,6 +107,17 @@ See the [LICENSE](LICENSE) file for more information.
 |--------|------------|
 | ![](./readme/workflow1.png) | ![](./readme/workflow2.jpeg) |
 
+<br><br>
+
+###  CLAP-Based Audio Semantic Analysis 
+
+|Code snippet| CLAP model overview
+|--------|------------|
+| ![](./readme/clap-code.PNG) | ![](./readme/clap.jpeg) |
+
+###  Audio feature extraction pipeline
+
+Audio files are loaded and normalized using SoundFile and librosa, then analyzed to extract tempo, key, and perceptual features. Tempo is estimated from rhythmic onsets, while key is detected via chroma analysis compared against Krumhansl major and minor profiles. In parallel, a CLAP-based model provides semantic descriptors such as style, emotion, and feel.
 
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
