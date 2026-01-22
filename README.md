@@ -55,9 +55,19 @@ See the [LICENSE](LICENSE) file for more information.
 | ![Landing](./readme/Landing.jpeg) | ![fsdaf](./readme/register.jpeg) | ![fsdaf](./readme/Login.jpeg) |
 
 
-| Create profile | Create profile | Create profile screen |
+| Create profile | Create profile | Create profile  |
 |---------------|---------------|----------------------|
 | <img src="./readme/create.gif" width="260" /> | <img src="./readme/goal.jpeg" width="260" /> | <img src="./readme/bio.jpeg" width="260" /> |
+
+
+| Feed | Match | Band suggestions |
+|---------------|---------------|----------------------|
+| <img src="./readme/feed.gif" width="260" /> | <img src="./readme/match.jpeg" width="260" /> | <img src="./readme/bandsugg.jpeg" width="260" /> |
+
+
+| Tracks | Create profile | Create profile  |
+|---------------|---------------|----------------------|
+| <img src="./readme/track.jpeg" width="260" /> | <img src="./readme/record.gif" width="260" /> | <img src="./readme/generate.gif" width="260" /> |
 
 
 
