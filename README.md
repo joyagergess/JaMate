@@ -25,9 +25,6 @@ See the [LICENSE](LICENSE) file for more information.
 
 <img src="./readme/system.jpeg"/>
 
-### Figma design
-
-[View the Figma design](https://www.figma.com/design/H7B9SAWOytn5TBotlrf1b1/JaMate-figma?node-id=0-1&t=lbNFucGi3OifQOTE-1)
 
 <br><br>
 
@@ -78,6 +75,11 @@ See the [LICENSE](LICENSE) file for more information.
 |---------------|---------------|----------------------|
 | <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/media.jpeg" width="260" /> | <img src="./readme/edit.gif" width="260" /> |
 
+### Design
+
+ **Figma design**  
+View the full UI and interaction flows on Figma:  
+ [Open the design file](https://www.figma.com/design/H7B9SAWOytn5TBotlrf1b1/JaMate-figma?node-id=0-1&t=lbNFucGi3OifQOTE-1)
 
 <br><br>
 
