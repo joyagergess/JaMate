@@ -52,12 +52,12 @@ See the [LICENSE](LICENSE) file for more information.
 
 | Landing                           | Register screen                       | Register screen                       |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/Landing.jpeg) | ![fsdaf](./readme/demo/register.jpeg) | ![fsdaf](./readme/demo/Login.jpeg) |
+| ![Landing](./readme/Landing.jpeg) | ![fsdaf](./readme/register.jpeg) | ![fsdaf](./readme/Login.jpeg) |
 
 
 |  Create profile                       | Create profile                   | Create profile screen                       |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/create.gif) | ![fsdaf](./readme/demo/goal.jpeg) | ![fsdaf](./readme/demo/bio.jpeg) |
+| ![Landing](./readme/create.gif) | ![fsdaf](./readme/goal.jpeg) | ![fsdaf](./readme/bio.jpeg) |
 
 
 
