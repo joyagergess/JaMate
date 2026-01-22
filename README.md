@@ -65,11 +65,18 @@ See the [LICENSE](LICENSE) file for more information.
 | <img src="./readme/feed.gif" width="260" /> | <img src="./readme/match.jpeg" width="260" /> | <img src="./readme/bandsugg.jpeg" width="260" /> |
 
 
-| Tracks | Create profile | Create profile  |
+| Tracks | Record | Ai Backing tracks  |
 |---------------|---------------|----------------------|
 | <img src="./readme/track.jpeg" width="260" /> | <img src="./readme/record.gif" width="260" /> | <img src="./readme/generate.gif" width="260" /> |
 
 
+| Direct chats | Jam comptability | Band chats  |
+|---------------|---------------|----------------------|
+| <img src="./readme/jam.gif" width="260" /> | <img src="./readme/comptability.jpeg" width="260" /> | <img src="./readme/bandgroup.jpeg" width="260" /> |
+
+| Profile | Profile media | Edit profile  |
+|---------------|---------------|----------------------|
+| <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/preview.gif" width="260" /> | <img src="./readme/readme/edit.gif" width="260" /> |
 
 
 
