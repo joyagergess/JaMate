@@ -54,9 +54,11 @@ See the [LICENSE](LICENSE) file for more information.
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
 | ![Landing](./readme/Landing.jpeg) | ![fsdaf](./readme/register.jpeg) | ![fsdaf](./readme/Login.jpeg) |
 
-| Create profile                    | Create profile                        | Create profile screen                       |
-| --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/create.gif) | ![fsdaf](./readme/goal.jpeg) | ![fsdaf](./readme/bio.jpeg) |
+
+| Create profile | Create profile | Create profile screen |
+|---------------|---------------|----------------------|
+| <img src="./readme/create.gif" width="260" /> | <img src="./readme/goal.jpeg" width="260" /> | <img src="./readme/bio.jpeg" width="260" /> |
+
 
 
 
