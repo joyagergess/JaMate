@@ -50,7 +50,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### User Screens (Mobile)
 
-| Landing                           | Register screen                       | Register screen                       |
+| Landing                           | Register                              | Login screen                       |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
 | ![Landing](./readme/Landing.jpeg) | ![fsdaf](./readme/register.jpeg) | ![fsdaf](./readme/Login.jpeg) |
 
