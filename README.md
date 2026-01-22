@@ -76,7 +76,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 | Profile | Profile media | Edit profile  |
 |---------------|---------------|----------------------|
-| <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/preview.gif" width="260" /> | <img src="./readme/readme/edit.gif" width="260" /> |
+| <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/media.jpeg" width="260" /> | <img src="./readme/edit.gif" width="260" /> |
 
 
 
