@@ -50,16 +50,16 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### User Screens (Mobile)
 
-| Login screen                            | Register screen                       | Register screen                       |
+| Landing                           | Register screen                       | Register screen                       |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) |
+| ![Landing](./readme/demo/Landing.jpeg) | ![fsdaf](./readme/demo/register.jpeg) | ![fsdaf](./readme/demo/Login.jpeg) |
 
 
-### Admin Screens (Web)
+|  Create profile                       | Create profile                   | Create profile screen                       |
+| --------------------------------------- | ------------------------------------- | ------------------------------------- |
+| ![Landing](./readme/demo/create.gif) | ![fsdaf](./readme/demo/goal.jpeg) | ![fsdaf](./readme/demo/bio.jpeg) |
 
-| Login screen                            | Register screen                       |
-| --------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) |
+
 
 
 <br><br>
