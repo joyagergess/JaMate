@@ -74,9 +74,9 @@ See the [LICENSE](LICENSE) file for more information.
 |---------------|---------------|----------------------|
 | <img src="./readme/jam.gif" width="260" /> | <img src="./readme/comptability.jpeg" width="260" /> | <img src="./readme/bandgroup.jpeg" width="260" /> |
 
-| Profile | Profile  | Edit profile  |
+| Profile | Profile media | Edit profile  |
 |---------------|---------------|----------------------|
-| <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/profile-track.jpeg" width="260" /> | <img src="./readme/edit.gif" width="260" /> |
+| <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/media.jpeg" width="260" /> | <img src="./readme/edit.gif" width="260" /> |
 
 
 
