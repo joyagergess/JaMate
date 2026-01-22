@@ -23,7 +23,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### System design
 
-<img src="./readme/System-design 1.svg"/>
+<img src="./readme/system.jpeg"/>
 
 ### Figma design
 
@@ -86,7 +86,6 @@ See the [LICENSE](LICENSE) file for more information.
 
 <br><br>
 
-### Embedding-Driven Music Discovery & Band Formation Workflow
 |Embedding-Driven Music Discovery & Band Formation|Audio analyze and Ai backing tracks|
 |--------|------------|
 | ![](./readme/workflow1.png) | ![](./readme/workflow2.jpeg) |
