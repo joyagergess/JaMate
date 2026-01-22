@@ -87,7 +87,9 @@ See the [LICENSE](LICENSE) file for more information.
 <br><br>
 
 ### Embedding-Driven Music Discovery & Band Formation Workflow
-<img src="./readme/feed.png"/>
+|Embedding-Driven Music Discovery & Band Formation|Audio analyze and Ai backing tracks|
+|--------|------------|
+| ![](./readme/workflow1.png) | ![](./readme/workflow2.jpeg) |
 
 
 <!-- Deployment -->
