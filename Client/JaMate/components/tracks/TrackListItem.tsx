@@ -51,7 +51,41 @@ export function TrackListItem({
         </TouchableOpacity>
 
         <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{item.title}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Text
+              style={[styles.name, { flex: 1 }]}
+              numberOfLines={1}
+            >
+              {item.title}
+            </Text>
+
+            {item.ai_key && (
+              <View
+                style={{
+                  backgroundColor: "rgba(108,99,255,0.15)",
+                  borderRadius: 999,
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#6C63FF",
+                    fontSize: 11,
+                    fontWeight: "600",
+                  }}
+                >
+                  {item.ai_key}
+                </Text>
+              </View>
+            )}
+          </View>
 
           <Text style={styles.sub}>
             {isPlaying && remainingSeconds !== null
