@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 /**
  * @mixin IdeHelperAiBackingTrack
  */
-class AiBackingTrack extends Model
+class  AiBackingTrack extends Model
 {
     use HasFactory;
 
