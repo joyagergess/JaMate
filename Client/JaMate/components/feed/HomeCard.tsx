@@ -39,24 +39,12 @@ export default function HomeCard({
   const animatedHeight = useRef(new Animated.Value(1)).current;
   const animatedOpacity = useRef(new Animated.Value(1)).current;
 
-  const media = useMemo(() => {
-    return profile?.media?.filter((m: any) => m.order !== 0) ?? [];
-  }, [profile?.media]);
+  const media = useMemo(
+    () => profile.media.filter((m: any) => m.order !== 0),
+    [profile.id],
+  );
 
   const current = media[mediaIndex];
-
-  if (!current) {
-    return (
-      <View style={styles.card}>
-        <View style={styles.media}>
-          <View style={styles.videoLoader}>
-            <Spinner />
-          </View>
-        </View>
-      </View>
-    );
-  }
-
   useEffect(() => {
     setMediaIndex(0);
     setVideoLoading(true);
@@ -77,6 +65,17 @@ export default function HomeCard({
       };
     }, [current.url]),
   );
+  if (!current) {
+    return (
+      <View style={styles.card}>
+        <View style={styles.media}>
+          <View style={styles.videoLoader}>
+            <Spinner />
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   const nextMedia = () => {
     if (mediaIndex < media.length - 1) {

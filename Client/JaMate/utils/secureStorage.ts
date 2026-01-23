@@ -3,7 +3,6 @@ import * as SecureStore from "expo-secure-store";
 
 export async function setItem(key: string, value: string) {
   if (Platform.OS === "web") {
-    // WEB ONLY – TEMPORARY FOR DEVELOPMENT
     localStorage.setItem(key, value);
     return;
   }

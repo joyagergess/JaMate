@@ -44,14 +44,12 @@ export default function ChatScreen() {
 
   const sendMessage = useSendMessage(conversationId);
 
-  /* mark read */
   useEffect(() => {
     if (!conversationId || !me) return;
     apiClient.post(`/conversations/${conversationId}/read`);
     queryClient.invalidateQueries({ queryKey: ["conversations"] });
   }, [conversationId, me]);
 
-  /* echo */
   useEffect(() => {
     if (!conversationId || !me) return;
 

@@ -1,4 +1,3 @@
-// useAuthBootstrap.ts
 import { useEffect, useState } from "react";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { apiClient } from "../../api/client";

@@ -9,7 +9,6 @@ type Props = {
   placeholder?: string;
   secure?: boolean;
 
-  // ✅ NEW (optional)
   rightIcon?: ReactNode;
   error?: string | null;
 };
@@ -24,7 +23,6 @@ export function AppInput({
 }: Props) {
   return (
     <View style={{ marginBottom: 16 }}>
-      {/* Label */}
       <Text
         style={{
           color: colors.muted,
@@ -35,7 +33,6 @@ export function AppInput({
         {label}
       </Text>
 
-      {/* Input wrapper */}
       <View
         style={{
           flexDirection: 'row',
@@ -60,7 +57,6 @@ export function AppInput({
           }}
         />
 
-        {/* Right icon (eye, etc.) */}
         {rightIcon && (
           <View style={{ marginLeft: 8 }}>
             {rightIcon}
@@ -68,7 +64,6 @@ export function AppInput({
         )}
       </View>
 
-      {/* Inline error */}
       {error && (
         <Text
           style={{

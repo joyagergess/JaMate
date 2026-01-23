@@ -1,33 +1,9 @@
-import { Slot, useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { Slot } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 import { useAuthBootstrap } from '../../hooks/auth/useAuthBootstrap';
-import { Href } from "expo-router";
 
 export default function AuthLayout() {
-  const router = useRouter();
-  const { isReady, isAuthenticated, hasProfile } = useAuthBootstrap();
-
-  useEffect(() => {
-    if (!isReady) return;
-
-    if (!isAuthenticated) {
-      return;
-    }
-
-    if (hasProfile === null) {
-      return;
-    }
-
-    if (hasProfile === false) {
-    router.replace("/create-profile" as Href);
-      return;
-    }
-
-    if (hasProfile === true) {
-      router.replace('/(tabs)');
-    }
-  }, [isReady, isAuthenticated, hasProfile]);
+  const { isReady } = useAuthBootstrap();
 
   if (!isReady) {
     return (

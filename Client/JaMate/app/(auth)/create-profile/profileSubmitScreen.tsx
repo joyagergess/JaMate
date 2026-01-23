@@ -12,7 +12,6 @@ export default function CreateProfileSubmitScreen() {
   const submitProfile = useSubmitProfile();
 
   const onSubmit = () => {
-    console.log("📦 FINAL CONTEXT DATA:", data);
 
     submitProfile.mutate(data, {
       onSuccess: (res) => {
