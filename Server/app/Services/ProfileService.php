@@ -48,7 +48,7 @@ class ProfileService
         if (!$profile) {
             throw new HttpException(404, 'Profile not found', null, [], 404);
         }
-
+        
         return DB::transaction(function () use ($profile, $data) {
 
             $embeddingDirty = $this->hasSemanticChanges($profile, $data);

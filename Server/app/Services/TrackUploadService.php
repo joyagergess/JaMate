@@ -16,28 +16,54 @@ class TrackUploadService
         int $duration,
         string $trackType = 'snippet'
     ): UserTrack {
-        $tmpFullPath = str_replace('\\', '/', $audio->getRealPath());
+        $tmpPath = $this->getTmpPath($audio);
+        $finalPath = $this->generateFinalPath();
 
-        if (!file_exists($tmpFullPath)) {
-            throw new \RuntimeException("Temp audio file not found: {$tmpFullPath}");
-        }
+        $this->ensureDirectoryExists($finalPath);
+        $this->convertAudio($tmpPath, $finalPath);
 
-        $finalPath = 'tracks/' . uniqid() . '.wav';
-        $finalFullPath = str_replace(
-            '\\',
-            '/',
-            storage_path("app/public/{$finalPath}")
+        return $this->createTrack(
+            $profileId,
+            $finalPath,
+            $duration,
+            $trackType
         );
+    }
 
-        if (!is_dir(dirname($finalFullPath))) {
-            mkdir(dirname($finalFullPath), 0777, true);
+    private function getTmpPath(UploadedFile $audio): string
+    {
+        $path = str_replace('\\', '/', $audio->getRealPath());
+
+        if (!file_exists($path)) {
+            throw new \RuntimeException("Temp audio file not found: {$path}");
         }
+
+        return $path;
+    }
+
+    private function generateFinalPath(): string
+    {
+        return 'tracks/' . uniqid() . '.wav';
+    }
+
+    private function ensureDirectoryExists(string $relativePath): void
+    {
+        $fullPath = $this->storageFullPath($relativePath);
+
+        if (!is_dir(dirname($fullPath))) {
+            mkdir(dirname($fullPath), 0777, true);
+        }
+    }
+
+    private function convertAudio(string $input, string $relativeOutput): void
+    {
+        $output = $this->storageFullPath($relativeOutput);
 
         $command = sprintf(
             '"%s" -y -i "%s" -ac 1 -ar 44100 "%s"',
             $this->ffmpegPath,
-            $tmpFullPath,
-            $finalFullPath
+            $input,
+            $output
         );
 
         $process = Process::fromShellCommandline($command);
@@ -49,11 +75,27 @@ class TrackUploadService
                 "Audio conversion failed:\n" . $process->getErrorOutput()
             );
         }
+    }
 
+    private function storageFullPath(string $relativePath): string
+    {
+        return str_replace(
+            '\\',
+            '/',
+            storage_path("app/public/{$relativePath}")
+        );
+    }
+
+    private function createTrack(
+        int $profileId,
+        string $audioPath,
+        int $duration,
+        string $trackType
+    ): UserTrack {
         return UserTrack::create([
             'profile_id' => $profileId,
             'title' => ucfirst($trackType),
-            'audio_url' => $finalPath,
+            'audio_url' => $audioPath,
             'duration' => $duration,
             'track_type' => $trackType,
             'visibility' => 'private',
