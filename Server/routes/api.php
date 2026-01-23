@@ -84,7 +84,7 @@ Route::prefix('v0.1')->group(function () {
             Route::post('/suggestions/{suggestion}/reject', [BandSuggestionController::class, 'reject']);
             Route::get('/{band}/setlist', [BandSetlistController::class, 'show']);
             Route::post('/{band}/setlist/generate', [BandSetlistController::class, 'generate']);
-        });
+         });
 
 
         Route::prefix('tracks')->group(function () {
