@@ -7,10 +7,8 @@ from analyzer import analyze_audio
 from jam.compatibility import JamCompatibilityAnalyzer
 from jam.arranger import JamArranger
 
-# Load env vars (safe even if not using .env)
 load_dotenv()
 
-# OpenAI client
 client = OpenAI()
 
 
@@ -53,7 +51,6 @@ def interpret_with_gpt(result: dict) -> dict:
         raise RuntimeError("GPT returned invalid JSON:\n" + content)
 
 
-# ---------------- ANALYSIS ----------------
 
 track_a = analyze_audio(
     r"C:\Users\USER\JaMate\Server\storage\app\public\tracks\696bcdf711eab.wav"
@@ -77,13 +74,12 @@ base_response = {
     "arrangement": arrangement,
 }
 
-print("\n📦 BASE RESPONSE")
+print("\nBASE RESPONSE")
 print(json.dumps(base_response, indent=2))
 
 
-# ---------------- GPT INTERPRETATION ----------------
 
-print("\n🤖 GPT INTERPRETATION")
+print("\n GPT INTERPRETATION")
 
 gpt_result = interpret_with_gpt(base_response)
 
