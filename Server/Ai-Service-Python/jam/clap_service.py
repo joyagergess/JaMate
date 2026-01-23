@@ -1,4 +1,4 @@
-from clap_analyzer import ClapAnalyzer
+from backing_track.clap_analyzer import ClapAnalyzer
 
 _clap = None
 

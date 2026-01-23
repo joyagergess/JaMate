@@ -1,5 +1,5 @@
 from typing import Dict, List
-from utils import key_mode
+from backing_track.utils import key_mode
 
 
 class JamArranger:
