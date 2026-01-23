@@ -8,14 +8,16 @@ use Illuminate\Http\Request;
 
 class AiBackingJobController extends Controller
 {
+
     public function __construct(
         private readonly AiBackingJobService $service
     ) {}
 
     public function show(Request $request, AiBackingJob $job)
     {
-        return response()->json(
-            $this->service->showJob($request, $job)
+        return $this->successResponse(
+            $this->service->showJob($request, $job),
+            'AI backing job retrieved successfully'
         );
     }
 }

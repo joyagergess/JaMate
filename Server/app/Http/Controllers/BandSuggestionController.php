@@ -25,7 +25,6 @@ class BandSuggestionController extends Controller
     }
 
 
-
     public function index(Request $request)
     {
         return $this->successResponse(

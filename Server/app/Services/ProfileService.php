@@ -48,7 +48,7 @@ class ProfileService
         if (!$profile) {
             throw new HttpException(404, 'Profile not found', null, [], 404);
         }
-        
+
         return DB::transaction(function () use ($profile, $data) {
 
             $embeddingDirty = $this->hasSemanticChanges($profile, $data);
@@ -149,5 +149,11 @@ class ProfileService
 
         $ids = $modelClass::whereIn('name', $normalized)->pluck('id')->all();
         $profile->{$relation}()->sync($ids);
+    }
+
+    
+    public function show(Profile $profile): Profile
+    {
+        return $this->loadProfileRelations($profile);
     }
 }

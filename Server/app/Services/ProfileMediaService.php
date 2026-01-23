@@ -32,51 +32,114 @@ class ProfileMediaService
 
     public function store(User $user, array $data): ProfileMedia
     {
-        $profile = $user->profile;
+        $profile = $this->getProfileOrFail($user);
+        $file    = $this->getMediaFileOrFail($data);
+        $type    = $this->getMediaTypeOrFail($data);
 
-        if (!$profile) {
+        $order   = $this->getNextOrderIndex($profile->id);
+        $basePath = "profiles/{$profile->id}";
+        $uuid     = (string) Str::uuid();
+
+        return match ($type) {
+            'image' => $this->storeImage($profile->id, $file, $basePath, $order),
+            'video' => $this->storeVideo($profile->id, $file, $basePath, $uuid, $order),
+        };
+    }
+
+
+    private function getProfileOrFail(User $user)
+    {
+        if (!$user->profile) {
             throw new HttpException(404, 'Profile not found');
         }
 
+        return $user->profile;
+    }
+
+    private function getMediaFileOrFail(array $data): UploadedFile
+    {
         if (!isset($data['media_file'])) {
             throw new HttpException(422, 'Media file is required');
         }
 
-        /** @var UploadedFile $file */
-        $file = $data['media_file'];
-        $type = $data['media_type'];
+        return $data['media_file'];
+    }
 
-        $basePath = "profiles/{$profile->id}";
-        $uuid     = (string) Str::uuid();
-
-        $maxOrder = ProfileMedia::where('profile_id', $profile->id)->max('order_index');
-        $order    = is_null($maxOrder) ? 0 : $maxOrder + 1;
-
-
-        if ($type === 'image') {
-            $path = $file->store($basePath, 'public');
-
-            return ProfileMedia::create([
-                'profile_id'  => $profile->id,
-                'media_type'  => 'image',
-                'media_url'   => $path,
-                'order_index' => $order,
-            ]);
-        }
-
-        if ($type !== 'video') {
+    private function getMediaTypeOrFail(array $data): string
+    {
+        if (!isset($data['media_type']) || !in_array($data['media_type'], ['image', 'video'])) {
             throw new HttpException(422, 'Invalid media type');
         }
 
+        return $data['media_type'];
+    }
 
+    private function getNextOrderIndex(int $profileId): int
+    {
+        $max = ProfileMedia::where('profile_id', $profileId)->max('order_index');
+        return is_null($max) ? 0 : $max + 1;
+    }
+
+
+    private function storeImage(
+        int $profileId,
+        UploadedFile $file,
+        string $basePath,
+        int $order
+    ): ProfileMedia {
+        $path = $file->store($basePath, 'public');
+
+        return ProfileMedia::create([
+            'profile_id'  => $profileId,
+            'media_type'  => 'image',
+            'media_url'   => $path,
+            'order_index' => $order,
+        ]);
+    }
+
+
+    private function storeVideo(
+        int $profileId,
+        UploadedFile $file,
+        string $basePath,
+        string $uuid,
+        int $order
+    ): ProfileMedia {
         $rawPath = $file->store("{$basePath}/raw", 'public');
 
-        $input  = realpath(Storage::disk('public')->path($rawPath));
-        $output = Storage::disk('public')->path("{$basePath}/{$uuid}.mp4");
-        $thumb  = Storage::disk('public')->path("{$basePath}/{$uuid}.jpg");
+        $paths = $this->buildVideoPaths($basePath, $uuid, $rawPath);
 
         usleep(300000);
 
+        $this->transcodeVideo($paths['input'], $paths['output']);
+        $this->generateThumbnail($paths['output'], $paths['thumb']);
+
+        $duration = $this->getVideoDuration($paths['output']);
+
+        Storage::disk('public')->delete($rawPath);
+
+        return ProfileMedia::create([
+            'profile_id'    => $profileId,
+            'media_type'    => 'video',
+            'media_url'     => "{$basePath}/{$uuid}.mp4",
+            'thumbnail_url' => "{$basePath}/{$uuid}.jpg",
+            'duration'      => $duration,
+            'order_index'   => $order,
+        ]);
+    }
+
+
+    private function buildVideoPaths(string $basePath, string $uuid, string $rawPath): array
+    {
+        return [
+            'input'  => realpath(Storage::disk('public')->path($rawPath)),
+            'output' => Storage::disk('public')->path("{$basePath}/{$uuid}.mp4"),
+            'thumb'  => Storage::disk('public')->path("{$basePath}/{$uuid}.jpg"),
+        ];
+    }
+
+    private function transcodeVideo(string $input, string $output): void
+    {
         $cmd = sprintf(
             '"%s" -y -i %s -map_metadata -1 -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" ' .
                 '-c:v libx264 -profile:v high -level 4.1 -pix_fmt yuv420p -crf 23 -preset fast ' .
@@ -89,39 +152,31 @@ class ProfileMediaService
         exec($cmd, $out, $code);
 
         if ($code !== 0) {
-            logger()->error('FFmpeg failed', [
-                'command' => $cmd,
-                'output'  => $out,
-                'code'    => $code,
-            ]);
-
             throw new HttpException(500, 'Video processing failed');
         }
+    }
 
+    private function generateThumbnail(string $video, string $thumb): void
+    {
         exec(sprintf(
             '"%s" -y -i %s -ss 00:00:01 -vframes 1 %s 2>&1',
             $this->ffmpegPath,
-            escapeshellarg($output),
+            escapeshellarg($video),
             escapeshellarg($thumb)
         ));
+    }
 
+    private function getVideoDuration(string $video): ?float
+    {
         $duration = trim(shell_exec(sprintf(
             '"%s" -v error -show_entries format=duration -of default=nw=1:nk=1 %s',
             $this->ffprobePath,
-            escapeshellarg($output)
+            escapeshellarg($video)
         )));
 
-        Storage::disk('public')->delete($rawPath);
-
-        return ProfileMedia::create([
-            'profile_id'    => $profile->id,
-            'media_type'    => 'video',
-            'media_url'     => "{$basePath}/{$uuid}.mp4",
-            'thumbnail_url' => "{$basePath}/{$uuid}.jpg",
-            'duration'      => is_numeric($duration) ? round((float) $duration, 2) : null,
-            'order_index'   => $order,
-        ]);
+        return is_numeric($duration) ? round((float) $duration, 2) : null;
     }
+
 
     public function update(ProfileMedia $media, array $data): ProfileMedia
     {
@@ -148,12 +203,36 @@ class ProfileMediaService
             return;
         }
 
-        $profile = $user->profile;
+        $profile = $this->getProfileOrFail($user);
 
-        if (!$profile) {
-            throw new HttpException(404, 'Profile not found');
-        }
+        [$cases, $ids] = $this->buildReorderSqlParts($media);
 
+        $this->executeReorderUpdate($profile->id, $cases, $ids);
+    }
+
+
+    public function updateAvatar(User $user, UploadedFile $file): ProfileMedia
+    {
+        $profile = $this->getProfileOrFail($user);
+        $media   = $this->getAvatarMediaOrFail($profile->id);
+
+        $this->deleteOldAvatarIfExists($media);
+
+        $path = $this->storeAvatarFile($profile->id, $file);
+
+        $media->update([
+            'media_type'     => 'image',
+            'media_url'      => $path,
+            'thumbnail_url'  => null,
+            'duration'       => null,
+        ]);
+
+        return $media->fresh();
+    }
+
+
+    private function buildReorderSqlParts(array $media): array
+    {
         $cases = [];
         $ids   = [];
 
@@ -165,44 +244,43 @@ class ProfileMediaService
             $ids[]   = $id;
         }
 
-        DB::statement("
-            UPDATE profile_media
-            SET order_index = CASE
-                " . implode(' ', $cases) . "
-            END
-            WHERE id IN (" . implode(',', $ids) . ")
-            AND profile_id = ?
-        ", [$profile->id]);
+        return [$cases, $ids];
     }
 
-    public function updateAvatar(User $user, UploadedFile $file): ProfileMedia
+    private function executeReorderUpdate(int $profileId, array $cases, array $ids): void
     {
-        $profile = $user->profile;
+        DB::statement("
+        UPDATE profile_media
+        SET order_index = CASE
+            " . implode(' ', $cases) . "
+        END
+        WHERE id IN (" . implode(',', $ids) . ")
+        AND profile_id = ?
+    ", [$profileId]);
+    }
 
-        if (!$profile) {
-            throw new HttpException(404, 'Profile not found');
-        }
-
-        $media = ProfileMedia::where('profile_id', $profile->id)
+    private function getAvatarMediaOrFail(int $profileId): ProfileMedia
+    {
+        $media = ProfileMedia::where('profile_id', $profileId)
             ->where('order_index', 0)
             ->first();
 
         if (!$media) {
             throw new HttpException(404, 'Avatar media not found');
         }
+
+        return $media;
+    }
+
+    private function deleteOldAvatarIfExists(ProfileMedia $media): void
+    {
         if ($media->media_url) {
             Storage::disk('public')->delete($media->media_url);
         }
+    }
 
-        $path = $file->store("profiles/{$profile->id}", 'public');
-
-        $media->update([
-            'media_type' => 'image',
-            'media_url' => $path,
-            'thumbnail_url' => null,
-            'duration' => null,
-        ]);
-
-        return $media->fresh();
+    private function storeAvatarFile(int $profileId, UploadedFile $file): string
+    {
+        return $file->store("profiles/{$profileId}", 'public');
     }
 }

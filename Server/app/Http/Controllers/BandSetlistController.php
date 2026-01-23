@@ -24,11 +24,6 @@ class BandSetlistController extends Controller
 
     public function generate(Request $request, Band $band)
     {
-        logger()->info('GENERATE ENDPOINT HIT', [
-            'band_id' => $band->id,
-            'user_id' => $request->user()->id,
-        ]);
-
         $profile = $request->user()->profile;
 
         abort_if(! $band->hasMember($profile), 403);

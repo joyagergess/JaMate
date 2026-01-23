@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Conversation;
 use App\Services\ConversationService;
+use App\Http\Requests\Conversation\RenameConversationRequest;
 
 class ConversationController extends Controller
 {
@@ -18,7 +19,7 @@ class ConversationController extends Controller
 
         return $this->successResponse(
             $this->conversationService->listForProfile($profile)
-          );
+        );
     }
 
     public function markAsRead(
@@ -34,19 +35,17 @@ class ConversationController extends Controller
 
         return response()->noContent();
     }
-    
-    public function rename(Request $request, Conversation $conversation)
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:100',
-        ]);
 
+    public function rename(
+        RenameConversationRequest $request,
+        Conversation $conversation
+    ) {
         $profile = $request->user()->profile;
 
         $updated = $this->conversationService->renameConversation(
             $conversation,
             $profile,
-            $data['name']
+            $request->string('name')
         );
 
         return $this->successResponse(
