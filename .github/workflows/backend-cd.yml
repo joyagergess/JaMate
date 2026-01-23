@@ -19,17 +19,18 @@ jobs:
           script: |
             set -e
 
-            echo "Deploying JaMate API..."
+            echo " Deploying JaMate API..."
 
             cd /var/www/JaMate
             git pull origin main
 
             cd Server
 
-            # IMPORTANT: run composer as www-data
-            sudo -u www-data composer install --no-dev --optimize-autoloader
+            # Composer as ubuntu, no scripts
+            composer install --no-dev --optimize-autoloader --no-scripts
 
-            # Run artisan as www-data
+            # Artisan as www-data
+            sudo -u www-data php artisan package:discover
             sudo -u www-data php artisan config:clear
             sudo -u www-data php artisan route:clear
             sudo -u www-data php artisan view:clear
