@@ -1,0 +1,34 @@
+name: Backend CD (API Deploy)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy JaMate API to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 15.188.64.72
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo " Deploying JaMate API..."
+
+            cd /var/www/JaMate
+            git pull origin main
+
+            cd Server
+            composer install --no-dev --optimize-autoloader
+
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+
+            echo "JaMate API deployed successfully"
