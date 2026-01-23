@@ -36,7 +36,6 @@ class ProfileEmbeddingService
             return;
         }
 
-        
             $embedding = app(OpenAIEmbeddingService::class)->generate($text);
 
             ProfileEmbedding::updateOrCreate(

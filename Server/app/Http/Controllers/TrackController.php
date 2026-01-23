@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Profile;
 use App\Http\Requests\Track\StoreTrackRequest;
 use App\Models\UserTrack;
 use App\Services\TrackService;
@@ -44,6 +44,15 @@ class TrackController extends Controller
             'tracks' => $trackService->listTracks(
                 $request->user()->profile->id
             ),
+        ]);
+    }
+    
+    public function listByProfile(
+        Profile $profile,
+        TrackService $trackService
+    ) {
+        return $this->successResponse([
+            'tracks' => $trackService->listTracks($profile->id),
         ]);
     }
 

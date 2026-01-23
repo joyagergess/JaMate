@@ -25,6 +25,7 @@ export default function ProtectedLayout() {
       router.replace("/create-profile" as Href);
       return;
     }
+
   }, [isReady, isAuthenticated, hasProfile, pathname]);
 
   if (!isReady) {

@@ -10,7 +10,14 @@ class MatchService
 {
     public function getMyMatches(Profile $me): Collection
     {
-        $matches = MatchModel::query()
+        $matches = $this->fetchMatchesForProfile($me);
+
+        return $this->formatMatches($matches, $me);
+    }
+
+    protected function fetchMatchesForProfile(Profile $me): Collection
+    {
+        return MatchModel::query()
             ->where('profile_one_id', $me->id)
             ->orWhere('profile_two_id', $me->id)
             ->with([
@@ -20,7 +27,10 @@ class MatchService
             ])
             ->latest()
             ->get();
+    }
 
+    protected function formatMatches(Collection $matches, Profile $me): Collection
+    {
         return $matches->map(function (MatchModel $match) use ($me) {
 
             $otherProfile =

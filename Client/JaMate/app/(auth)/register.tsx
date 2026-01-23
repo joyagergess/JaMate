@@ -63,16 +63,14 @@ export default function RegisterScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.push("/")}
         >
           <Ionicons name="chevron-back" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>
-          Create Account{"\n"}with Email
-        </Text>
+        <Text style={styles.title}>Create Account{"\n"}with Email</Text>
 
         {formError && <Text style={styles.errorText}>{formError}</Text>}
 
@@ -83,7 +81,7 @@ export default function RegisterScreen() {
             setEmail(v);
             setFormError(null);
           }}
-          placeholder="example@gmail.com"
+          placeholder="Enter your email"
         />
 
         {!isEmailValid && email.length > 0 && (
@@ -99,6 +97,7 @@ export default function RegisterScreen() {
             setPassword(v);
             setFormError(null);
           }}
+          placeholder="Enter your password"
           secure={!showPassword}
           rightIcon={
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -118,12 +117,11 @@ export default function RegisterScreen() {
             setConfirmPassword(v);
             setFormError(null);
           }}
+          placeholder="Re-enter your password"
           secure={!showConfirmPassword}
           rightIcon={
             <TouchableOpacity
-              onPress={() =>
-                setShowConfirmPassword(!showConfirmPassword)
-              }
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               <Ionicons
                 name={showConfirmPassword ? "eye-off" : "eye"}
@@ -145,8 +143,7 @@ export default function RegisterScreen() {
             color={accepted ? "#6D5DF6" : undefined}
           />
           <Text style={styles.checkboxText}>
-            I agree to JaMate’s{" "}
-            <Text style={styles.link}>Privacy Policy</Text>.
+            I agree to JaMate’s <Text style={styles.link}>Privacy Policy</Text>.
           </Text>
         </View>
 
@@ -166,11 +163,10 @@ export default function RegisterScreen() {
                 onError: (err: any) => {
                   setFormError(getRegisterErrorMessage(err));
                 },
-              }
+              },
             );
           }}
         />
-
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>

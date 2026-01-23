@@ -20,7 +20,6 @@ class AuthService
                 $this->handleExistingUserRegistration($user);
                 return;
             }
-
             $user = $this->createUser($data);
             $this->attachEmailAuthProvider($user);
             $this->sendVerificationEmail($user);
@@ -30,9 +29,8 @@ class AuthService
     public function login(array $data): string
     {
         $user = $this->findUserByEmail($data['email']);
-
         $this->ensureUserCanLogin($user, $data['password']);
-
+        
         return JWTAuth::fromUser($user);
     }
 

@@ -3,9 +3,14 @@ import { apiClient } from "../../api/client";
 
 export type ConversationItem = {
   id: number;
-  type: "direct" | "band";
+  type: "direct" | "group";
   unread_count: number;
   name: string | null;
+
+  band?: {
+    id: number;
+  };
+
   participants: {
     profile: {
       id: number;
@@ -25,7 +30,6 @@ export type ConversationItem = {
     sent_at: string;
   }[];
 };
-
 
 export function useConversations() {
   return useQuery({

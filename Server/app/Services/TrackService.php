@@ -25,23 +25,6 @@ class TrackService
         );
     }
 
-    public function listTracks(int $profileId)
-    {
-        return UserTrack::where('profile_id', $profileId)
-            ->latest()
-            ->get()
-            ->map(function (UserTrack $track) {
-                return [
-                    'id' => $track->id,
-                    'title' => $track->title,
-                    'duration' => $track->duration,
-                    'track_type' => $track->track_type,
-                    'audio_public_url' => $track->audio_public_url,
-                    'created_at' => $track->created_at?->toISOString(),
-                ];
-            });
-    }
-
     public function updateTitle(
         UserTrack $track,
         int $profileId,
@@ -69,5 +52,22 @@ class TrackService
         }
 
         $track->delete();
+    }
+
+    public function listTracks(int $profileId)
+    {
+        return UserTrack::where('profile_id', $profileId)
+            ->latest()
+            ->get()
+            ->map(function (UserTrack $track) {
+                return [
+                    'id' => $track->id,
+                    'title' => $track->title,
+                    'duration' => $track->duration,
+                    'track_type' => $track->track_type,
+                    'audio_public_url' => $track->audio_public_url,
+                    'created_at' => $track->created_at?->toISOString(),
+                ];
+            });
     }
 }

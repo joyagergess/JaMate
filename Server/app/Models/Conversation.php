@@ -38,4 +38,5 @@ class Conversation extends Model
     {
         return $this->hasOne(Band::class);
     }
+    
 }

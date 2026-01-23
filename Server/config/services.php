@@ -53,6 +53,10 @@ return [
     'ai_music' => [
         'url' => env('AI_MUSIC_SERVICE_URL', 'http://localhost:8001'),
     ],
+    'n8n' => [
+        'band_setlist_webhook' => env('N8N_BAND_SETLIST_WEBHOOK'),
+        'webhook_secret' => env('N8N_WEBHOOK_SECRET'),
 
+    ],
 
 ];

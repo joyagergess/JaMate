@@ -8,8 +8,6 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
 
-
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.center}>
@@ -40,6 +38,7 @@ export default function WelcomeScreen() {
           <Text style={styles.secondaryText}>Sign in</Text>
         </TouchableOpacity>
 
+       
       </View>
     </SafeAreaView>
   );

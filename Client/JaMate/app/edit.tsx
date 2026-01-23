@@ -12,6 +12,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Image } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useUpdateAvatar } from "../hooks/profile/useUpdateAvatar";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 import { useProfile } from "../hooks/profile/useProfile";
 import { useUpdateProfile } from "../hooks/profile/useUpdateProfile";
@@ -24,7 +26,6 @@ import { useProfileMedia } from "../hooks/profile/useProfileMedia";
 import { ALL_GENRES } from "../constants/genres";
 import { ALL_INSTRUMENTS } from "../constants/instruments";
 import { orderBySelected } from "../utils/orderBySelected";
-
 
 const EXPERIENCE_LEVELS = [
   "Beginner",
@@ -45,7 +46,6 @@ const OBJECTIVES = [
   "Band",
   "Band members",
 ];
-
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -88,7 +88,7 @@ export default function EditProfileScreen() {
     setGender(profile.gender);
     setExperience(
       (profile.experience_level.charAt(0).toUpperCase() +
-        profile.experience_level.slice(1)) as any
+        profile.experience_level.slice(1)) as any,
     );
 
     setGenres(profile.genres.map((g: any) => g.name));
@@ -146,215 +146,241 @@ export default function EditProfileScreen() {
           level: experience.toLowerCase(),
         })),
       },
-      { onSuccess: () => router.back() }
+      { onSuccess: () => router.push("/(tabs)/profile") },
     );
   };
 
   return (
     <>
-      <ScrollView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
-        <View style={{ padding: 24 }}>
-          <Title>Edit Profile</Title>
-          <View style={{ alignItems: "center", marginBottom: 32 }}>
-            <TouchableOpacity onPress={pickAvatar}>
-              <Image
-                source={
-                  avatarPreview
-                    ? { uri: avatarPreview }
-                    : require("../assets/images/unknow.jpg")
-                }
-                style={{
-                  width: 120,
-                  height: 120,
-                  borderRadius: 60,
-                  backgroundColor: "#111827",
-                }}
-              />
-              <Text style={{ color: "#6D5DF6", marginTop: 10 }}>
-                Edit profile picture
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingTop: 8,
+            paddingBottom: 12,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/profile")}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
+          <View style={{ padding: 24 }}>
+            <Title>Edit Profile</Title>
+            <View style={{ alignItems: "center", marginBottom: 32 }}>
+              <TouchableOpacity onPress={pickAvatar}>
+                <Image
+                  source={
+                    avatarPreview
+                      ? { uri: avatarPreview }
+                      : require("../assets/images/unknow.jpg")
+                  }
+                  style={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: 60,
+                    backgroundColor: "#111827",
+                  }}
+                />
+                <Text style={{ color: "#6D5DF6", marginTop: 10 }}>
+                  Edit profile picture
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Label>Name</Label>
+            <Input
+              value={name}
+              onChangeText={setName}
+              placeholder="Your name"
+            />
+
+            <Label>Username</Label>
+            <Input
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Username"
+            />
+
+            <Label>Bio</Label>
+            <Input
+              value={bio}
+              onChangeText={setBio}
+              placeholder="Tell us about you"
+              multiline
+              style={{ height: 100 }}
+            />
+
+            <Label>Location</Label>
+            <Input
+              value={location}
+              onChangeText={setLocation}
+              placeholder="City, country"
+            />
+
+            <Label>Birth date</Label>
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              style={inputStyle}
+            >
+              <Text style={{ color: "#fff" }}>
+                {birthDate.toISOString().split("T")[0]}
               </Text>
             </TouchableOpacity>
-          </View>
 
-          <Label>Name</Label>
-          <Input value={name} onChangeText={setName} placeholder="Your name" />
-
-          <Label>Username</Label>
-          <Input
-            value={username}
-            onChangeText={setUsername}
-            placeholder="Username"
-          />
-
-          <Label>Bio</Label>
-          <Input
-            value={bio}
-            onChangeText={setBio}
-            placeholder="Tell us about you"
-            multiline
-            style={{ height: 100 }}
-          />
-
-          <Label>Location</Label>
-          <Input
-            value={location}
-            onChangeText={setLocation}
-            placeholder="City, country"
-          />
-
-          <Label>Birth date</Label>
-          <TouchableOpacity
-            onPress={() => setShowDatePicker(true)}
-            style={inputStyle}
-          >
-            <Text style={{ color: "#fff" }}>
-              {birthDate.toISOString().split("T")[0]}
-            </Text>
-          </TouchableOpacity>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={birthDate}
-              mode="date"
-              maximumDate={new Date()}
-              onChange={(_, d) => {
-                setShowDatePicker(false);
-                if (d) setBirthDate(d);
-              }}
-            />
-          )}
-
-          <Section title="Gender">
-            <Row>
-              {GENDERS.map((g) => (
-                <Segment
-                  key={g}
-                  label={g.charAt(0).toUpperCase() + g.slice(1)}
-                  selected={gender === g}
-                  onPress={() => setGender(g)}
-                />
-              ))}
-            </Row>
-          </Section>
-
-          <Section title="Experience level">
-            <Row wrap>
-              {EXPERIENCE_LEVELS.map((lvl) => (
-                <Segment
-                  key={lvl}
-                  label={lvl}
-                  selected={experience === lvl}
-                  onPress={() => setExperience(lvl)}
-                />
-              ))}
-            </Row>
-          </Section>
-
-          <Section title="Objectives (max 3)">
-            <Row wrap>
-              {OBJECTIVES.map((o) => (
-                <Segment
-                  key={o}
-                  label={o}
-                  selected={objectives.includes(o)}
-                  onPress={() =>
-                    setObjectives(
-                      objectives.includes(o)
-                        ? objectives.filter((x) => x !== o)
-                        : objectives.length < MAX_OBJECTIVES
-                        ? [...objectives, o]
-                        : objectives
-                    )
-                  }
-                />
-              ))}
-            </Row>
-          </Section>
-
-          <Section title="Genres">
-            <Row wrap>
-              {orderedGenres.slice(0, 6).map((g) => (
-                <SelectablePill
-                  key={g}
-                  label={g}
-                  selected={genres.includes(g)}
-                  onPress={() =>
-                    setGenres(
-                      genres.includes(g)
-                        ? genres.filter((x) => x !== g)
-                        : genres.length < MAX_GENRES
-                        ? [...genres, g]
-                        : genres
-                    )
-                  }
-                />
-              ))}
-              <SelectablePill
-                label="More"
-                selected={false}
-                onPress={() => setShowGenres(true)}
+            {showDatePicker && (
+              <DateTimePicker
+                value={birthDate}
+                mode="date"
+                maximumDate={new Date()}
+                onChange={(_, d) => {
+                  setShowDatePicker(false);
+                  if (d) setBirthDate(d);
+                }}
               />
-            </Row>
-          </Section>
+            )}
 
-          <Section title="Instruments">
-            <Row wrap>
-              {orderedInstruments.slice(0, 6).map((i) => (
+            <Section title="Gender">
+              <Row>
+                {GENDERS.map((g) => (
+                  <Segment
+                    key={g}
+                    label={g.charAt(0).toUpperCase() + g.slice(1)}
+                    selected={gender === g}
+                    onPress={() => setGender(g)}
+                  />
+                ))}
+              </Row>
+            </Section>
+
+            <Section title="Experience level">
+              <Row wrap>
+                {EXPERIENCE_LEVELS.map((lvl) => (
+                  <Segment
+                    key={lvl}
+                    label={lvl}
+                    selected={experience === lvl}
+                    onPress={() => setExperience(lvl)}
+                  />
+                ))}
+              </Row>
+            </Section>
+
+            <Section title="Objectives (max 3)">
+              <Row wrap>
+                {OBJECTIVES.map((o) => (
+                  <Segment
+                    key={o}
+                    label={o}
+                    selected={objectives.includes(o)}
+                    onPress={() =>
+                      setObjectives(
+                        objectives.includes(o)
+                          ? objectives.filter((x) => x !== o)
+                          : objectives.length < MAX_OBJECTIVES
+                            ? [...objectives, o]
+                            : objectives,
+                      )
+                    }
+                  />
+                ))}
+              </Row>
+            </Section>
+
+            <Section title="Genres">
+              <Row wrap>
+                {orderedGenres.slice(0, 6).map((g) => (
+                  <SelectablePill
+                    key={g}
+                    label={g}
+                    selected={genres.includes(g)}
+                    onPress={() =>
+                      setGenres(
+                        genres.includes(g)
+                          ? genres.filter((x) => x !== g)
+                          : genres.length < MAX_GENRES
+                            ? [...genres, g]
+                            : genres,
+                      )
+                    }
+                  />
+                ))}
                 <SelectablePill
-                  key={i}
-                  label={i}
-                  selected={instruments.includes(i)}
-                  onPress={() =>
-                    setInstruments(
-                      instruments.includes(i)
-                        ? instruments.filter((x) => x !== i)
-                        : [...instruments, i]
-                    )
-                  }
+                  label="More"
+                  selected={false}
+                  onPress={() => setShowGenres(true)}
                 />
-              ))}
-              <SelectablePill
-                label="More"
-                selected={false}
-                onPress={() => setShowInstruments(true)}
+              </Row>
+            </Section>
+
+            <Section title="Instruments">
+              <Row wrap>
+                {orderedInstruments.slice(0, 6).map((i) => (
+                  <SelectablePill
+                    key={i}
+                    label={i}
+                    selected={instruments.includes(i)}
+                    onPress={() =>
+                      setInstruments(
+                        instruments.includes(i)
+                          ? instruments.filter((x) => x !== i)
+                          : [...instruments, i],
+                      )
+                    }
+                  />
+                ))}
+                <SelectablePill
+                  label="More"
+                  selected={false}
+                  onPress={() => setShowInstruments(true)}
+                />
+              </Row>
+            </Section>
+
+            <View style={{ marginTop: 40 }}>
+              <AppButton
+                title={isPending ? "Saving..." : "Save changes"}
+                onPress={onSave}
+                disabled={isPending}
               />
-            </Row>
-          </Section>
-
-          <View style={{ marginTop: 40 }}>
-            <AppButton
-              title={isPending ? "Saving..." : "Save changes"}
-              onPress={onSave}
-              disabled={isPending}
-            />
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      {/* ===== SEARCH MODALS ===== */}
+        {/* ===== SEARCH MODALS ===== */}
 
-      <SearchablePickerModal
-        visible={showGenres}
-        title="Select genres"
-        items={ALL_GENRES}
-        selected={genres}
-        max={MAX_GENRES}
-        onChange={setGenres}
-        onClose={() => setShowGenres(false)}
-      />
+        <SearchablePickerModal
+          visible={showGenres}
+          title="Select genres"
+          items={ALL_GENRES}
+          selected={genres}
+          max={MAX_GENRES}
+          onChange={setGenres}
+          onClose={() => setShowGenres(false)}
+        />
 
-      <SearchablePickerModal
-        visible={showInstruments}
-        title="Select instruments"
-        items={ALL_INSTRUMENTS}
-        selected={instruments}
-        onChange={setInstruments}
-        onClose={() => setShowInstruments(false)}
-      />
+        <SearchablePickerModal
+          visible={showInstruments}
+          title="Select instruments"
+          items={ALL_INSTRUMENTS}
+          selected={instruments}
+          onChange={setInstruments}
+          onClose={() => setShowInstruments(false)}
+        />
+      </SafeAreaView>
     </>
   );
 }
-
 
 function Title({ children }: any) {
   return (

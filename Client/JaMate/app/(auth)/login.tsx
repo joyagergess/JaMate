@@ -50,7 +50,6 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* CONTENT */}
       <View style={styles.content}>
         <Text style={styles.title}>Login</Text>
 
@@ -63,7 +62,7 @@ export default function LoginScreen() {
             setEmail(v);
             setFormError(null);
           }}
-          placeholder="example@gmail.com"
+          placeholder="Enter your email"
         />
 
         <AppInput
@@ -73,6 +72,7 @@ export default function LoginScreen() {
             setPassword(v);
             setFormError(null);
           }}
+          placeholder="Enter your password"
           secure={!showPassword}
           rightIcon={
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -84,7 +84,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           }
         />
-
         <AppButton
           title="Login"
           loading={isPending}
@@ -98,6 +97,8 @@ export default function LoginScreen() {
                 onSuccess: async (token: string) => {
                   await setItem(AUTH_TOKEN_KEY, token);
                   triggerRefresh();
+
+                  router.replace("/(tabs)");
                 },
                 onError: (err: any) => {
                   setFormError(getLoginErrorMessage(err));

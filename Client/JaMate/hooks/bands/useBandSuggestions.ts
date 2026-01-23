@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
 
-/* ------------------ MEDIA ------------------ */
 
 export type MediaItem = {
   id: number;
@@ -12,7 +11,6 @@ export type MediaItem = {
   order_index?: number;
 };
 
-/* ------------------ MEMBER ------------------ */
 
 export type BandSuggestionMember = {
   decision: "pending" | "jam" | "decline";
@@ -23,7 +21,6 @@ export type BandSuggestionMember = {
   };
 };
 
-/* ------------------ SUGGESTION ------------------ */
 
 export type BandSuggestion = {
   id: number;
@@ -34,19 +31,17 @@ export type BandSuggestion = {
   };
 };
 
-/* ------------------ QUERY ------------------ */
 
 export function useBandSuggestions() {
   return useQuery<BandSuggestion[]>({
     queryKey: ["band-suggestions"],
     queryFn: async () => {
-      const res = await apiClient.get("/bands/suggestions"); // ✅ FIX
+      const res = await apiClient.get("/bands/suggestions");
       return res.data.data;
     },
   });
 }
 
-/* ------------------ ACCEPT ------------------ */
 
 export function useAcceptBandSuggestion() {
   const qc = useQueryClient();
@@ -54,7 +49,7 @@ export function useAcceptBandSuggestion() {
   return useMutation({
     mutationFn: async (suggestionId: number) => {
       return apiClient.post(
-        `/bands/suggestions/${suggestionId}/accept` // ✅ FIX
+        `/bands/suggestions/${suggestionId}/accept` 
       );
     },
     onSuccess: async () => {
@@ -64,7 +59,6 @@ export function useAcceptBandSuggestion() {
   });
 }
 
-/* ------------------ REJECT ------------------ */
 
 export function useRejectBandSuggestion() {
   const qc = useQueryClient();
@@ -72,7 +66,7 @@ export function useRejectBandSuggestion() {
   return useMutation({
     mutationFn: async (suggestionId: number) => {
       return apiClient.post(
-        `/bands/suggestions/${suggestionId}/reject` // ✅ FIX
+        `/bands/suggestions/${suggestionId}/reject` 
       );
     },
     onSuccess: async () => {

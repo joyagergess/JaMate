@@ -24,9 +24,7 @@ export function DirectChatsList({ conversations, me, search }: Props) {
   if (!directChats.length) {
     return (
       <View style={{ paddingTop: 60, alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>
-          No chats yet
-        </Text>
+        <Text style={{ color: "#9CA3AF" }}>No chats yet</Text>
       </View>
     );
   }
@@ -36,18 +34,17 @@ export function DirectChatsList({ conversations, me, search }: Props) {
       data={directChats}
       keyExtractor={(c) => c.id.toString()}
       renderItem={({ item }) => {
+        const isUnread = item.unread_count > 0;
+
         const otherProfile = item.participants
           .map((p) => p.profile)
           .find((p) => p.id !== me.id);
 
         if (!otherProfile) return null;
 
-        // 🔍 SEARCH FILTER
         if (
           search &&
-          !otherProfile.name
-            .toLowerCase()
-            .includes(search.toLowerCase())
+          !otherProfile.name.toLowerCase().includes(search.toLowerCase())
         ) {
           return null;
         }
@@ -56,13 +53,9 @@ export function DirectChatsList({ conversations, me, search }: Props) {
           otherProfile.media
             ?.slice()
             .sort((a, b) => a.order_index - b.order_index)
-            .find((m) => m.media_type === "image")
-            ?.media_url ?? null;
+            .find((m) => m.media_type === "image")?.media_url ?? null;
 
-        const avatarUrl = avatarPath
-          ? buildImageUrl(avatarPath)
-          : null;
-
+        const avatarUrl = avatarPath ? buildImageUrl(avatarPath) : null;
         const lastMessage = item.messages?.[0];
 
         return (
@@ -81,6 +74,9 @@ export function DirectChatsList({ conversations, me, search }: Props) {
                 alignItems: "center",
                 paddingHorizontal: 16,
                 paddingVertical: 14,
+                backgroundColor: isUnread
+                  ? "rgba(108, 99, 255, 0.08)"
+                  : "transparent",
                 borderBottomWidth: 1,
                 borderBottomColor: "rgba(255,255,255,0.05)",
               }}
@@ -99,21 +95,73 @@ export function DirectChatsList({ conversations, me, search }: Props) {
               />
 
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={{ color: "#fff", fontWeight: "600" }}>
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontWeight: isUnread ? "700" : "600",
+                  }}
+                >
                   {otherProfile.name}
                 </Text>
 
                 <Text
-                  style={{ color: "#9CA3AF" }}
                   numberOfLines={1}
+                  style={{
+                    color: isUnread ? "#FFFFFF" : "#9CA3AF",
+                    fontWeight: isUnread ? "500" : "400",
+                    marginTop: 2,
+                  }}
                 >
-                  {lastMessage?.body ?? "No messages yet"}
+                  {getMessagePreview(lastMessage)}
                 </Text>
               </View>
+
+              {isUnread && (
+                <View
+                  style={{
+                    minWidth: 18,
+                    height: 18,
+                    borderRadius: 9,
+                    backgroundColor: "#FF375F",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingHorizontal: 6,
+                    marginLeft: 8,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 11,
+                      fontWeight: "700",
+                    }}
+                  >
+                    {item.unread_count}
+                  </Text>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
         );
       }}
     />
   );
+}
+
+function getMessagePreview(message: any) {
+  if (!message) return "No messages yet";
+
+  switch (message.type) {
+    case "text":
+      return message.body;
+
+    case "track":
+      return message.track_title ?? "Shared a track";
+
+    case "voice":
+      return "Voice message";
+
+    default:
+      return "New message";
+  }
 }

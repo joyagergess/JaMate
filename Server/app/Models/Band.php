@@ -19,7 +19,7 @@ class Band extends Model
         'conversation_id',
     ];
 
-   
+
     public function suggestion()
     {
         return $this->belongsTo(BandSuggestion::class, 'band_suggestion_id');
@@ -33,5 +33,11 @@ class Band extends Model
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
+    }
+    public function hasMember(Profile $profile): bool
+    {
+        return $this->members()
+            ->where('profile_id', $profile->id)
+            ->exists();
     }
 }

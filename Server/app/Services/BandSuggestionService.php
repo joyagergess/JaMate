@@ -95,37 +95,42 @@ class BandSuggestionService
 
     protected function finalizeBand(int $suggestionId): void
     {
-        $suggestion = BandSuggestion::with('members')
-            ->where('id', $suggestionId)
-            ->where('status', 'pending')
-            ->lockForUpdate()
-            ->firstOrFail();
+        DB::transaction(function () use ($suggestionId) {
 
-        $suggestion->update(['status' => 'accepted']);
+            $suggestion = BandSuggestion::with('members')
+                ->where('id', $suggestionId)
+                ->where('status', 'pending')
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $conversation = Conversation::create([
-            'type' => 'group',
-            'name' => 'New Band',
-        ]);
+            $suggestion->update([
+                'status' => 'accepted',
+            ]);
 
-        ConversationParticipant::insert(
-            $suggestion->members->map(fn($m) => [
-                'conversation_id' => $conversation->id,
-                'profile_id'      => $m->profile_id,
-            ])->all()
-        );
+            $conversation = Conversation::create([
+                'type' => 'group',
+                'name' => 'New Band',
+            ]);
 
-        $band = Band::create([
-            'band_suggestion_id' => $suggestion->id,
-            'conversation_id'    => $conversation->id,
-        ]);
+            ConversationParticipant::insert(
+                $suggestion->members->map(fn($m) => [
+                    'conversation_id' => $conversation->id,
+                    'profile_id'      => $m->profile_id,
+                ])->all()
+            );
 
-        BandMember::insert(
-            $suggestion->members->map(fn($m) => [
-                'band_id'    => $band->id,
-                'profile_id' => $m->profile_id,
-                'joined_at'  => now(),
-            ])->all()
-        );
+            $band = Band::create([
+                'band_suggestion_id' => $suggestion->id,
+                'conversation_id'    => $conversation->id,
+            ]);
+
+            BandMember::insert(
+                $suggestion->members->map(fn($m) => [
+                    'band_id'    => $band->id,
+                    'profile_id' => $m->profile_id,
+                    'joined_at'  => now(),
+                ])->all()
+            );
+        });
     }
 }

@@ -25,6 +25,9 @@ import { buildImageUrl } from "../../../utils/media";
 import { chatStyles as styles } from "../../../styles/chat.styles";
 import { echo } from "../../../lib/echo";
 import { Spinner } from "../../../components/ui/Spinner";
+import { DraggableSetlistBubble } from "../../../components/ui/DraggableSetlistBubble";
+import { useBandSetlist } from "../../../hooks/bands/useBandSetlist";
+import { useGenerateBandSetlist } from "../../../hooks/bands/useGenerateBandSetlist";
 
 type Message = {
   id: number;
@@ -42,16 +45,21 @@ export default function BandChatScreen() {
 
   const { data: me } = useProfile();
   const { data: conversations } = useConversations();
+  const { data, isLoading } = useMessages(conversationId);
+
+  const conversation = useMemo(
+    () => conversations?.find((c) => c.id === conversationId),
+    [conversations, conversationId],
+  );
+
+  const bandId = conversation?.band?.id;
 
 
-  const {
-    data,
-    isLoading,
-  } = useMessages(conversationId);
-
+  const { data: setlistData } = useBandSetlist(bandId);
+  const generateSetlist = useGenerateBandSetlist(bandId);
   const messages = useMemo(
     () => data?.pages.flatMap((p) => p.data) ?? [],
-    [data]
+    [data],
   );
 
   const sendMessage = useSendMessage(conversationId);
@@ -62,14 +70,7 @@ export default function BandChatScreen() {
   const [showRename, setShowRename] = useState(false);
   const [newName, setNewName] = useState("");
 
-
-  const conversation = useMemo(
-    () => conversations?.find((c) => c.id === conversationId),
-    [conversations, conversationId]
-  );
-
   const participants = conversation?.participants ?? [];
-
 
   useEffect(() => {
     if (!conversationId || !me) return;
@@ -78,11 +79,9 @@ export default function BandChatScreen() {
     queryClient.invalidateQueries({ queryKey: ["conversations"] });
   }, [conversationId, me, queryClient]);
 
-
   useEffect(() => {
     listRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
-
 
   useEffect(() => {
     if (!conversationId || !me) return;
@@ -90,40 +89,34 @@ export default function BandChatScreen() {
     const channel = echo.private(`conversation.${conversationId}`);
 
     channel.listen(".MessageSent", (e: { message: Message }) => {
-      queryClient.setQueryData(
-        ["messages", conversationId],
-        (old: any) => {
-          if (!old) return old;
+      queryClient.setQueryData(["messages", conversationId], (old: any) => {
+        if (!old) return old;
 
-          const firstPage = old.pages[0];
+        const firstPage = old.pages[0];
 
-          if (firstPage.data.some((m: any) => m.id === e.message.id)) {
-            return old;
-          }
-
-          return {
-            ...old,
-            pages: [
-              {
-                ...firstPage,
-                data: [...firstPage.data, e.message],
-              },
-              ...old.pages.slice(1),
-            ],
-          };
+        if (firstPage.data.some((m: any) => m.id === e.message.id)) {
+          return old;
         }
-      );
 
-      queryClient.invalidateQueries({
-        queryKey: ["conversations"],
+        return {
+          ...old,
+          pages: [
+            {
+              ...firstPage,
+              data: [...firstPage.data, e.message],
+            },
+            ...old.pages.slice(1),
+          ],
+        };
       });
+
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
     });
 
     return () => {
       echo.leave(`conversation.${conversationId}`);
     };
   }, [conversationId, me, queryClient]);
-
 
   if (isLoading || !me || !conversation) {
     return (
@@ -140,10 +133,8 @@ export default function BandChatScreen() {
     );
   }
 
-
   const getProfile = (id: number) =>
     participants.find((p) => p.profile.id === id)?.profile;
-
 
   const onSend = () => {
     if (!text.trim()) return;
@@ -155,7 +146,6 @@ export default function BandChatScreen() {
 
     setText("");
   };
-
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -276,105 +266,15 @@ export default function BandChatScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      <Modal transparent visible={showMenu} animationType="fade">
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            justifyContent: "flex-end",
-          }}
-          activeOpacity={1}
-          onPress={() => setShowMenu(false)}
-        >
-          <View
-            style={{
-              backgroundColor: "#0B0E13",
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                setShowMenu(false);
-                setShowRename(true);
-                setNewName(conversation.name ?? "");
-              }}
-              style={{ padding: 16 }}
-            >
-              <Text style={{ color: "#fff", fontSize: 16 }}>Rename band</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
 
-      {/* RENAME MODAL */}
-      <Modal transparent visible={showRename} animationType="fade">
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: "85%",
-              backgroundColor: "#111827",
-              borderRadius: 16,
-              padding: 16,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 16,
-                fontWeight: "700",
-                marginBottom: 12,
-              }}
-            >
-              Rename band
-            </Text>
-
-            <TextInput
-              value={newName}
-              onChangeText={setNewName}
-              placeholder="Band name"
-              placeholderTextColor="#6B7280"
-              style={{
-                backgroundColor: "#0B0E13",
-                color: "#fff",
-                borderRadius: 10,
-                padding: 12,
-                marginBottom: 16,
-              }}
-            />
-
-            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-              <TouchableOpacity
-                onPress={() => setShowRename(false)}
-                style={{ marginRight: 16 }}
-              >
-                <Text style={{ color: "#9CA3AF" }}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  if (!newName.trim()) return;
-
-                  rename.mutate(newName.trim(), {
-                    onSuccess: () => setShowRename(false),
-                  });
-                }}
-              >
-                <Text style={{ color: "#16C784", fontWeight: "700" }}>
-                  Save
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {bandId && (
+        <DraggableSetlistBubble
+          status={setlistData?.status ?? "processing"}
+          setlist={setlistData?.setlist}
+          isGenerating={generateSetlist.isPending}
+          onGenerate={() => generateSetlist.mutate()}
+        />
+      )}
     </SafeAreaView>
   );
 }
