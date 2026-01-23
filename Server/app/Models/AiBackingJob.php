@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AiBackingJob extends Model
 {
-    protected $table = 'ai_backing_jobs';
+     protected $table = 'ai_backing_jobs';
 
     protected $fillable = [
         'source_track_id',
