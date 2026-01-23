@@ -39,8 +39,6 @@ Route::prefix('v0.1')->group(function () {
     });
 
 
-
-
     Route::middleware('auth:api')->group(function () {
 
         Route::prefix('profile')->group(function () {
@@ -84,7 +82,7 @@ Route::prefix('v0.1')->group(function () {
             Route::post('/suggestions/{suggestion}/reject', [BandSuggestionController::class, 'reject']);
             Route::get('/{band}/setlist', [BandSetlistController::class, 'show']);
             Route::post('/{band}/setlist/generate', [BandSetlistController::class, 'generate']);
-         });
+        });
 
 
         Route::prefix('tracks')->group(function () {
@@ -96,11 +94,10 @@ Route::prefix('v0.1')->group(function () {
         });
 
         Route::get('/profiles/{profile}/tracks', [TrackController::class, 'listByProfile']);
-
-
         Route::post('/jams/analyze', [JamController::class, 'analyze']);
+        Route::get('/ai-backing-jobs/{job}', [AiBackingJobController::class, 'show']);
     });
-    Route::get('/ai-backing-jobs/{job}', [AiBackingJobController::class, 'show']);
+
     Route::get('/media/{path}', [MediaController::class, 'stream'])->where('path', '.*');
 
     Route::prefix('internal')

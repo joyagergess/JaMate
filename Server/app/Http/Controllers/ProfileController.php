@@ -53,15 +53,15 @@ class ProfileController extends Controller
             return $this->errorResponse($e->getMessage(), $e->getStatusCode());
         }
     }
+
     public function show(Profile $profile)
     {
+        $profile = $this->profileService->show($profile);
+
         return $this->successResponse(
-            $profile->load([
-                'instruments',
-                'genres',
-                'objectives',
-            ]),
+            $profile,
             'Profile fetched successfully'
         );
     }
+    
 }
