@@ -45,7 +45,7 @@ See the [LICENSE](LICENSE) file for more information.
 - AI-assisted setlist generation: An n8n workflow that analyzes band context and uses Spotify song metadata to build and order live-performance setlists.
 
 
-<img src="./readme/feature.png"/>
+<img src="./readme/feature.jpeg"/>
 
 <br><br>
 
@@ -54,34 +54,33 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### User Screens (Mobile)
 
-| Landing                           | Register                         | Login screen                  |
-| --------------------------------- | -------------------------------- | ----------------------------- |
-| ![Landing](./readme/Landing.jpeg) | ![fsdaf](./readme/register.jpeg) | ![fsdaf](./readme/Login.jpeg) |
+| Landing | Register | Login |
+|--------|----------|-------|
+| <img src="./readme/Landing.jpeg" width="260" /> | <img src="./readme/register.jpeg" width="260" /> | <img src="./readme/Login.jpeg" width="260" /> |
 
-| Create profile                                | Create profile                               | Create profile                              |
-| --------------------------------------------- | -------------------------------------------- | ------------------------------------------- |
+
+| Create profile | Goals | Bio |
+|---------------|-------|-----|
 | <img src="./readme/create.gif" width="260" /> | <img src="./readme/goal.jpeg" width="260" /> | <img src="./readme/bio.jpeg" width="260" /> |
 
-| Feed                                        | Match                                         | Band suggestions                                 |
-| ------------------------------------------- | --------------------------------------------- | ------------------------------------------------ |
+| Feed | Match | Band suggestions |
+|------|-------|------------------|
 | <img src="./readme/feed.gif" width="260" /> | <img src="./readme/match.jpeg" width="260" /> | <img src="./readme/bandsugg.jpeg" width="260" /> |
 
-| Tracks                                        | Record                                        | Ai Backing tracks                               |
-| --------------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| Tracks | Record | AI Backing tracks |
+|--------|--------|-------------------|
 | <img src="./readme/track.jpeg" width="260" /> | <img src="./readme/record.gif" width="260" /> | <img src="./readme/generate.gif" width="260" /> |
 
-| Direct chats                               | Jam comptability                                     | Band chats                                        |
-| ------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------- |
-| <img src="./readme/jam.gif" width="260" /> | <img src="./readme/convo.jpeg" width="260" /> | <img src="./readme/comptability.jpeg" width="260" /> |
+| Direct chats | Jam compatibility | Band chats |
+|--------------|-------------------|------------|
+| <img src="./readme/jam.gif" width="260" /> | <img src="./readme/comptability.jpeg" width="260" /> | <img src="./readme/convo.jpeg" width="260" /> |
 
-
-| Group convo                               | Setlist                                     | Band chats                                        |
-| ------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------- |
+| Group convo | Setlist | Members |
+|-------------|---------|---------|
 | <img src="./readme/bandconvo.jpeg" width="260" /> | <img src="./readme/setlist.gif" width="260" /> | <img src="./readme/members.jpeg" width="260" /> |
 
-
-| Profile                                         | Profile media                                 | Edit profile                                |
-| ----------------------------------------------- | --------------------------------------------- | ------------------------------------------- |
+| Profile | Profile media | Edit profile |
+|---------|---------------|--------------|
 | <img src="./readme/profile.jpeg" width="260" /> | <img src="./readme/media.jpeg" width="260" /> | <img src="./readme/edit.gif" width="260" /> |
 
 ### Design
