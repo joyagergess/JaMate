@@ -3,9 +3,9 @@ from fastapi.responses import FileResponse
 import tempfile
 import os
 
-from analyzer import analyze_audio
-from prompt_builder import build_musicgen_prompt
-from lyria_generate import generate_music
+from backing_track.analyzer import analyze_audio
+from backing_track.prompt_builder import build_musicgen_prompt
+from backing_track.lyria_generate import generate_music
 
 router = APIRouter()
 

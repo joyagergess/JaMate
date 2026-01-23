@@ -1,5 +1,5 @@
 from typing import Any
-from constants import NOTES
+from backing_track.constants import NOTES
 
 def normalize_tempo(bpm: float) -> float:
     if bpm >= 140:

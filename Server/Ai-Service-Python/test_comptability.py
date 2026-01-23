@@ -1,55 +1,12 @@
 import json
-import os
 from dotenv import load_dotenv
-from openai import OpenAI
 
-from analyzer import analyze_audio
+from backing_track.analyzer import analyze_audio
 from jam.compatibility import JamCompatibilityAnalyzer
 from jam.arranger import JamArranger
+from jam.gpt_interpreter import interpret_with_gpt
 
 load_dotenv()
-
-client = OpenAI()
-
-
-SYSTEM_PROMPT = """
-You are a music producer assistant.
-
-You are given the result of an automated jam analysis system.
-All musical decisions, scores, and strategies are FINAL.
-You must not change numbers, scores, or invent musical facts.
-
-Your job:
-- Explain the compatibility in clear human language
-- Explain why the chosen jam strategy fits
-- Give 2–3 practical jam suggestions musicians can follow
-
-Return JSON ONLY in this format:
-{
-  "summary": string,
-  "strategy_explanation": string,
-  "jam_suggestions": string[]
-}
-"""
-
-
-def interpret_with_gpt(result: dict) -> dict:
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": json.dumps(result, indent=2)},
-        ],
-        temperature=0.4,
-    )
-
-    content = response.choices[0].message.content
-
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        raise RuntimeError("GPT returned invalid JSON:\n" + content)
-
 
 
 track_a = analyze_audio(
@@ -77,9 +34,7 @@ base_response = {
 print("\nBASE RESPONSE")
 print(json.dumps(base_response, indent=2))
 
-
-
-print("\n GPT INTERPRETATION")
+print("\nGPT INTERPRETATION")
 
 gpt_result = interpret_with_gpt(base_response)
 

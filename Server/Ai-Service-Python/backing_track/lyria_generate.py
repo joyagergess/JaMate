@@ -14,6 +14,8 @@ def generate_music(prompt: str, duration: int = 15) -> tuple[str, int]:
     )
     audio_bytes = None
 
+    #guess we never know what might be the output file of lyria so had to put safety
+    
     if hasattr(output, "read"):
         audio_bytes = output.read()
     elif isinstance(output, str):

@@ -1,5 +1,5 @@
 from typing import Dict
-from utils import RELATIVE_KEYS, normalize_energy, key_mode
+from backing_track.utils import RELATIVE_KEYS, normalize_energy, key_mode
 from jam.strategies import generate_jam_strategies
 
 

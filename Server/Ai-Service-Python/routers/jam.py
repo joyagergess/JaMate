@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 import tempfile
 import os
 
-from analyzer import analyze_audio
+from backing_track.analyzer import analyze_audio
 from jam.compatibility import JamCompatibilityAnalyzer
 from jam.arranger import JamArranger
 from jam.clap_service import analyze_with_clap

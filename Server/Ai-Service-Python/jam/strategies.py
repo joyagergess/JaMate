@@ -1,5 +1,5 @@
 from typing import Dict, List
-from utils import normalize_energy
+from backing_track.utils import normalize_energy
 
 
 def generate_jam_strategies(a: Dict, b: Dict, tempo_diff: float) -> List[Dict]:

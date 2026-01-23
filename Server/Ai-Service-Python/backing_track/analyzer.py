@@ -2,13 +2,13 @@ import librosa
 import soundfile as sf
 import numpy as np
 
-from constants import (
+from backing_track.constants import (
     TARGET_SR, NOTES,
     KRUMHANSL_MAJOR, KRUMHANSL_MINOR
 )
-from utils import normalize_tempo
-from features import extract_energy, extract_brightness, detect_groove
-from clap_analyzer import ClapAnalyzer
+from backing_track.utils import normalize_tempo
+from backing_track.features import extract_energy, extract_brightness, detect_groove
+from backing_track.clap_analyzer import ClapAnalyzer
 
 clap = ClapAnalyzer()
 
