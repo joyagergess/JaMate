@@ -36,7 +36,7 @@ class Conversation extends Model
 
     public function band()
     {
-        return $this->hasOne(Band::class);
+         return $this->hasOne(Band::class);
     }
     
 }
