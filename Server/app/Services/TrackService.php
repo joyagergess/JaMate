@@ -67,6 +67,8 @@ class TrackService
                     'track_type' => $track->track_type,
                     'audio_public_url' => $track->audio_public_url,
                     'created_at' => $track->created_at?->toISOString(),
+                    'ai_key' => $track->generatedByAiBackingJob?->musical_key,
+
                 ];
             });
     }
