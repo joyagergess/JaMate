@@ -61,7 +61,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 | Create profile | Goals | Bio |
 |---------------|-------|-----|
-| <img src="./readme/create.gif" width="260" /> | <img src="./readme/goal.jpeg" width="260" /> | <img src="./readme/bio.jpeg" width="260" /> |
+| <img src="./readme/create.gif" width="260" /> | <img src="./readme/welcom.jpeg" width="260" /> | <img src="./readme/goal.jpeg" width="260" /> |
 
 | Feed | Match | Band suggestions |
 |------|-------|------------------|
@@ -73,7 +73,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 | Direct chats | Jam compatibility | Band chats |
 |--------------|-------------------|------------|
-| <img src="./readme/jam.gif" width="260" /> | <img src="./readme/comptability.jpeg" width="260" /> | <img src="./readme/convo.jpeg" width="260" /> |
+| <img src="./readme/jam.gif" width="260" /> | <img src="./readme/convo.jpeg" width="260" /> | <img src="./readme/comptability.jpeg" width="260" /> |
 
 | Group convo | Setlist | Members |
 |-------------|---------|---------|
