@@ -138,8 +138,8 @@ Docker was initially planned for the deployment setup, but hardware limitations 
 
 
 
-|  API Register (swagger)                           | API Login  (cURL) 2                         | CI CD                         |
+|  API Register (Swagger)                           | API Login  (cURL) 2                         | CI CD                         |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/swagger.jpeg) | ![fsdaf](./readme/demo/curl.jpeg) | ![fsdaf](./readme/demo/CICD.PNG) |
+| ![Landing](./readme/swagger.jpeg) | ![fsdaf](./readme/curl.jpeg) | ![fsdaf](./readme/CICD.PNG) |
 
 <br><br>
