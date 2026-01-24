@@ -2,6 +2,7 @@ import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { buildImageUrl } from "../../utils/media";
 import { ConversationItem } from "../../hooks/messages/useConversations";
+import { bandChatsListStyles as styles } from "../../styles/bandChatList.styles";
 
 type Props = {
   conversations: ConversationItem[];
@@ -9,13 +10,13 @@ type Props = {
 
 export function BandChatsList({ conversations }: Props) {
   const bandChats = conversations.filter(
-    (c) => c.type === "group" 
+    (c) => c.type === "group"
   );
 
   if (!bandChats.length) {
     return (
-      <View style={{ paddingTop: 60, alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>No band chats yet</Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No band chats yet</Text>
       </View>
     );
   }
@@ -38,18 +39,8 @@ export function BandChatsList({ conversations }: Props) {
             }
             activeOpacity={0.85}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 16,
-                paddingVertical: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: "rgba(255,255,255,0.05)",
-              }}
-            >
-              {/* GROUP AVATARS */}
-              <View style={{ width: 52 }}>
+            <View style={styles.row}>
+              <View style={styles.avatarsWrapper}>
                 {members.slice(0, 3).map((m, i) => {
                   const avatarPath =
                     m.media
@@ -69,62 +60,32 @@ export function BandChatsList({ conversations }: Props) {
                           ? { uri: avatarUrl }
                           : require("../../assets/images/unknow.jpg")
                       }
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 14,
-                        position: "absolute",
-                        left: i * 16,
-                        borderWidth: 1,
-                        borderColor: "#0B0E13",
-                      }}
+                      style={[
+                        styles.avatar,
+                        { left: i * 16 },
+                      ]}
                     />
                   );
                 })}
               </View>
 
-              {/* INFO */}
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontSize: 15,
-                    fontWeight: "600",
-                  }}
-                >
+              <View style={styles.content}>
+                <Text style={styles.title}>
                   {item.name || "Band chat"}
                 </Text>
 
                 <Text
-                  style={{
-                    color: "#9CA3AF",
-                    fontSize: 13,
-                    marginTop: 2,
-                  }}
+                  style={styles.subtitle}
                   numberOfLines={1}
                 >
-                  {lastMessage?.body ?? members.map((m) => m.name).join(", ")}
+                  {lastMessage?.body ??
+                    members.map((m) => m.name).join(", ")}
                 </Text>
               </View>
 
               {item.unread_count > 0 && (
-                <View
-                  style={{
-                    backgroundColor: "#FF375F",
-                    borderRadius: 12,
-                    minWidth: 22,
-                    paddingHorizontal: 6,
-                    paddingVertical: 2,
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 12,
-                      fontWeight: "600",
-                    }}
-                  >
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
                     {item.unread_count}
                   </Text>
                 </View>

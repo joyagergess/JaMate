@@ -18,7 +18,7 @@ export type ConversationItem = {
       media: {
         id: number;
         media_type: "image" | "video";
-        url: string;
+        media_url: string;
         order_index: number;
       }[];
     };

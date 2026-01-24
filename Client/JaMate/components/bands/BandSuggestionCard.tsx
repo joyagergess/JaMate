@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 import { buildImageUrl } from "../../utils/media";
 import type { BandSuggestionMember } from "../../hooks/bands/useBandSuggestions";
+import { bandSuggestionCardStyles as styles } from "../../styles/bandSuggestionCard.styles";
 
 type Props = {
   members: BandSuggestionMember[];
@@ -23,18 +24,15 @@ export function BandSuggestionCard({ members, status }: Props) {
 
   return (
     <View
-      style={{
-        backgroundColor: "#0B0E13",
-        borderRadius: 24,
-        paddingVertical: 18,
-        paddingHorizontal: 14,
-        marginHorizontal: 20,
-        borderWidth: 1.5,
-        borderColor,
-        opacity: status === "rejected" ? 0.7 : 1,
-      }}
+      style={[
+        styles.container,
+        {
+          borderColor,
+          opacity: status === "rejected" ? 0.7 : 1,
+        },
+      ]}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={styles.membersRow}>
         {members.map((m) => {
           const media = m.profile.media ?? [];
 
@@ -56,13 +54,13 @@ export function BandSuggestionCard({ members, status }: Props) {
             <TouchableOpacity
               key={m.profile.id}
               activeOpacity={0.7}
-              onPress={() => {
+              onPress={() =>
                 router.push({
                   pathname: "/profile/[id]",
                   params: { id: String(m.profile.id) },
-                } as unknown as Href);
-              }}
-              style={{ alignItems: "center", width: 64 }}
+                } as unknown as Href)
+              }
+              style={styles.memberItem}
             >
               <Image
                 source={
@@ -70,22 +68,10 @@ export function BandSuggestionCard({ members, status }: Props) {
                     ? { uri: avatarUrl }
                     : require("../../assets/images/unknow.jpg")
                 }
-                style={{
-                  width: 54,
-                  height: 54,
-                  borderRadius: 27,
-                  marginBottom: 6,
-                }}
+                style={styles.avatar}
               />
 
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: "600",
-                }}
-                numberOfLines={1}
-              >
+              <Text style={styles.name} numberOfLines={1}>
                 {m.profile.name}
               </Text>
             </TouchableOpacity>

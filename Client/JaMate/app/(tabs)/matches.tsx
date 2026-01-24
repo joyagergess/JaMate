@@ -18,7 +18,6 @@ import { buildImageUrl } from "../../utils/media";
 
 import { BandSuggestionsDeck } from "../../components/bands/BandSuggestionsDeck";
 
-
 type MatchMedia = {
   id: number;
   type: "image" | "video";
@@ -37,7 +36,6 @@ type MatchItem = {
     media: MatchMedia[];
   };
 };
-
 
 export default function Matches() {
   const { data: matches, isLoading } = useMatches();
@@ -60,16 +58,12 @@ export default function Matches() {
 
   const safeMatches = (matches ?? []) as MatchItem[];
 
-
   const filteredMatches = useMemo(() => {
     if (!search.trim()) return safeMatches;
 
     const q = search.toLowerCase();
-    return safeMatches.filter((m) =>
-      m.profile.name.toLowerCase().includes(q)
-    );
+    return safeMatches.filter((m) => m.profile.name.toLowerCase().includes(q));
   }, [safeMatches, search]);
-
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -148,10 +142,7 @@ export default function Matches() {
                   <TouchableOpacity
                     style={styles.profileBtn}
                     onPress={() => {
-                      router.push({
-                        pathname: "/profile/[id]",
-                        params: { id: String(item.profile.id) },
-                      } as unknown as Href);
+                      router.push(`/profile/${item.profile.id}`);
                     }}
                   >
                     <Text style={styles.profileText}>View Profile</Text>
@@ -162,9 +153,7 @@ export default function Matches() {
           }}
           ListEmptyComponent={
             <View style={{ paddingTop: 60, alignItems: "center" }}>
-              <Text style={{ color: "#9CA3AF" }}>
-                No matches found 
-              </Text>
+              <Text style={{ color: "#9CA3AF" }}>No matches found</Text>
             </View>
           }
         />

@@ -14,16 +14,14 @@ import { StepIndicator } from "../../../components/ui/StepIndicator";
 import { AppButton } from "../../../components/ui/AppButton";
 import { createProfileStyles as styles } from "../../../styles/create-profile.styles";
 
-/* ===================== HELPERS ===================== */
 
 function normalizeAvatar(media: ProfileMedia[]): ProfileMedia[] {
   return media.map((m) => ({
     ...m,
-    order_index: 1, // always avatar
+    order_index: 1, 
   }));
 }
 
-/* ===================== SCREEN ===================== */
 
 export default function CreateProfileMediaScreen() {
   const router = useRouter();
@@ -54,7 +52,6 @@ export default function CreateProfileMediaScreen() {
     update({ videos: [] });
   };
 
-  /* ===================== UI ===================== */
 
   return (
     <CreateProfileLayout

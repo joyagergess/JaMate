@@ -5,6 +5,7 @@ import { router } from "expo-router";
 
 import { apiClient } from "../../api/client";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
+import { profileHeaderStyles as styles } from "../../styles/profileHeader.styles";
 
 type Media = {
   id: number;
@@ -56,63 +57,40 @@ export function ProfileHeader({
   };
 
   return (
-    <View style={{ alignItems: "center", paddingTop: 40 }}>
+    <View style={styles.container}>
       {!readOnly && (
         <TouchableOpacity
-          style={{ position: "absolute", right: 24, top: 40 }}
+          style={styles.logoutButton}
           onPress={logout}
         >
-          <Ionicons name="log-out-outline" size={22} color="#6C63FF" />
+          <Ionicons
+            name="log-out-outline"
+            size={22}
+            color="#6C63FF"
+          />
         </TouchableOpacity>
       )}
 
-      <Image
-        source={avatarSource}
-        style={{
-          width: 110,
-          height: 110,
-          borderRadius: 55,
-          marginBottom: 16,
-          backgroundColor: "#1F2937",
-        }}
-      />
+      <Image source={avatarSource} style={styles.avatar} />
 
-      <Text style={{ color: "#fff", fontSize: 22, fontWeight: "600" }}>
-        {profile.name}
-      </Text>
+      <Text style={styles.name}>{profile.name}</Text>
 
       {!!profile.username && (
-        <Text style={{ color: "#9CA3AF", marginTop: 4 }}>
+        <Text style={styles.username}>
           @{profile.username}
         </Text>
       )}
 
       {!!profile.bio && (
-        <Text
-          style={{
-            color: "#D1D5DB",
-            textAlign: "center",
-            marginTop: 12,
-            paddingHorizontal: 32,
-            lineHeight: 20,
-          }}
-        >
-          {profile.bio}
-        </Text>
+        <Text style={styles.bio}>{profile.bio}</Text>
       )}
 
       {!readOnly && (
         <TouchableOpacity
           onPress={() => router.push("/edit")}
-          style={{
-            marginTop: 20,
-            backgroundColor: "#6D5DF6",
-            paddingHorizontal: 28,
-            paddingVertical: 10,
-            borderRadius: 24,
-          }}
+          style={styles.editButton}
         >
-          <Text style={{ color: "#fff", fontWeight: "600" }}>
+          <Text style={styles.editButtonText}>
             Edit Profile
           </Text>
         </TouchableOpacity>

@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Spinner } from "../../components/ui/Spinner";
 import { TrackListItem } from "../../components/tracks/TrackListItem";
 import { useTracksByProfileId } from "../../hooks/tracks/useTracksByProfileId";
+import { profileTracksSectionStyles as styles } from "../../styles/profileTracksSection.styles";
 
 type Filter = "all" | "originals" | "ai";
 
@@ -36,7 +37,7 @@ export function ProfileTracksSection({ profileId }: Props) {
 
   if (isLoading) {
     return (
-      <View style={{ paddingVertical: 40 }}>
+      <View style={styles.loading}>
         <Spinner size={28} />
       </View>
     );
@@ -45,14 +46,7 @@ export function ProfileTracksSection({ profileId }: Props) {
   return (
     <View>
       {/* FILTER BAR */}
-      <View
-        style={{
-          flexDirection: "row",
-          paddingHorizontal: 20,
-          marginBottom: 16,
-          gap: 12,
-        }}
-      >
+      <View style={styles.filterBar}>
         <FilterButton
           label="All"
           active={filter === "all"}
@@ -70,20 +64,14 @@ export function ProfileTracksSection({ profileId }: Props) {
         />
       </View>
 
-      {/* TRACKS */}
       {filteredTracks.length === 0 ? (
-        <View style={{ paddingHorizontal: 20 }}>
-          <Text
-            style={{
-              color: "rgba(255,255,255,0.5)",
-              fontSize: 14,
-            }}
-          >
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
             No tracks found
           </Text>
         </View>
       ) : (
-        <View style={{ paddingHorizontal: 20, gap: 12 }}>
+        <View style={styles.list}>
           {filteredTracks.map((track: any) => (
             <TrackListItem
               key={track.id}
@@ -115,26 +103,20 @@ function FilterButton({
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={{
-        paddingHorizontal: 14,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: "center",
-        backgroundColor: active
-          ? "rgba(109,93,246,0.2)"
-          : "rgba(255,255,255,0.06)",
-        borderWidth: 1,
-        borderColor: active
-          ? "#6D5DF6"
-          : "rgba(255,255,255,0.1)",
-      }}
+      style={[
+        styles.filterButton,
+        active
+          ? styles.filterButtonActive
+          : styles.filterButtonInactive,
+      ]}
     >
       <Text
-        style={{
-          color: active ? "#6D5DF6" : "#9CA3AF",
-          fontSize: 13,
-          fontWeight: "600",
-        }}
+        style={[
+          styles.filterText,
+          active
+            ? styles.filterTextActive
+            : styles.filterTextInactive,
+        ]}
       >
         {label}
       </Text>

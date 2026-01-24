@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -22,19 +21,14 @@ import { useConversations } from "../../../hooks/messages/useConversations";
 import { useProfile } from "../../../hooks/profile/useProfile";
 import { useRenameConversation } from "../../../hooks/messages/useRenameConversation";
 import { buildImageUrl } from "../../../utils/media";
-import { chatStyles as styles } from "../../../styles/chat.styles";
+import { chatStyles } from "../../../styles/chat.styles";
+import { styles } from "../../../styles/BandChatScreen.styles";
 import { echo } from "../../../lib/echo";
 import { Spinner } from "../../../components/ui/Spinner";
 import { DraggableSetlistBubble } from "../../../components/ui/DraggableSetlistBubble";
 import { useBandSetlist } from "../../../hooks/bands/useBandSetlist";
 import { useGenerateBandSetlist } from "../../../hooks/bands/useGenerateBandSetlist";
-
-type Message = {
-  id: number;
-  body: string | null;
-  sent_at: string;
-  sender_profile_id: number;
-};
+import type { Message } from "../../../hooks/messages/useMessages";
 
 export default function BandChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,27 +48,23 @@ export default function BandChatScreen() {
 
   const bandId = conversation?.band?.id;
 
-
   const { data: setlistData } = useBandSetlist(bandId);
   const generateSetlist = useGenerateBandSetlist(bandId);
+
   const messages = useMemo(
     () => data?.pages.flatMap((p) => p.data) ?? [],
     [data],
   );
 
   const sendMessage = useSendMessage(conversationId);
-  const rename = useRenameConversation(conversationId);
+  useRenameConversation(conversationId);
 
   const [text, setText] = useState("");
-  const [showMenu, setShowMenu] = useState(false);
-  const [showRename, setShowRename] = useState(false);
-  const [newName, setNewName] = useState("");
 
   const participants = conversation?.participants ?? [];
 
   useEffect(() => {
     if (!conversationId || !me) return;
-
     apiClient.post(`/conversations/${conversationId}/read`);
     queryClient.invalidateQueries({ queryKey: ["conversations"] });
   }, [conversationId, me, queryClient]);
@@ -120,14 +110,7 @@ export default function BandChatScreen() {
 
   if (isLoading || !me || !conversation) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#0B0E13",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={styles.loadingContainer}>
         <Spinner size={42} />
       </View>
     );
@@ -148,18 +131,18 @@ export default function BandChatScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={chatStyles.screen}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.header}>
+        <View style={chatStyles.header}>
           <TouchableOpacity onPress={() => router.replace("/messages")}>
             <Ionicons name="chevron-back" size={24} color="#7C7CFF" />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ flex: 1, marginLeft: 10 }}
+            style={styles.headerCenter}
             onPress={() =>
               router.push({
                 pathname: "/chat/band/[id]/settings",
@@ -167,15 +150,13 @@ export default function BandChatScreen() {
               })
             }
           >
-            <Text style={styles.headerTitle}>
+            <Text style={chatStyles.headerTitle}>
               {conversation.name || "Band chat"}
             </Text>
-            <Text style={{ color: "#9CA3AF", fontSize: 12 }}>
-              {participants.length} members
-            </Text>
+            <Text style={styles.subTitle}>{participants.length} members</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setShowMenu(true)}>
+          <TouchableOpacity>
             <Ionicons name="ellipsis-vertical" size={18} color="#aaa" />
           </TouchableOpacity>
         </View>
@@ -184,7 +165,7 @@ export default function BandChatScreen() {
           ref={listRef}
           data={messages}
           keyExtractor={(m) => m.id.toString()}
-          contentContainerStyle={{ paddingVertical: 16 }}
+          contentContainerStyle={styles.listPadding}
           renderItem={({ item }) => {
             const isMe = item.sender_profile_id === me.id;
             const sender = getProfile(item.sender_profile_id);
@@ -200,46 +181,35 @@ export default function BandChatScreen() {
             return (
               <View
                 style={[
-                  styles.bubble,
-                  isMe ? styles.bubbleMe : styles.bubbleOther,
+                  chatStyles.bubble,
+                  isMe ? chatStyles.bubbleMe : chatStyles.bubbleOther,
                 ]}
               >
                 {!isMe && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <View style={styles.senderRow}>
                     <Image
                       source={
                         avatarUrl
                           ? { uri: avatarUrl }
                           : require("../../../assets/images/unknow.jpg")
                       }
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 9,
-                        marginRight: 6,
-                      }}
+                      style={styles.senderAvatar}
                     />
-                    <Text
-                      style={{
-                        color: "#9CA3AF",
-                        fontSize: 12,
-                        fontWeight: "600",
-                      }}
-                    >
-                      {sender?.name}
-                    </Text>
+                    <Text style={styles.senderName}>{sender?.name}</Text>
                   </View>
                 )}
 
-                <Text style={styles.bubbleText}>{item.body}</Text>
+                {item.type === "text" && (
+                  <Text style={chatStyles.bubbleText}>{item.body}</Text>
+                )}
 
-                <Text style={styles.time}>
+                {item.type === "track" && (
+                  <Text style={chatStyles.bubbleText}>
+                    🎵 {item.track_title}
+                  </Text>
+                )}
+
+                <Text style={chatStyles.time}>
                   {new Date(item.sent_at).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -250,13 +220,13 @@ export default function BandChatScreen() {
           }}
         />
 
-        <View style={styles.inputBar}>
+        <View style={chatStyles.inputBar}>
           <TextInput
             value={text}
             onChangeText={setText}
             placeholder="Type a message"
             placeholderTextColor="#777"
-            style={styles.input}
+            style={chatStyles.input}
             multiline
           />
 
@@ -266,11 +236,12 @@ export default function BandChatScreen() {
         </View>
       </KeyboardAvoidingView>
 
-
       {bandId && (
         <DraggableSetlistBubble
           status={setlistData?.status ?? "processing"}
-          setlist={setlistData?.setlist}
+          setlist={
+            setlistData?.status === "ready" ? setlistData.setlist : undefined
+          }
           isGenerating={generateSetlist.isPending}
           onGenerate={() => generateSetlist.mutate()}
         />

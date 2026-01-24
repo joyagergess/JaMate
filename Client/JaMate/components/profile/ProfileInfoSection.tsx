@@ -1,22 +1,13 @@
 import { View, Text } from "react-native";
 import { calculateAge } from "../../utils/date";
-
-const LABEL_WIDTH = 150;
-const ROW_SPACING = 22; 
+import {
+  profileInfoSectionStyles as styles,
+} from "../../styles/profileInfoSection.styles";
 
 function Chip({ label }: { label: string }) {
   return (
-    <View
-      style={{
-        backgroundColor: "#1F2937",
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        borderRadius: 16,
-        marginRight: 8,
-        marginBottom: 8,
-      }}
-    >
-      <Text style={{ color: "#fff", fontSize: 12 }}>{label}</Text>
+    <View style={styles.chip}>
+      <Text style={styles.chipText}>{label}</Text>
     </View>
   );
 }
@@ -39,7 +30,7 @@ export function ProfileInfoSection({ profile }: { profile: Profile }) {
     : null;
 
   return (
-    <View style={{ paddingHorizontal: 24 }}>
+    <View style={styles.container}>
       <InfoRowInline label="Name" value={profile.name} />
 
       {age !== null && (
@@ -47,7 +38,10 @@ export function ProfileInfoSection({ profile }: { profile: Profile }) {
       )}
 
       {profile.gender && (
-        <InfoRowInline label="Gender" value={profile.gender} />
+        <InfoRowInline
+          label="Gender"
+          value={profile.gender}
+        />
       )}
 
       {profile.experience_level && (
@@ -58,16 +52,27 @@ export function ProfileInfoSection({ profile }: { profile: Profile }) {
       )}
 
       {profile.location && (
-        <InfoRowInline label="Location" value={profile.location} />
+        <InfoRowInline
+          label="Location"
+          value={profile.location}
+        />
       )}
 
-      <InfoChipsInline label="Genres" items={profile.genres} />
-      <InfoChipsInline label="Objectives" items={profile.objectives} />
-      <InfoChipsInline label="Instruments" items={profile.instruments} />
+      <InfoChipsInline
+        label="Genres"
+        items={profile.genres}
+      />
+      <InfoChipsInline
+        label="Objectives"
+        items={profile.objectives}
+      />
+      <InfoChipsInline
+        label="Instruments"
+        items={profile.instruments}
+      />
     </View>
   );
 }
-
 
 function InfoRowInline({
   label,
@@ -77,34 +82,12 @@ function InfoRowInline({
   value: string;
 }) {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: ROW_SPACING,
-      }}
-    >
-      <Text
-        style={{
-          color: "#9CA3AF",
-          width: LABEL_WIDTH,
-        }}
-      >
-        {label}
-      </Text>
-
-      <Text
-        style={{
-          color: "#fff",
-          flexShrink: 1,
-        }}
-      >
-        {value}
-      </Text>
+    <View style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
     </View>
   );
 }
-
 
 function InfoChipsInline({
   label,
@@ -116,30 +99,10 @@ function InfoChipsInline({
   if (!items || items.length === 0) return null;
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "flex-start",
-        marginBottom: ROW_SPACING,
-      }}
-    >
-      <Text
-        style={{
-          color: "#9CA3AF",
-          width: LABEL_WIDTH,
-          marginTop: 6,
-        }}
-      >
-        {label}
-      </Text>
+    <View style={styles.chipsRow}>
+      <Text style={styles.chipsLabel}>{label}</Text>
 
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          flexWrap: "wrap",
-        }}
-      >
+      <View style={styles.chipsContainer}>
         {items.map((i) => (
           <Chip key={i.id} label={i.name} />
         ))}

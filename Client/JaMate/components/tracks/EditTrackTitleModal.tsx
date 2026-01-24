@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useUpdateTrackTitle } from "../../hooks/tracks/useUpdateTrackTitle";
+import { trackModalStyles as styles } from "../../styles/trackModals.styles";
 
 type Props = {
   visible: boolean;
@@ -55,30 +56,11 @@ export function EditTrackTitleModal({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          justifyContent: "center",
-          padding: 24,
-        }}
+        style={styles.overlay}
       >
-        <View
-          style={{
-            backgroundColor: "#0B0E13",
-            borderRadius: 14,
-            padding: 20,
-          }}
-        >
-          {/* HEADER */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 16,
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>
               Edit track title
             </Text>
 
@@ -87,52 +69,32 @@ export function EditTrackTitleModal({
             </TouchableOpacity>
           </View>
 
-          {/* INPUT */}
           <TextInput
             value={title}
             onChangeText={setTitle}
             placeholder="Track title"
             placeholderTextColor="#6B7280"
             autoFocus
-            style={{
-              backgroundColor: "#111827",
-              color: "white",
-              paddingHorizontal: 14,
-              paddingVertical: 12,
-              borderRadius: 10,
-              fontSize: 15,
-              marginBottom: 20,
-            }}
+            style={styles.input}
           />
 
-          {/* ACTIONS */}
-          <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={styles.row}>
             <TouchableOpacity
               onPress={onClose}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 10,
-                backgroundColor: "#1F2937",
-                alignItems: "center",
-              }}
+              style={styles.cancelButton}
             >
-              <Text style={{ color: "#9CA3AF" }}>Cancel</Text>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={submit}
               disabled={updateTitle.isPending}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 10,
-                backgroundColor: "#16C784",
-                alignItems: "center",
-                opacity: updateTitle.isPending ? 0.6 : 1,
-              }}
+              style={[
+                styles.saveButton,
+                { opacity: updateTitle.isPending ? 0.6 : 1 },
+              ]}
             >
-              <Text style={{ color: "#0B0E13", fontWeight: "600" }}>
+              <Text style={styles.saveText}>
                 {updateTitle.isPending ? "Saving..." : "Save"}
               </Text>
             </TouchableOpacity>

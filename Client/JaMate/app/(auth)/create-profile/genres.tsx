@@ -13,12 +13,10 @@ import { useCreateProfile } from "../../../context/CreateProfileContext";
 import { ALL_GENRES } from "../../../constants/genres";
 import { orderBySelected } from "../../../utils/orderBySelected";
 
-/* ===================== CONSTANTS ===================== */
 
 const MAX_GENRES = 3;
 const PREVIEW_COUNT = 6;
 
-/* ===================== SCREEN ===================== */
 
 export default function CreateProfileGenresScreen() {
   const router = useRouter();
@@ -27,7 +25,6 @@ export default function CreateProfileGenresScreen() {
   const selected = data.genres ?? [];
   const [showPicker, setShowPicker] = useState(false);
 
-  /** Selected genres first */
   const orderedGenres = useMemo(
     () => orderBySelected(ALL_GENRES, selected),
     [selected]
@@ -70,7 +67,6 @@ export default function CreateProfileGenresScreen() {
               />
             ))}
 
-            {/* MORE */}
             <SelectablePill
               label="More"
               selected={false}
@@ -80,7 +76,6 @@ export default function CreateProfileGenresScreen() {
         </ScrollView>
       </CreateProfileLayout>
 
-      {/* ===== SEARCH MODAL ===== */}
       <SearchablePickerModal
         visible={showPicker}
         title="Select genres"

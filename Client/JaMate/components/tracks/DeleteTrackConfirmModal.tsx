@@ -6,6 +6,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { trackModalStyles as styles } from "../../styles/trackModals.styles";
+
 type Props = {
   visible: boolean;
   onCancel: () => void;
@@ -24,22 +26,9 @@ export function DeleteTrackConfirmModal({
       animationType="fade"
       onRequestClose={onCancel}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#0B0E13",
-            borderRadius: 14,
-            padding: 20,
-          }}
-        >
-          <View style={{ alignItems: "center", marginBottom: 12 }}>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.iconWrapper}>
             <Ionicons
               name="trash-outline"
               size={32}
@@ -47,56 +36,27 @@ export function DeleteTrackConfirmModal({
             />
           </View>
 
-          <Text
-            style={{
-              color: "white",
-              fontSize: 16,
-              fontWeight: "600",
-              textAlign: "center",
-              marginBottom: 8,
-            }}
-          >
+          <Text style={styles.title}>
             Delete AI backing track?
           </Text>
 
-          <Text
-            style={{
-              color: "#9CA3AF",
-              fontSize: 14,
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
+          <Text style={styles.subtitle}>
             This action cannot be undone.
           </Text>
 
-          <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={styles.row}>
             <TouchableOpacity
               onPress={onCancel}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 10,
-                backgroundColor: "#1F2937",
-                alignItems: "center",
-              }}
+              style={styles.cancelButton}
             >
-              <Text style={{ color: "#9CA3AF" }}>Cancel</Text>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onConfirm}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 10,
-                backgroundColor: "#EF4444",
-                alignItems: "center",
-              }}
+              style={styles.dangerButton}
             >
-              <Text style={{ color: "white", fontWeight: "600" }}>
-                Delete
-              </Text>
+              <Text style={styles.dangerText}>Delete</Text>
             </TouchableOpacity>
           </View>
         </View>

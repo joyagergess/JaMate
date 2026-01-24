@@ -1,7 +1,6 @@
 import {
   Modal,
   View,
-  Dimensions,
   TouchableOpacity,
   Image,
   StatusBar,
@@ -14,8 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProfileMedia } from "../../hooks/profile/useProfileMedia";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
-
-const { width, height } = Dimensions.get("window");
+import { feedPreviewModalStyles as styles } from "../../styles/feedPreviewModal.styles";
 
 type Props = {
   visible: boolean;
@@ -32,7 +30,7 @@ export function FeedPreviewModal({
 }: Props) {
   const [index, setIndex] = useState(startIndex);
   const [token, setToken] = useState<string | null>(null);
-  const insets = useSafeAreaInsets(); 
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (visible) {
@@ -65,21 +63,13 @@ export function FeedPreviewModal({
     >
       <StatusBar hidden />
 
-      <View
-        style={{
-          width,
-          height,
-          backgroundColor: "#000",
-        }}
-      >
+      <View style={styles.container}>
         <TouchableOpacity
           onPress={onClose}
-          style={{
-            position: "absolute",
-            top: insets.top + 12,
-            right: 20,
-            zIndex: 50,
-          }}
+          style={[
+            styles.closeButton,
+            { top: insets.top + 12 },
+          ]}
         >
           <Ionicons name="close" size={30} color="#fff" />
         </TouchableOpacity>
@@ -88,7 +78,7 @@ export function FeedPreviewModal({
           <Image
             key={current.id}
             source={{ uri: current.url }}
-            style={{ width, height }}
+            style={styles.media}
             resizeMode="cover"
           />
         ) : (
@@ -100,7 +90,7 @@ export function FeedPreviewModal({
                 Authorization: `Bearer ${token}`,
               },
             }}
-            style={{ width, height }}
+            style={styles.media}
             resizeMode={ResizeMode.COVER}
             shouldPlay
             isLooping
@@ -109,48 +99,35 @@ export function FeedPreviewModal({
           />
         )}
 
-        <View
-          style={{
-            position: "absolute",
-            inset: 0,
-            flexDirection: "row",
-            zIndex: 20,
-          }}
-        >
+        <View style={styles.navigationOverlay}>
           <TouchableOpacity
-            style={{ width: "50%", height: "100%" }}
+            style={styles.navZone}
             onPress={prev}
           />
           <TouchableOpacity
-            style={{ width: "50%", height: "100%" }}
+            style={styles.navZone}
             onPress={next}
           />
         </View>
 
         <View
-          style={{
-            position: "absolute",
-            top: insets.top + 8, 
-            left: 0,
-            right: 0,
-            flexDirection: "row",
-            gap: 6,
-            paddingHorizontal: 12,
-            zIndex: 30,
-          }}
+          style={[
+            styles.progressContainer,
+            { top: insets.top + 8 },
+          ]}
         >
           {media.map((_, i) => (
             <View
               key={i}
-              style={{
-                flex: 1,
-                height: 3,
-                borderRadius: 3,
-                backgroundColor:
-                  i <= index
-                    ? "#fff"
-                    : "rgba(255,255,255,0.3)",
-              }}
+              style={[
+                styles.progressBar,
+                {
+                  backgroundColor:
+                    i <= index
+                      ? "#FFFFFF"
+                      : "rgba(255,255,255,0.3)",
+                },
+              ]}
             />
           ))}
         </View>

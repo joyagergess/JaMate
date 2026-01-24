@@ -115,7 +115,6 @@ collapsedInstruments: {
     borderRadius: 3,
   },
 
-  /* INFO OVERLAY */
 
   infoWrapper: {
     position: "absolute",
@@ -160,7 +159,6 @@ collapsedInstruments: {
     marginTop: 2,
   },
 
-  /* GENRES */
 
   genresRow: {
     flexDirection: "row",
@@ -181,7 +179,6 @@ collapsedInstruments: {
     fontSize: 12,
   },
 
-  /* OBJECTIVES */
 
   chipsRow: {
     flexDirection: "row",
@@ -202,7 +199,6 @@ collapsedInstruments: {
     fontSize: 12,
   },
 
-  /* ACTIONS */
 
   actions: {
     marginTop: 18,

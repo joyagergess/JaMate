@@ -10,8 +10,6 @@ import { useCreateProfile } from "../../../context/CreateProfileContext";
 import { AppButton } from "../../../components/ui/AppButton";
 import { StepIndicator } from "@/components/ui/StepIndicator";
 
-const TOTAL_STEPS = 5;
-const CURRENT_STEP = 3;
 
 export default function CreateProfileBirthdayScreen() {
   const router = useRouter();
@@ -47,7 +45,6 @@ export default function CreateProfileBirthdayScreen() {
 
         <Text style={styles.title}>Your birthday?</Text>
 
-        {/* WEB */}
         {Platform.OS === "web" ? (
           <input
             type="date"
@@ -69,7 +66,6 @@ export default function CreateProfileBirthdayScreen() {
           />
         ) : (
           <>
-            {/*  MOBILE */}
             <TouchableOpacity
               style={styles.textInput}
               activeOpacity={0.7}
