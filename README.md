@@ -129,12 +129,17 @@ Audio files are loaded and normalized using SoundFile and librosa, then analyzed
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
 
-### Add Title Here
+### Deployment
 
-- Description here.
+- This project uses an automated CI/CD pipeline with GitHub Actions to test and deploy the backend to production.
 
-| Postman API 1                           | Postman API 2                         | Postman API 3                         |
+  
+Docker was initially planned for the deployment setup, but hardware limitations preventing local virtualization led to a direct server-based deployment.
+
+
+
+|  API Register (swagger)                           | API Login  (cURL) 2                         | CI CD                         |
 | --------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![Landing](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) | ![fsdaf](./readme/demo/1440x1024.png) |
+| ![Landing](./readme/demo/swagger.jpeg) | ![fsdaf](./readme/demo/curl.jpeg) | ![fsdaf](./readme/demo/CICD.PNG) |
 
 <br><br>
