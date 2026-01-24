@@ -110,12 +110,11 @@ View the full UI and interaction flows on Figma:
 
 - Refactored a complex Eloquent query into a raw SQL query to minimize joins, reduce execution cost, and speed up candidate selection.
 
-<br><br>
 
 - ### Indexing strategy
 | Profile media  | Band suggestions    |
 | --------------------- | --------------------- |
-|![](./readme/index3.PNG) | ![](./readme/index4.PNG) |
+|![](./readme/index4.PNG) | ![](./readme/index3.PNG) |
 
 - Indexes were added on read-heavy tables to optimize frequent queries and improve overall performance.
 
