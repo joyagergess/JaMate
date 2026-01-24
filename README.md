@@ -113,9 +113,9 @@ View the full UI and interaction flows on Figma:
 <br><br>
 
 - ### Indexing strategy
-| Profile media  | Band suggestions members     |
+| Profile media  | Band suggestions    |
 | --------------------- | --------------------- |
-|![](./readme/index.PNG) | ![](./readme/index2.PNG) |
+|![](./readme/index3.PNG) | ![](./readme/index4.PNG) |
 
 - Indexes were added on read-heavy tables to optimize frequent queries and improve overall performance.
 
