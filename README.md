@@ -10,7 +10,7 @@ See the [LICENSE](LICENSE) file for more information.
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
 
-> JaMate is a Tinder-style platform that smartly matches musicians to jam together, form bands, and collaborate. It understands short recording snippets (mood, key, tempo, energy , etc..) to analyze track-to-track compatibility and generate adaptive backing tracks for seamless jamming.
+> JaMate is a platform that smartly matches musicians to jam together, form bands, and collaborate(inspired by tinder). In addition ,it understands short recording snippets (mood, key, tempo, energy , etc..) to analyze track-to-track compatibility and generate adaptive backing tracks for seamless jamming.
 
 <br><br>
 
@@ -100,7 +100,9 @@ View the full UI and interaction flows on Figma:
 
 <br><br>
 
-### Query optimization for performance
+### Performance
+
+- ### Query optimization 
 
 | Old version           | Better version        |
 | --------------------- | --------------------- |
@@ -109,6 +111,17 @@ View the full UI and interaction flows on Figma:
 - Refactored a complex Eloquent query into a raw SQL query to minimize joins, reduce execution cost, and speed up candidate selection.
 
 <br><br>
+
+- ### Indexing strategy
+| Profile media  | Band suggestions members     |
+| --------------------- | --------------------- |
+|![](./readme/index.PNG) | ![](./readme/index2.PNG) |
+
+- Indexes were added on read-heavy tables to optimize frequent queries and improve overall performance.
+
+
+<br><br>
+
 
 | Embedding-Driven Music Discovery & Band Formation | Audio analyze and Ai backing tracks |
 | ------------------------------------------------- | ----------------------------------- |
