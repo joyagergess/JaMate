@@ -96,7 +96,7 @@ View the full UI and interaction flows on Figma:
 
 | Services                         | Validation                        | Testing                     |
 | -------------------------------- | --------------------------------- | --------------------------- |
-| ![Landing](./readme/service.PNG) | ![fsdaf](./readme/validation.PNG) | ![fsdaf](./readme/test.PNG) |
+| ![Landing](./readme/service.PNG) | ![fsdaf](./readme/validation1.PNG) | ![fsdaf](./readme/test.PNG) |
 
 <br><br>
 
