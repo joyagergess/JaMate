@@ -44,7 +44,6 @@ export default function BandMembersScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
-      {/* HEADER */}
       <View
         style={{
           flexDirection: "row",
@@ -71,7 +70,6 @@ export default function BandMembersScreen() {
         </Text>
       </View>
 
-      {/* LIST */}
       <FlatList
         data={members}
         keyExtractor={(m) => m.id.toString()}

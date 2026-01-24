@@ -1,4 +1,3 @@
-console.log("🚀 echo.ts file loaded");
 
 import Echo from "laravel-echo";
 import Pusher from "pusher-js/react-native";
@@ -26,13 +25,13 @@ export const echo = new Echo({
 });
 
 echo.connector.pusher.connection.bind("state_change", (states: any) => {
-  console.log("🔄 WS state:", states);
+  console.log(" WS state:", states);
 });
 
 echo.connector.pusher.connection.bind("connected", () => {
-  console.log("✅ WebSocket connected");
+  console.log("WebSocket connected");
 });
 
 echo.connector.pusher.connection.bind("error", (err: any) => {
-  console.log("❌ WebSocket error", err);
+  console.log(" WebSocket error", err);
 });
