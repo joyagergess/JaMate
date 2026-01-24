@@ -34,7 +34,7 @@ class Profile extends Model
     ];
 
     protected $casts = [
-        'birth_date' => 'date',
+         'birth_date' => 'date',
         'gender' => 'string',
         'experience_level' => 'string',
         'embedding_dirty' => 'boolean',
