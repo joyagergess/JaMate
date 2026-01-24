@@ -13,6 +13,7 @@ import {
 import { buildImageUrl } from "../../utils/media";
 import { Spinner } from "../ui/Spinner";
 import { useProfile } from "../../hooks/profile/useProfile";
+import { bandSuggestionsListStyles as styles } from "../../styles/bandSuggestionsList.styles";
 
 export function BandSuggestionsList() {
   const { data, isLoading } = useBandSuggestions();
@@ -22,7 +23,7 @@ export function BandSuggestionsList() {
 
   if (isLoading) {
     return (
-      <View style={{ paddingTop: 60, alignItems: "center" }}>
+      <View style={styles.loadingContainer}>
         <Spinner size={32} />
       </View>
     );
@@ -30,10 +31,8 @@ export function BandSuggestionsList() {
 
   if (!data?.length) {
     return (
-      <View style={{ paddingTop: 60, alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>
-          No band suggestions yet 
-        </Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.emptyText}>No band suggestions yet</Text>
       </View>
     );
   }
@@ -42,7 +41,7 @@ export function BandSuggestionsList() {
     <FlatList
       data={data}
       keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={styles.listContent}
       renderItem={({ item }) => {
         const members = item.members;
 
@@ -73,19 +72,10 @@ export function BandSuggestionsList() {
         }
 
         return (
-          <View
-            style={{
-              backgroundColor: "#111827",
-              marginHorizontal: 16,
-              marginBottom: 14,
-              borderRadius: 18,
-              padding: 14,
-            }}
-          >
-            <View style={{ flexDirection: "row", marginBottom: 12 }}>
+          <View style={styles.card}>
+            <View style={styles.avatarsRow}>
               {members.map((m) => {
-                const avatar =
-                  m.profile.media?.[0]?.media_url;
+                const avatar = m.profile.media?.[0]?.media_url;
 
                 return (
                   <Image
@@ -95,76 +85,43 @@ export function BandSuggestionsList() {
                         ? { uri: buildImageUrl(avatar) }
                         : require("../../assets/images/unknow.jpg")
                     }
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      marginRight: 8,
-                    }}
+                    style={styles.avatar}
                   />
                 );
               })}
             </View>
 
-            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
-              Band suggestion
-            </Text>
+            <Text style={styles.title}>Band suggestion</Text>
 
-            <Text style={{ color: "#9CA3AF", marginTop: 4 }}>
+            <Text style={styles.subtitle}>
               {acceptedCount}/{members.length} accepted
             </Text>
 
             {statusLabel && (
               <View
-                style={{
-                  marginTop: 10,
-                  alignSelf: "flex-start",
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 999,
-                  backgroundColor: statusColor,
-                }}
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: statusColor },
+                ]}
               >
-                <Text style={{ color: "#fff", fontSize: 12, fontWeight: "600" }}>
-                  {statusLabel}
-                </Text>
+                <Text style={styles.statusText}>{statusLabel}</Text>
               </View>
             )}
 
             {!statusLabel && myDecision === "pending" && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginTop: 14,
-                  justifyContent: "space-between",
-                }}
-              >
+              <View style={styles.actionsRow}>
                 <TouchableOpacity
                   onPress={() => reject.mutate(item.id)}
-                  style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 18,
-                    borderRadius: 14,
-                    backgroundColor: "#1F2937",
-                  }}
+                  style={styles.declineButton}
                 >
-                  <Text style={{ color: "#F87171", fontWeight: "600" }}>
-                    Decline
-                  </Text>
+                  <Text style={styles.declineText}>Decline</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => accept.mutate(item.id)}
-                  style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 18,
-                    borderRadius: 14,
-                    backgroundColor: "#6C63FF",
-                  }}
+                  style={styles.acceptButton}
                 >
-                  <Text style={{ color: "#000", fontWeight: "700" }}>
-                    Accept
-                  </Text>
+                  <Text style={styles.acceptText}>Accept</Text>
                 </TouchableOpacity>
               </View>
             )}

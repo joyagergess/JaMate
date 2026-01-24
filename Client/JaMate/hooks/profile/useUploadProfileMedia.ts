@@ -10,7 +10,7 @@ export function useUploadProfileMedia() {
       form.append("media_type", media.type);
 
       form.append("media_file", {
-        uri: media.localUri,
+        uri: media.uri,
         name: `media.${media.type === "video" ? "mp4" : "jpg"}`,
         type: media.mimeType,
       } as any);

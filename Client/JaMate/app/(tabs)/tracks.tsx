@@ -1,4 +1,3 @@
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMemo, useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -20,10 +19,12 @@ import {
 } from "../../components/tracks/TrackActionsMenu";
 
 import { useAudioPlayer } from "../../hooks/tracks/useAudioPlayer";
-import { TrackListItem } from "../../components/tracks/TrackListItem";
-import { GeneratingCard } from "../../components/tracks/GeneratingCard";
-
 import { useAiBackingJob } from "@/hooks/tracks/useAiBackingJob";
+
+import { TracksTabs } from "../../components/tracks/TracksTabs";
+import { TracksEmptyState } from "../../components/tracks/TracksEmptyState";
+import { TracksList } from "../../components/tracks/TracksList";
+import { AiDoneOverlay } from "../../components/tracks/AiDoneOverlay";
 
 type Tab = "tracks" | "ai" | "record";
 
@@ -48,53 +49,41 @@ export default function MyTracks() {
 
   const [isGeneratingUi, setIsGeneratingUi] = useState(false);
   const [aiDoneVisible, setAiDoneVisible] = useState(false);
-
   const [search, setSearch] = useState("");
 
-  const {
-    togglePlay,
-    playingId,
-    isPlaying,
-    remainingSeconds,
-    loadingTrackId,
-    progress,
-  } = useAudioPlayer();
+  type Track = {
+    id: number;
+    title?: string;
+    track_type: string;
+  };
+
+  const audio = useAudioPlayer();
 
   useEffect(() => {
-    if (tabParam === "tracks" || tabParam === "ai" || tabParam === "record") {
-      setTab(tabParam);
-    }
+    if (tabParam) setTab(tabParam);
   }, [tabParam]);
 
   const originals = useMemo(
-    () => tracks?.filter((t: any) => t.track_type !== "ai_generated") ?? [],
-    [tracks]
+    () => tracks?.filter((t: Track) => t.track_type !== "ai_generated") ?? [],
+    [tracks],
   );
 
   const aiTracks = useMemo(
-    () => tracks?.filter((t: any) => t.track_type === "ai_generated") ?? [],
-    [tracks]
+    () => tracks?.filter((t: Track) => t.track_type === "ai_generated") ?? [],
+    [tracks],
   );
 
-  const filteredOriginals = useMemo(() => {
-    if (!search.trim()) return originals;
-    return originals.filter((t: any) =>
-      t.title?.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [originals, search]);
-
-  const filteredAiTracks = useMemo(() => {
-    if (!search.trim()) return aiTracks;
-    return aiTracks.filter((t: any) =>
-      t.title?.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [aiTracks, search]);
+  const data =
+    tab === "tracks"
+      ? originals.filter((t: Track) =>
+          t.title?.toLowerCase().includes(search.toLowerCase()),
+        )
+      : aiTracks.filter((t: Track) =>
+          t.title?.toLowerCase().includes(search.toLowerCase()),
+        );
 
   useEffect(() => {
-    if (!jobId) return;
-    if (!aiJob) return;
-    if (aiJob.status !== "done") return;
-    if (jobHandled) return;
+    if (!jobId || !aiJob || aiJob.status !== "done" || jobHandled) return;
 
     setIsGeneratingUi(false);
     queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
@@ -107,15 +96,6 @@ export default function MyTracks() {
     }, 0);
   }, [jobId, aiJob, jobHandled]);
 
-  const openMenu = (event: any, track: any) => {
-    event.currentTarget.measureInWindow(
-      (x: number, y: number, width: number, height: number) => {
-        setMenuAnchor({ x, y, width, height });
-        setMenuTrack(track);
-      }
-    );
-  };
-
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loading}>
@@ -124,28 +104,9 @@ export default function MyTracks() {
     );
   }
 
-  const emptyText =
-    tab === "tracks"
-      ? "No tracks found"
-      : tab === "ai"
-      ? "No AI backing tracks found"
-      : null;
-
   return (
     <SafeAreaView style={styles.screen}>
-      <View style={styles.tabs}>
-        {["tracks", "ai", "record"].map((t) => (
-          <TouchableOpacity key={t} onPress={() => setTab(t as Tab)}>
-            <Text style={[styles.tabText, tab === t && styles.tabActive]}>
-              {t === "tracks"
-                ? "My Tracks"
-                : t === "ai"
-                ? "AI Backing Tracks"
-                : "Record"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <TracksTabs tab={tab} onChange={setTab} />
 
       {tab !== "record" && (
         <SearchBar
@@ -157,68 +118,36 @@ export default function MyTracks() {
 
       {tab === "record" ? (
         <RecordSnippet />
+      ) : data.length === 0 && !isGeneratingUi ? (
+        <TracksEmptyState
+          text={
+            tab === "tracks" ? "No tracks found" : "No AI backing tracks found"
+          }
+        />
       ) : (
-        <>
-          {(tab === "tracks" && filteredOriginals.length === 0) ||
-          (tab === "ai" && filteredAiTracks.length === 0 && !isGeneratingUi) ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 24,
-              }}
-            >
-              <Text
-                style={{
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: 16,
-                  textAlign: "center",
-                }}
-              >
-                {emptyText}
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={tab === "tracks" ? filteredOriginals : filteredAiTracks}
-              keyExtractor={(item) => item.id.toString()}
-              ListHeaderComponent={
-                tab === "ai" && isGeneratingUi ? <GeneratingCard /> : null
-              }
-              contentContainerStyle={{ paddingBottom: 40 }}
-              renderItem={({ item }) => (
-                <TrackListItem
-                  item={item}
-                  isAi={tab === "ai"}
-                  isPlaying={playingId === item.id && isPlaying}
-                  loading={loadingTrackId === item.id}
-                  remainingSeconds={remainingSeconds}
-                  progress={playingId === item.id ? progress : 0}
-                  onPlay={() => togglePlay(item)}
-                  onMenu={(e) => openMenu(e, item)}
-                  onGenerateAi={
-                    tab === "tracks"
-                      ? () => {
-                          setTab("ai");
-                          setIsGeneratingUi(true);
-
-                          generateBacking.mutate(item.id, {
-                            onSuccess: (data) => {
-                              setJobId(data.data.job_id);
-                            },
-                            onError: () => {
-                              setIsGeneratingUi(false);
-                            },
-                          });
-                        }
-                      : undefined
-                  }
-                />
-              )}
-            />
-          )}
-        </>
+        <TracksList
+          data={data}
+          isAi={tab === "ai"}
+          isGeneratingUi={isGeneratingUi}
+          onPlay={audio.togglePlay}
+          {...audio}
+          onMenu={(e, item) => {
+            e.currentTarget.measureInWindow(
+              (x: number, y: number, width: number, height: number) => {
+                setMenuAnchor({ x, y, width, height });
+                setMenuTrack(item);
+              },
+            );
+          }}
+          onGenerateAi={(item) => {
+            setTab("ai");
+            setIsGeneratingUi(true);
+            generateBacking.mutate(item.id, {
+              onSuccess: (d) => setJobId(d.data.job_id),
+              onError: () => setIsGeneratingUi(false),
+            });
+          }}
+        />
       )}
 
       {menuTrack && (
@@ -254,46 +183,12 @@ export default function MyTracks() {
       )}
 
       {aiDoneVisible && (
-        <View
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 24,
+        <AiDoneOverlay
+          onClose={() => {
+            setAiDoneVisible(false);
+            setTab("ai");
           }}
-        >
-          <View
-            style={{
-              backgroundColor: "#111",
-              borderRadius: 12,
-              padding: 24,
-              width: "100%",
-              maxWidth: 340,
-            }}
-          >
-            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "600" }}>
-              AI Track Ready
-            </Text>
-
-            <Text style={{ color: "rgba(255,255,255,0.7)", marginTop: 8 }}>
-              Your AI backing track has finished generating.
-            </Text>
-
-            <TouchableOpacity
-              style={{ marginTop: 16 }}
-              onPress={() => {
-                setAiDoneVisible(false);
-                setTab("ai");
-              }}
-            >
-              <Text style={{ color: "#6C63FF", fontWeight: "600" }}>
-                View AI Track
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        />
       )}
     </SafeAreaView>
   );

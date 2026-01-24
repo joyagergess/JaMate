@@ -8,6 +8,7 @@ import {
 } from "../../hooks/bands/useBandSuggestions";
 import { BandSuggestionCard } from "./BandSuggestionCard";
 import { useProfile } from "../../hooks/profile/useProfile";
+import { bandSuggestionsDeckStyles as styles } from "../../styles/bandSuggestionsDeck.styles";
 
 type CardStatus = "waiting" | "rejected" | "formed" | undefined;
 
@@ -20,24 +21,24 @@ export function BandSuggestionsDeck() {
 
   if (isLoading) {
     return (
-      <View style={{ paddingTop: 80, alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>Loading…</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading…</Text>
       </View>
     );
   }
 
   if (!data?.length) {
     return (
-      <View style={{ paddingTop: 80, alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>No band suggestions yet</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>No band suggestions yet</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ paddingTop: 24, paddingBottom: 120 }}
+      style={styles.scroll}
+      contentContainerStyle={styles.scrollContent}
     >
       {data.map((suggestion: BandSuggestion) => {
         const members = suggestion.members;
@@ -69,18 +70,11 @@ export function BandSuggestionsDeck() {
         }
 
         return (
-          <View key={suggestion.id} style={{ marginBottom: 44 }}>
+          <View key={suggestion.id} style={styles.cardWrapper}>
             <BandSuggestionCard members={members} status={status} />
 
             {helperText && (
-              <Text
-                style={{
-                  marginTop: 10,
-                  textAlign: "center",
-                  fontSize: 13,
-                  color: helperColor,
-                }}
-              >
+              <Text style={[styles.helperText, { color: helperColor }]}>
                 {helperText}
               </Text>
             )}
@@ -89,66 +83,26 @@ export function BandSuggestionsDeck() {
               <TouchableOpacity
                 onPress={() => router.push("/messages")}
                 activeOpacity={0.7}
-                style={{
-                  alignSelf: "center", 
-                  marginTop: 14,
-                  paddingHorizontal: 10, 
-                  paddingVertical: 8, 
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: "#6C63FF",
-                  backgroundColor: "rgba(22,199,132,0.08)",
-                }}
+                style={styles.openChatButton}
               >
-                <Text
-                  style={{
-                    color: "#6C63FF",
-                    fontSize: 13,
-                    fontWeight: "600",
-                    letterSpacing: 0.2,
-                  }}
-                >
-                  Open group chat
-                </Text>
+                <Text style={styles.openChatText}>Open group chat</Text>
               </TouchableOpacity>
             )}
 
             {suggestion.status === "pending" && myDecision === "pending" && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginTop: 18,
-                  marginHorizontal: 32,
-                }}
-              >
+              <View style={styles.actionsRow}>
                 <TouchableOpacity
                   onPress={() => reject.mutate(suggestion.id)}
-                  style={{
-                    flex: 1,
-                    marginRight: 10,
-                    paddingVertical: 12,
-                    borderRadius: 14,
-                    backgroundColor: "#1F2937",
-                    alignItems: "center",
-                  }}
+                  style={styles.declineButton}
                 >
-                  <Text style={{ color: "#F87171" }}>Decline</Text>
+                  <Text style={styles.declineText}>Decline</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => accept.mutate(suggestion.id)}
-                  style={{
-                    flex: 1,
-                    marginLeft: 10,
-                    paddingVertical: 12,
-                    borderRadius: 14,
-                    backgroundColor: "#6C63FF",
-                    alignItems: "center",
-                  }}
+                  style={styles.acceptButton}
                 >
-                  <Text style={{ color: "#000", fontWeight: "800" }}>
-                    Accept
-                  </Text>
+                  <Text style={styles.acceptText}>Accept</Text>
                 </TouchableOpacity>
               </View>
             )}

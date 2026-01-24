@@ -1,4 +1,4 @@
-import { Modal, View, TouchableOpacity, StyleSheet } from "react-native";
+import { Modal, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
 import { useEffect, useRef, useState } from "react";
@@ -6,6 +6,7 @@ import * as SecureStore from "expo-secure-store";
 
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { Spinner } from "../ui/Spinner";
+import { videoPreviewModalStyles as styles } from "../../styles/videoPreviewModal.styles";
 
 type Props = {
   visible: boolean;
@@ -46,7 +47,7 @@ export function VideoPreviewModal({
 
         <Video
           ref={videoRef}
-          key={videoUrl} 
+          key={videoUrl}
           source={{
             uri: videoUrl,
             headers: {
@@ -58,15 +59,11 @@ export function VideoPreviewModal({
           useNativeControls
           shouldPlay
           isLooping
-
-          /* RELIABLE PLAYBACK SIGNAL */
           onPlaybackStatusUpdate={(status: AVPlaybackStatus) => {
             if (status.isLoaded && status.isPlaying) {
               setVideoLoading(false);
             }
           }}
-
-          /* SAFETY NETS */
           onReadyForDisplay={() => setVideoLoading(false)}
           onError={() => setVideoLoading(false)}
         />
@@ -74,27 +71,3 @@ export function VideoPreviewModal({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  video: {
-    width: "100%",
-    height: "100%",
-  },
-  close: {
-    position: "absolute",
-    top: 50,
-    right: 20,
-    zIndex: 20,
-  },
-  loader: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 10,
-    backgroundColor: "#000",
-  },
-});

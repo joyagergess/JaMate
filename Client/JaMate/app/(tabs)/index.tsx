@@ -3,7 +3,6 @@ import {
   Text,
   StatusBar,
   Animated,
-  PanResponder,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
@@ -17,17 +16,27 @@ import { Spinner } from "../../components/ui/Spinner";
 import { useFeed } from "../../hooks/feed/useFeed";
 import { useSwipe } from "../../hooks/feed/useSwipe";
 import { useProfile } from "../../hooks/profile/useProfile";
+import { useSwipeButtons } from "../../components/feed/useSwipeButtons";
+import { useSwipeGesture } from "../../components/feed/useSwipeGesture";
+
 import { FeedItem } from "../../types/feed";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { styles } from "../../styles/homeFeed.styles";
 
 import HomeCard from "../../components/feed/HomeCard";
+import { SwipeActions } from "../../components/feed/SwipeActions";
 
-const { width, height } = Dimensions.get("window");
+import {
+  homeScreenStyles as s,
+  COLORS,
+  LAYOUT,
+} from "../../styles/homeFeed.screen.styles";
+
+const { width } = Dimensions.get("window");
 
 const ROTATION = 12;
 const SWIPE_OUT = width * 1.2;
-const DROP_ZONE_Y = height - 160;
+const DROP_ZONE_Y = LAYOUT.DROP_ZONE_Y;
 
 export default function HomeScreen() {
   const [feedIndex, setFeedIndex] = useState(0);
@@ -40,8 +49,9 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const hasPrefetchedRef = useRef(false);
+  const activeProfileIdRef = useRef<number | null>(null);
 
-
+  
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -51,7 +61,6 @@ export default function HomeScreen() {
     }, []),
   );
 
-
   useEffect(() => {
     if (feedIndex === 15 && !hasPrefetchedRef.current) {
       hasPrefetchedRef.current = true;
@@ -59,26 +68,37 @@ export default function HomeScreen() {
     }
   }, [feedIndex]);
 
-
   useEffect(() => {
     if (feed && feedIndex >= feed.length && !isLoading) {
       refetch().then(() => setFeedIndex(0));
     }
   }, [feedIndex, feed, isLoading]);
 
+  useEffect(() => {
+    SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
+  }, []);
+
 
   const onlyHasProfilePicture =
     me?.media?.length === 1 && me.media[0].order_index === 0;
 
+  const item: FeedItem | null = feed?.[feedIndex] ?? null;
+  const profile = item?.profile ?? null;
 
+  useEffect(() => {
+    activeProfileIdRef.current = profile?.id ?? null;
+  }, [profile?.id]);
+
+  
   const position = useRef(new Animated.ValueXY()).current;
-  const skipScale = useRef(new Animated.Value(1)).current;
-  const jamScale = useRef(new Animated.Value(1)).current;
-  const skipOpacity = useRef(new Animated.Value(0.6)).current;
-  const jamOpacity = useRef(new Animated.Value(0.6)).current;
 
-  const activeProfileIdRef = useRef<number | null>(null);
-  const hoveredRef = useRef<"skip" | "jam" | null>(null);
+  const {
+    skipScale,
+    jamScale,
+    skipOpacity,
+    jamOpacity,
+    animateButtons,
+  } = useSwipeButtons();
 
   const rotate = position.x.interpolate({
     inputRange: [-width / 2, 0, width / 2],
@@ -91,32 +111,6 @@ export default function HomeScreen() {
       { translateY: position.y },
       { rotate },
     ],
-  };
-
-
-  const animateButtons = (target: "skip" | "jam" | null) => {
-    Animated.parallel([
-      Animated.spring(skipScale, {
-        toValue: target === "skip" ? 1.35 : 1,
-        friction: 5,
-        useNativeDriver: true,
-      }),
-      Animated.spring(jamScale, {
-        toValue: target === "jam" ? 1.35 : 1,
-        friction: 5,
-        useNativeDriver: true,
-      }),
-      Animated.timing(skipOpacity, {
-        toValue: target === "skip" ? 1 : 0.6,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-      Animated.timing(jamOpacity, {
-        toValue: target === "jam" ? 1 : 0.6,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-    ]).start();
   };
 
   const resetCard = () => {
@@ -152,63 +146,30 @@ export default function HomeScreen() {
     });
   };
 
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5,
-
-      onPanResponderMove: (_, g) => {
-        position.setValue({ x: g.dx, y: g.dy });
-
-        if (g.moveY > DROP_ZONE_Y) {
-          const dir = g.moveX < width / 2 ? "skip" : "jam";
-          hoveredRef.current = dir;
-          animateButtons(dir);
-        } else {
-          hoveredRef.current = null;
-          animateButtons(null);
-        }
-      },
-
-      onPanResponderRelease: () => {
-        if (hoveredRef.current) forceSwipe(hoveredRef.current);
-        else resetCard();
-        hoveredRef.current = null;
-      },
-    }),
-  ).current;
-
-
-  useEffect(() => {
-    SecureStore.getItemAsync(AUTH_TOKEN_KEY).then(setToken);
-  }, []);
-
-  const item: FeedItem | null = feed?.[feedIndex] ?? null;
-  const profile = item?.profile ?? null;
-
-  useEffect(() => {
-    activeProfileIdRef.current = profile?.id ?? null;
-  }, [profile?.id]);
+  
+  const panResponder = useSwipeGesture({
+    position,
+    dropZoneY: DROP_ZONE_Y,
+    onHover: animateButtons,
+    onRelease: (dir) => {
+      if (dir) forceSwipe(dir);
+      else resetCard();
+    },
+  });
 
 
   if (!isLoading && feed && feed.length === 0) {
     return (
       <SafeAreaView style={styles.screen}>
         <StatusBar hidden />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Ionicons name="people-outline" size={72} color="#6D5DF6" />
-          <Text style={{ color: "#fff", fontSize: 22, marginTop: 20 }}>
-            No musicians available right now
-          </Text>
-          <Text style={{ color: "#9CA3AF", marginTop: 10 }}>
-            New musicians will appear soon 
-          </Text>
+        <View style={s.emptyContainer}>
+          <Ionicons name="people-outline" size={72} color={COLORS.PRIMARY} />
+          <Text style={s.emptyTitle}>No musicians available right now</Text>
+          <Text style={s.emptySubtitle}>New musicians will appear soon</Text>
         </View>
       </SafeAreaView>
     );
   }
-
 
   if (!token || (!profile && isLoading)) {
     return (
@@ -218,21 +179,17 @@ export default function HomeScreen() {
     );
   }
 
-
   if (onlyHasProfilePicture) {
     return (
       <SafeAreaView style={styles.screen}>
         <StatusBar hidden />
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Ionicons name="images-outline" size={72} color="#6D5DF6" />
-          <Text style={{ color: "#fff", fontSize: 22, marginTop: 20 }}>
-            Upload media to continue
-          </Text>
+        <View style={s.emptyContainer}>
+          <Ionicons name="images-outline" size={72} color={COLORS.PRIMARY} />
+          <Text style={s.emptyTitle}>Upload media to continue</Text>
         </View>
       </SafeAreaView>
     );
   }
-
 
 
   return (
@@ -247,34 +204,27 @@ export default function HomeScreen() {
       />
 
       {showMatchModal && (
-        <Animated.View style={styles.matchOverlay}>
-          <Text style={styles.matchTitle}>It's a Jam! </Text>
+        <Animated.View style={s.matchOverlay}>
+          <Text style={s.matchTitle}>It's a Jam!</Text>
           <TouchableOpacity
             onPress={() => {
               setShowMatchModal(false);
               router.push("/matches");
             }}
           >
-            <Text style={styles.matchButtonText}>View Match</Text>
+            <Text style={s.matchButtonText}>View Match</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
 
-      <View style={styles.actions}>
-        <Animated.View style={{ transform: [{ scale: skipScale }], opacity: skipOpacity }}>
-          <TouchableOpacity style={styles.skipBtn} onPress={() => forceSwipe("skip")}>
-            <Ionicons name="close" size={20} color="#fff" />
-            <Text style={styles.btnText}>Skip</Text>
-          </TouchableOpacity>
-        </Animated.View>
-
-        <Animated.View style={{ transform: [{ scale: jamScale }], opacity: jamOpacity }}>
-          <TouchableOpacity style={styles.jamBtn} onPress={() => forceSwipe("jam")}>
-            <Ionicons name="musical-notes" size={20} color="#fff" />
-            <Text style={styles.btnTextBold}>Jam</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+      <SwipeActions
+        skipScale={skipScale}
+        jamScale={jamScale}
+        skipOpacity={skipOpacity}
+        jamOpacity={jamOpacity}
+        onSkip={() => forceSwipe("skip")}
+        onJam={() => forceSwipe("jam")}
+      />
     </SafeAreaView>
   );
 }

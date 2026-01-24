@@ -6,7 +6,7 @@ export function useProfileById(profileId: number) {
     queryKey: ["profile", profileId],
     queryFn: async () => {
       const res = await apiClient.get(`/profile/${profileId}`);
-      return res.data.data; 
+      return res.data.data;
     },
     enabled: !!profileId,
   });

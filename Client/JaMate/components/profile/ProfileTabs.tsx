@@ -5,6 +5,7 @@ import { ProfileInfoSection } from "./ProfileInfoSection";
 import { ProfileMediaSection } from "./ProfileMediaSection";
 import { ProfileTracksSection } from "./ProfileTracksSection";
 import { ProfileMedia } from "../../hooks/profile/useProfileMedia";
+import { profileTabsStyles as styles } from "../../styles/profileTabs.styles";
 
 const tabs = ["Infos", "Tracks", "Media"] as const;
 
@@ -25,14 +26,8 @@ export function ProfileTabs({
     useState<(typeof tabs)[number]>("Infos");
 
   return (
-    <View style={{ marginTop: 32 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          borderBottomWidth: 1,
-          borderBottomColor: "rgba(255,255,255,0.08)",
-        }}
-      >
+    <View style={styles.container}>
+      <View style={styles.tabsRow}>
         {tabs.map((tab) => {
           const isActive = active === tab;
 
@@ -40,39 +35,28 @@ export function ProfileTabs({
             <TouchableOpacity
               key={tab}
               onPress={() => setActive(tab)}
-              style={{
-                flex: 1,
-                alignItems: "center",
-                paddingVertical: 12,
-              }}
+              style={styles.tabButton}
             >
               <Text
-                style={{
-                  color: isActive ? "#6D5DF6" : "#9CA3AF",
-                  fontWeight: "600",
-                }}
+                style={[
+                  styles.tabText,
+                  isActive
+                    ? styles.tabTextActive
+                    : styles.tabTextInactive,
+                ]}
               >
                 {tab}
               </Text>
 
               {isActive && (
-                <View
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    height: 2,
-                    width: "60%",
-                    backgroundColor: "#6D5DF6",
-                    borderRadius: 2,
-                  }}
-                />
+                <View style={styles.indicator} />
               )}
             </TouchableOpacity>
           );
         })}
       </View>
 
-      <View style={{ marginTop: 24 }}>
+      <View style={styles.content}>
         {active === "Infos" && (
           <ProfileInfoSection profile={profile} />
         )}

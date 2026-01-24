@@ -7,6 +7,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { matchesStyles as styles } from "../../styles/matches.styles";
+import { trackComponentsStyles as c } from "../../styles/trackComponents.styles";
 import { formatDate } from "../../utils/formatDate";
 
 type Props = {
@@ -34,7 +35,7 @@ export function TrackListItem({
 }: Props) {
   return (
     <View style={[styles.card, { flexDirection: "column" }]}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      <View style={c.row}>
         <TouchableOpacity onPress={onPlay} disabled={loading}>
           {loading ? (
             <ActivityIndicator
@@ -51,13 +52,7 @@ export function TrackListItem({
         </TouchableOpacity>
 
         <View style={{ flex: 1 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
+          <View style={c.titleRow}>
             <Text
               style={[styles.name, { flex: 1 }]}
               numberOfLines={1}
@@ -66,23 +61,8 @@ export function TrackListItem({
             </Text>
 
             {item.ai_key && (
-              <View
-                style={{
-                  backgroundColor: "rgba(108,99,255,0.15)",
-                  borderRadius: 999,
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
-                }}
-              >
-                <Text
-                  style={{
-                    color: "#6C63FF",
-                    fontSize: 11,
-                    fontWeight: "600",
-                  }}
-                >
-                  {item.ai_key}
-                </Text>
+              <View style={c.keyBadge}>
+                <Text style={c.keyText}>{item.ai_key}</Text>
               </View>
             )}
           </View>
@@ -95,72 +75,45 @@ export function TrackListItem({
               : `${item.duration}s`}
           </Text>
 
-          <View
-            style={{
-              height: 4,
-              backgroundColor: "#1F2937",
-              borderRadius: 999,
-              marginTop: 6,
-              overflow: "hidden",
-            }}
-          >
+          <View style={c.progressBar}>
             <View
-              style={{
-                height: "100%",
-                width: `${Math.min(progress * 100, 100)}%`,
-                backgroundColor: isAi ? "#6C63FF" : "#7C7CFF",
-                opacity: isPlaying ? 1 : 0.6,
-              }}
+              style={[
+                c.progressFill,
+                {
+                  width: `${Math.min(progress * 100, 100)}%`,
+                  backgroundColor: isAi ? "#6C63FF" : "#7C7CFF",
+                  opacity: isPlaying ? 1 : 0.6,
+                },
+              ]}
             />
           </View>
 
           {!!item.created_at && (
-            <Text
-              style={{
-                color: "#6B7280",
-                fontSize: 11,
-                marginTop: 4,
-              }}
-            >
+            <Text style={c.dateText}>
               {formatDate(item.created_at)}
             </Text>
           )}
         </View>
 
-        <View style={{ flexDirection: "row", gap: 12 }}>
+        <View style={c.row}>
           {!isAi && onGenerateAi && (
             <TouchableOpacity
               onPress={onGenerateAi}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-                backgroundColor: "#1F2937",
-                borderWidth: 1,
-                borderColor: "#374151",
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: 999,
-              }}
+              style={c.aiButton}
             >
               <Ionicons
                 name="sparkles-outline"
                 size={12}
                 color="#6C63FF"
               />
-              <Text
-                style={{
-                  color: "#6C63FF",
-                  fontSize: 11,
-                  fontWeight: "600",
-                }}
-              >
-                AI track
-              </Text>
+              <Text style={c.aiButtonText}>AI track</Text>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity onPress={onMenu} style={{ padding: 6 }}>
+          <TouchableOpacity
+            onPress={onMenu}
+            style={c.menuTrigger}
+          >
             <Ionicons
               name="ellipsis-vertical"
               size={18}

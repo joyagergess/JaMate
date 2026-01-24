@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { SelectablePill } from "../ui/SelectablePill";
 import { AppButton } from "../ui/AppButton";
+import { pillPickerModalStyles as styles } from "../../styles/pillPickerModal.styles";
 
 type Props = {
   visible: boolean;
@@ -29,41 +30,26 @@ export function PillPickerModal({
 }: Props) {
   const [query, setQuery] = useState("");
 
-  const filtered = items.filter(i =>
+  const filtered = items.filter((i) =>
     i.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={{ flex: 1, backgroundColor: "#0B0E13", padding: 24 }}>
-        <Text
-          style={{
-            color: "#FFFFFF",
-            fontSize: 20,
-            fontWeight: "700",
-            marginBottom: 16,
-          }}
-        >
-          {title}
-        </Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>{title}</Text>
 
         <TextInput
           placeholder="Search..."
           placeholderTextColor="#6B7280"
           value={query}
           onChangeText={setQuery}
-          style={{
-            backgroundColor: "#111827",
-            color: "#FFFFFF",
-            borderRadius: 12,
-            padding: 14,
-            marginBottom: 16,
-          }}
+          style={styles.searchInput}
         />
 
         <ScrollView>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {filtered.map(item => (
+          <View style={styles.pillsWrapper}>
+            {filtered.map((item) => (
               <SelectablePill
                 key={item}
                 label={item}

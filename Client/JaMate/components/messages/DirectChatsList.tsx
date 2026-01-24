@@ -2,6 +2,7 @@ import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { buildImageUrl } from "../../utils/media";
 import { ConversationItem } from "../../hooks/messages/useConversations";
+import { directChatsListStyles as styles } from "../../styles/directChatsList.styles";
 
 type Props = {
   conversations: ConversationItem[];
@@ -23,8 +24,8 @@ export function DirectChatsList({ conversations, me, search }: Props) {
 
   if (!directChats.length) {
     return (
-      <View style={{ paddingTop: 60, alignItems: "center" }}>
-        <Text style={{ color: "#9CA3AF" }}>No chats yet</Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No chats yet</Text>
       </View>
     );
   }
@@ -44,7 +45,9 @@ export function DirectChatsList({ conversations, me, search }: Props) {
 
         if (
           search &&
-          !otherProfile.name.toLowerCase().includes(search.toLowerCase())
+          !otherProfile.name
+            .toLowerCase()
+            .includes(search.toLowerCase())
         ) {
           return null;
         }
@@ -55,7 +58,10 @@ export function DirectChatsList({ conversations, me, search }: Props) {
             .sort((a, b) => a.order_index - b.order_index)
             .find((m) => m.media_type === "image")?.media_url ?? null;
 
-        const avatarUrl = avatarPath ? buildImageUrl(avatarPath) : null;
+        const avatarUrl = avatarPath
+          ? buildImageUrl(avatarPath)
+          : null;
+
         const lastMessage = item.messages?.[0];
 
         return (
@@ -69,17 +75,10 @@ export function DirectChatsList({ conversations, me, search }: Props) {
             activeOpacity={0.85}
           >
             <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingHorizontal: 16,
-                paddingVertical: 14,
-                backgroundColor: isUnread
-                  ? "rgba(108, 99, 255, 0.08)"
-                  : "transparent",
-                borderBottomWidth: 1,
-                borderBottomColor: "rgba(255,255,255,0.05)",
-              }}
+              style={[
+                styles.row,
+                isUnread && styles.unreadRow,
+              ]}
             >
               <Image
                 source={
@@ -87,55 +86,33 @@ export function DirectChatsList({ conversations, me, search }: Props) {
                     ? { uri: avatarUrl }
                     : require("../../assets/images/unknow.jpg")
                 }
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                }}
+                style={styles.avatar}
               />
 
-              <View style={{ flex: 1, marginLeft: 12 }}>
+              <View style={styles.content}>
                 <Text
-                  style={{
-                    color: "#fff",
-                    fontWeight: isUnread ? "700" : "600",
-                  }}
+                  style={[
+                    styles.name,
+                    isUnread && styles.nameUnread,
+                  ]}
                 >
                   {otherProfile.name}
                 </Text>
 
                 <Text
                   numberOfLines={1}
-                  style={{
-                    color: isUnread ? "#FFFFFF" : "#9CA3AF",
-                    fontWeight: isUnread ? "500" : "400",
-                    marginTop: 2,
-                  }}
+                  style={[
+                    styles.preview,
+                    isUnread && styles.previewUnread,
+                  ]}
                 >
                   {getMessagePreview(lastMessage)}
                 </Text>
               </View>
 
               {isUnread && (
-                <View
-                  style={{
-                    minWidth: 18,
-                    height: 18,
-                    borderRadius: 9,
-                    backgroundColor: "#FF375F",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingHorizontal: 6,
-                    marginLeft: 8,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 11,
-                      fontWeight: "700",
-                    }}
-                  >
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
                     {item.unread_count}
                   </Text>
                 </View>
@@ -154,13 +131,10 @@ function getMessagePreview(message: any) {
   switch (message.type) {
     case "text":
       return message.body;
-
     case "track":
       return message.track_title ?? "Shared a track";
-
     case "voice":
       return "Voice message";
-
     default:
       return "New message";
   }

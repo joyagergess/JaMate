@@ -13,6 +13,7 @@ import { useMemo } from "react";
 import { useConversations } from "../../../../hooks/messages/useConversations";
 import { buildImageUrl } from "../../../../utils/media";
 import { Spinner } from "../../../../components/ui/Spinner";
+import { styles } from "../../../../styles/BandMembersScreen.styles";
 
 export default function BandMembersScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -27,14 +28,7 @@ export default function BandMembersScreen() {
 
   if (isLoading || !conversation) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#0B0E13",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <View style={styles.loadingContainer}>
         <Spinner size={42} />
       </View>
     );
@@ -43,31 +37,13 @@ export default function BandMembersScreen() {
   const members = conversation.participants.map((p) => p.profile);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0B0E13" }}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 16,
-          paddingVertical: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: "rgba(255,255,255,0.06)",
-        }}
-      >
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="#7C7CFF" />
         </TouchableOpacity>
 
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: "700",
-            marginLeft: 12,
-          }}
-        >
-          Band members
-        </Text>
+        <Text style={styles.headerTitle}>Band members</Text>
       </View>
 
       <FlatList
@@ -95,39 +71,17 @@ export default function BandMembersScreen() {
               }
               activeOpacity={0.85}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingHorizontal: 16,
-                  paddingVertical: 14,
-                  borderBottomWidth: 1,
-                  borderBottomColor: "rgba(255,255,255,0.05)",
-                }}
-              >
+              <View style={styles.memberRow}>
                 <Image
                   source={
                     avatarUrl
                       ? { uri: avatarUrl }
                       : require("../../../../assets/images/unknow.jpg")
                   }
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    marginRight: 12,
-                  }}
+                  style={styles.avatar}
                 />
 
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontSize: 15,
-                    fontWeight: "600",
-                  }}
-                >
-                  {item.name}
-                </Text>
+                <Text style={styles.memberName}>{item.name}</Text>
               </View>
             </TouchableOpacity>
           );

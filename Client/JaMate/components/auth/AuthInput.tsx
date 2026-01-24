@@ -1,5 +1,5 @@
-import { Text, TextInput } from 'react-native';
-import { authStyles as styles } from '../../styles/auth.styles';
+import { Text, TextInput } from "react-native";
+import { authInputStyles as styles } from "../../styles/auth.components.styles";
 
 type Props = {
   label: string;

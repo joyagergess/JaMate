@@ -21,33 +21,20 @@ export function useBandSetlist(bandId?: number) {
     queryKey: ["band-setlist", bandId],
     enabled: !!bandId,
     queryFn: async () => {
-      console.log("➡️ FETCH /bands/" + bandId + "/setlist");
+      console.log(" FETCH /bands/" + bandId + "/setlist");
 
       const res = await apiClient.get(
         `/bands/${bandId}/setlist`
       );
 
-      console.log("⬅️ RESPONSE:", res.data.data);
       return res.data.data;
     },
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      console.log("⏱️ refetchInterval check → status:", status);
       return status === "processing" ? 3000 : false;
     },
   });
 
-  useEffect(() => {
-    if (query.data) {
-      console.log("✅ QUERY DATA UPDATED:", query.data);
-    }
-  }, [query.data]);
-
-  useEffect(() => {
-    if (query.error) {
-      console.error("❌ QUERY ERROR:", query.error);
-    }
-  }, [query.error]);
 
   return query;
 }

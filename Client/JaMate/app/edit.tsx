@@ -14,6 +14,15 @@ import * as ImagePicker from "expo-image-picker";
 import { useUpdateAvatar } from "../hooks/profile/useUpdateAvatar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  Title,
+  Label,
+  Input,
+  Section,
+  Row,
+  Segment,
+  inputStyle,
+} from "../components/profile/EditProfileHelpers";
 
 import { useProfile } from "../hooks/profile/useProfile";
 import { useUpdateProfile } from "../hooks/profile/useUpdateProfile";
@@ -357,7 +366,6 @@ export default function EditProfileScreen() {
           </View>
         </ScrollView>
 
-        {/* ===== SEARCH MODALS ===== */}
 
         <SearchablePickerModal
           visible={showGenres}
@@ -382,82 +390,4 @@ export default function EditProfileScreen() {
   );
 }
 
-function Title({ children }: any) {
-  return (
-    <Text
-      style={{
-        color: "#fff",
-        fontSize: 24,
-        fontWeight: "700",
-        marginBottom: 24,
-      }}
-    >
-      {children}
-    </Text>
-  );
-}
 
-function Label({ children }: any) {
-  return <Text style={{ color: "#9CA3AF", marginBottom: 6 }}>{children}</Text>;
-}
-
-const inputStyle = {
-  backgroundColor: "#111827",
-  padding: 14,
-  borderRadius: 12,
-  marginBottom: 18,
-};
-function Input(props: any) {
-  return (
-    <TextInput
-      {...props}
-      style={[inputStyle, { color: "#FFFFFF" }]}
-      placeholderTextColor="#6B7280"
-    />
-  );
-}
-
-function Section({ title, children }: any) {
-  return (
-    <View style={{ marginTop: 24 }}>
-      <Text style={{ color: "#fff", fontWeight: "600", marginBottom: 12 }}>
-        {title}
-      </Text>
-      {children}
-    </View>
-  );
-}
-
-function Row({ children, wrap }: any) {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        flexWrap: wrap ? "wrap" : "nowrap",
-        gap: 10,
-      }}
-    >
-      {children}
-    </View>
-  );
-}
-
-function Segment({ label, selected, onPress }: any) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 999,
-        backgroundColor: selected ? "#6D5DF6" : "transparent",
-        borderWidth: 1,
-        borderColor: selected ? "#6D5DF6" : "#374151",
-      }}
-    >
-      <Text style={{ color: selected ? "#fff" : "#E5E7EB", fontWeight: "600" }}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-}

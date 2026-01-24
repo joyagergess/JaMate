@@ -64,7 +64,6 @@ export default function CreateProfileInstrumentsScreen() {
               />
             ))}
 
-            {/* MORE BUTTON */}
             <SelectablePill
               label="Other"
               selected={false}
@@ -74,7 +73,6 @@ export default function CreateProfileInstrumentsScreen() {
         </ScrollView>
       </CreateProfileLayout>
 
-      {/* ===== SEARCH MODAL ===== */}
       <SearchablePickerModal
         visible={showPicker}
         title="Select instruments"

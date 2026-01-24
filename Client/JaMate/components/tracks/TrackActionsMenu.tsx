@@ -7,6 +7,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { trackComponentsStyles as styles } from "../../styles/trackComponents.styles";
+
 export type MenuAnchor = {
   x: number;
   y: number;
@@ -49,58 +51,36 @@ export function TrackActionsMenu({
         style={{ flex: 1 }}
       >
         <View
-          style={{
-            position: "absolute",
-            top,
-            left,
-            width: MENU_WIDTH,
-            backgroundColor: "#0B0E13",
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: "#1F2937",
-            shadowColor: "#000",
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            elevation: 12,
-            overflow: "hidden",
-          }}
+          style={[
+            styles.menuContainer,
+            {
+              top,
+              left,
+            },
+          ]}
         >
           <TouchableOpacity
             onPress={() => {
               onClose();
               onEdit();
             }}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              padding: 12,
-            }}
+            style={styles.menuItem}
           >
             <Ionicons name="create-outline" size={16} color="#E5E7EB" />
-            <Text style={{ color: "#E5E7EB", fontSize: 14 }}>
-              Edit title
-            </Text>
+            <Text style={styles.menuText}>Edit title</Text>
           </TouchableOpacity>
 
-          <View style={{ height: 1, backgroundColor: "#1F2937" }} />
+          <View style={styles.menuDivider} />
 
           <TouchableOpacity
             onPress={() => {
               onClose();
               onDelete();
             }}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              padding: 12,
-            }}
+            style={styles.menuItem}
           >
             <Ionicons name="trash-outline" size={16} color="#EF4444" />
-            <Text style={{ color: "#EF4444", fontSize: 14 }}>
-              Delete track
-            </Text>
+            <Text style={styles.menuDangerText}>Delete track</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

@@ -22,7 +22,7 @@ export type Profile = {
 export type ProfileMedia = {
   id: number;
   type: "image" | "video";
-  url: string;
+  media_url: string;
   order_index: number;
 };
 

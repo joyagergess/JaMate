@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { jamAnalyzeModalStyles as styles } from "../../styles/jamAnalyzeModal.styles";
 
 type Props = {
   visible: boolean;
@@ -24,180 +25,108 @@ export function JamAnalyzeModal({ visible, onClose, result }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          justifyContent: "center",
-          padding: 16,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#0B0E13",
-            borderRadius: 16,
-            padding: 16,
-            maxHeight: "85%",
-          }}
-        >
+      <View style={styles.overlay}>
+        <View style={styles.modal}>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text
-              style={{
-                color: "#7C7CFF",
-                fontSize: 18,
-                fontWeight: "700",
-                marginBottom: 12,
-              }}
-            >
-              Jam Compatibility
-            </Text>
+            <Text style={styles.title}>Jam Compatibility</Text>
 
-            <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>
+            <Text style={styles.scoreText}>
               Score:{" "}
-              <Text style={{ fontWeight: "700" }}>
+              <Text style={styles.scoreValue}>
                 {compatibility.compatibility_score}/100
               </Text>
             </Text>
 
-            <Text style={{ color: "#9CA3AF" }}>
+            <Text style={styles.mutedText}>
               Similarity: {compatibility.similarity_percent}%
             </Text>
 
-            <Text style={{ color: "#9CA3AF", marginBottom: 12 }}>
+            <Text style={[styles.mutedText, { marginBottom: 12 }]}>
               {compatibility.label}
             </Text>
 
             {gpt_suggestions && (
               <>
-                <Text
-                  style={{
-                    color: "#A5B4FC",
-                    fontSize: 15,
-                    fontWeight: "600",
-                    marginTop: 16,
-                    marginBottom: 6,
-                  }}
-                >
-                  Jam Suggestions
-                </Text>
+                <Text style={styles.sectionTitle}>Jam Suggestions</Text>
 
-                <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>
+                <Text style={styles.suggestionText}>
                   Suggested Key: {gpt_suggestions.suggested_key}
                 </Text>
 
-                <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>
-                  Chord Progression: {gpt_suggestions.chord_progression}
+                <Text style={styles.suggestionText}>
+                  Chord Progression:{" "}
+                  {gpt_suggestions.chord_progression}
                 </Text>
 
-                <Text style={{ color: "#E5E7EB", marginBottom: 4 }}>
+                <Text style={styles.suggestionText}>
                   Shared Style: {gpt_suggestions.shared_style}
                 </Text>
 
-                <Text
-                  style={{
-                    color: "#9CA3AF",
-                    marginTop: 6,
-                  }}
-                >
+                <Text style={styles.suggestionDescription}>
                   {gpt_suggestions.jam_focus}
                 </Text>
               </>
             )}
 
-            <Text
-              style={{
-                color: "#A5B4FC",
-                fontSize: 15,
-                fontWeight: "600",
-                marginTop: 20,
-                marginBottom: 8,
-              }}
-            >
+            <Text style={styles.comparisonTitle}>
               Track Comparison
             </Text>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ width: "48%" }}>
-                <Text
-                  style={{
-                    color: "#7C7CFF",
-                    fontWeight: "700",
-                    marginBottom: 4,
-                  }}
-                >
-                  Track A
-                </Text>
-
-                <Text style={{ color: "#E5E7EB" }}>
-                  Key: {track_a.key}
-                </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+            <View style={styles.comparisonRow}>
+              <View style={styles.comparisonColumn}>
+                <Text style={styles.trackTitle}>Track A</Text>
+                <Text style={styles.trackText}>Key: {track_a.key}</Text>
+                <Text style={styles.trackText}>
                   Tempo: {Math.round(track_a.tempo)} BPM
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Energy: {track_a.energy?.energy_level}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Brightness: {track_a.brightness?.brightness}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Groove: {track_a.groove}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Mood: {track_a.mood}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Style: {track_a.style}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Emotion: {track_a.emotion}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Feel: {track_a.feel}
                 </Text>
               </View>
 
-              <View style={{ width: "48%" }}>
-                <Text
-                  style={{
-                    color: "#7C7CFF",
-                    fontWeight: "700",
-                    marginBottom: 4,
-                  }}
-                >
-                  Track B
-                </Text>
-
-                <Text style={{ color: "#E5E7EB" }}>
-                  Key: {track_b.key}
-                </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+              <View style={styles.comparisonColumn}>
+                <Text style={styles.trackTitle}>Track B</Text>
+                <Text style={styles.trackText}>Key: {track_b.key}</Text>
+                <Text style={styles.trackText}>
                   Tempo: {Math.round(track_b.tempo)} BPM
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Energy: {track_b.energy?.energy_level}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Brightness: {track_b.brightness?.brightness}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Groove: {track_b.groove}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Mood: {track_b.mood}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Style: {track_b.style}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Emotion: {track_b.emotion}
                 </Text>
-                <Text style={{ color: "#E5E7EB" }}>
+                <Text style={styles.trackText}>
                   Feel: {track_b.feel}
                 </Text>
               </View>
@@ -205,23 +134,11 @@ export function JamAnalyzeModal({ visible, onClose, result }: Props) {
 
             {compatibility.why_it_works?.length > 0 && (
               <>
-                <Text
-                  style={{
-                    color: "#A5B4FC",
-                    fontSize: 15,
-                    fontWeight: "600",
-                    marginTop: 16,
-                  }}
-                >
-                  Why it works
-                </Text>
+                <Text style={styles.whyTitle}>Why it works</Text>
 
                 {compatibility.why_it_works.map(
                   (reason: string, i: number) => (
-                    <Text
-                      key={i}
-                      style={{ color: "#E5E7EB", marginTop: 4 }}
-                    >
+                    <Text key={i} style={styles.whyText}>
                       • {reason}
                     </Text>
                   )
@@ -232,20 +149,9 @@ export function JamAnalyzeModal({ visible, onClose, result }: Props) {
 
           <TouchableOpacity
             onPress={onClose}
-            style={{
-              marginTop: 16,
-              alignSelf: "center",
-              paddingVertical: 10,
-              paddingHorizontal: 28,
-              borderRadius: 999,
-              backgroundColor: "#1F2937",
-              borderWidth: 1,
-              borderColor: "#374151",
-            }}
+            style={styles.closeButton}
           >
-            <Text style={{ color: "#7C7CFF", fontWeight: "600" }}>
-              Close
-            </Text>
+            <Text style={styles.closeText}>Close</Text>
           </TouchableOpacity>
         </View>
       </View>
