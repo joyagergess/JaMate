@@ -124,7 +124,14 @@ View the full UI and interaction flows on Figma:
 
 ### Audio feature extraction pipeline
 
-Audio files are loaded and normalized using SoundFile and librosa, then analyzed to extract tempo, key, and perceptual features. Tempo is estimated from rhythmic onsets, while key is detected via chroma analysis compared against Krumhansl major and minor profiles. In parallel, a CLAP-based model provides semantic descriptors such as style, emotion, and feel.
+| Tool / Method                     | Purpose                          |
+| --------------------------------- | -------------------------------- |
+| SoundFile, librosa                | Audio loading & normalization    |
+| Rhythmic onsets                   | Tempo detection                  |
+| Chroma analysis + Krumhansl       | Key detection                    |
+| Librosa perceptual features       | Energy, dynamics                 |
+| CLAP                              | Semantic analysis (style, mood)  |
+
 
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
