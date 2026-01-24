@@ -19,7 +19,7 @@ See the [LICENSE](LICENSE) file for more information.
 
 ### Entity Relationship Diagram
 
-<img src="./readme/diagram(1).svg"/>
+<img src="./readme/DIAGRAM.svg"/>
 
 ### System design
 
