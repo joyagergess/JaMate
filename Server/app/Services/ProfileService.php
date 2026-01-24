@@ -151,9 +151,14 @@ class ProfileService
         $profile->{$relation}()->sync($ids);
     }
 
-    
+
     public function show(Profile $profile): Profile
     {
-        return $this->loadProfileRelations($profile);
+        return $profile->load([
+            'instruments',
+            'genres',
+            'objectives',
+            'media',
+        ]);
     }
 }

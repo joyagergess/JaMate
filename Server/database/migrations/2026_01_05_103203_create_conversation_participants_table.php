@@ -18,6 +18,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->unique(['conversation_id', 'profile_id']);
+            
             $table->index('profile_id');
         });
     }
