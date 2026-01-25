@@ -144,17 +144,21 @@ View the full UI and interaction flows on Figma:
 | Librosa perceptual features       | Energy, dynamics                 |
 | CLAP                              | Semantic analysis (style, mood)  |
 
+<br><br>
+
 ## AI Agent
 
-During the development of JaMate, I also built a dedicated AI agent designed to answer questions about my SE Factory journey and the projects I worked on, including JaMate.
+During the development of JaMate, I also built a dedicated **AI agent** designed to answer questions about my **SE Factory journey** and the projects I worked on, including JaMate.
 
-The agent was built as a standalone project. You can explore its source code here:
-👉 https://github.com/joyagergess/sefactory-ai-knowledge-portfolio.git
+The agent was built as a standalone project.
 
-You can also interact with the AI agent directly to ask about my journey and projects:
-👉 http://13.37.217.214/
+- **Source code:** https://github.com/joyagergess/sefactory-ai-knowledge-portfolio.git  
+- **Live demo:** http://13.37.217.214/
 
-<img src="./readme/agent.PNG" width="260" />
+<p align="center">
+  <img src="./readme/agent.PNG" width="700" alt="AI Agent Interface" />
+</p>
+
 
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
