@@ -17,7 +17,6 @@ class TrackAiService
                 'track' => 'Cannot generate from AI-generated track.',
             ]);
         }
-
         $job = AiBackingJob::create([
             'source_track_id' => $track->id,
             'status' => 'queued',
