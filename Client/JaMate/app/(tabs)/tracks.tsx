@@ -41,6 +41,27 @@ export default function MyTracks() {
 
   const { data: aiJob } = useAiBackingJob(jobId);
 
+  useEffect(() => {
+    if (aiJob?.status === "done" || aiJob?.status === "failed") {
+      setJobId(null); 
+    }
+  }, [aiJob]);
+
+
+  useEffect(() => {
+    if (!aiJob || jobHandled) return;
+
+    if (aiJob.status === "done") {
+      console.log("AI JOB DONE");
+
+      setIsGeneratingUi(false);
+      setAiDoneVisible(true);
+      setJobHandled(true);
+
+      queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
+    }
+  }, [aiJob, jobHandled, queryClient]);
+
   const [tab, setTab] = useState<Tab>("tracks");
   const [menuTrack, setMenuTrack] = useState<any | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<MenuAnchor | null>(null);
@@ -83,18 +104,18 @@ export default function MyTracks() {
         );
 
   useEffect(() => {
-    if (!jobId || !aiJob || aiJob.status !== "done" || jobHandled) return;
+    if (!aiJob || jobHandled) return;
 
-    setIsGeneratingUi(false);
-    queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
-    setAiDoneVisible(true);
-    setJobHandled(true);
+    if (aiJob.status === "done") {
+      console.log("AI JOB DONE");
 
-    setTimeout(() => {
-      setJobId(null);
-      setJobHandled(false);
-    }, 0);
-  }, [jobId, aiJob, jobHandled]);
+      setIsGeneratingUi(false);
+      setAiDoneVisible(true);
+      setJobHandled(true);
+
+      queryClient.invalidateQueries({ queryKey: ["my-tracks"] });
+    }
+  }, [aiJob, jobHandled, queryClient]);
 
   if (isLoading) {
     return (

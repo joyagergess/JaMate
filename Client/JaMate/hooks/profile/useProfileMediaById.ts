@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
-import { ProfileMedia } from "./useProfileMedia";
 
 export function useProfileMediaById(profileId: number) {
   return useQuery({

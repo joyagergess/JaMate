@@ -15,7 +15,6 @@ export function useProfileMedia() {
     queryKey: ["profile", "media"],
     queryFn: async () => {
       const res = await apiClient.get("/profile/media/get");
-      console.log("RAW MEDIA RESPONSE:", res.data.data);
       return res.data.data;
     },
   });
