@@ -144,6 +144,14 @@ View the full UI and interaction flows on Figma:
 | Librosa perceptual features       | Energy, dynamics                 |
 | CLAP                              | Semantic analysis (style, mood)  |
 
+## AI Agent
+
+This project includes an AI agent that answers questions about my SE Factory journey and the projects I worked on, including JaMate.
+
+You can ask my ai agent about me here :
+👉 http://13.37.217.214/
+
+<img src="./readme/agent.PNG" width="260" />
 
 <!-- Deployment -->
 <img src="./readme/title7.svg"/>
