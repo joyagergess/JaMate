@@ -7,7 +7,7 @@ export function useGenerateBackingTrack() {
       const res = await apiClient.post(
         `/tracks/${trackId}/generate-backing`
       );
-      return res.data; 
+      return res.data;
     },
   });
 }

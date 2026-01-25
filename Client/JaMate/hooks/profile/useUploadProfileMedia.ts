@@ -1,17 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
-import { ProfileMedia } from "../../context/CreateProfileContext";
 
 export function useUploadProfileMedia() {
   return useMutation({
-    mutationFn: async (media: ProfileMedia) => {
+    mutationFn: async (media: {
+      localUri: string;
+      mimeType: string;
+      type: "image" | "video";
+    }) => {
       const form = new FormData();
 
       form.append("media_type", media.type);
 
       form.append("media_file", {
-        uri: media.uri,
-        name: `media.${media.type === "video" ? "mp4" : "jpg"}`,
+        uri: media.localUri,
+        name: media.type === "video" ? "video.mp4" : "image.jpg",
         type: media.mimeType,
       } as any);
 

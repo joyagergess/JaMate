@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\URL;
 class FeedService
 {
     protected const MAX_CANDIDATES = 50;
-    protected const JAMMED_ME_BOOST = 20;
+    protected const JAMMED_ME_BOOST = 30;
 
     public function __construct(
         protected SimilarityService $similarityService
