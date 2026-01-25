@@ -146,9 +146,12 @@ View the full UI and interaction flows on Figma:
 
 ## AI Agent
 
-This project includes an AI agent that answers questions about my SE Factory journey and the projects I worked on, including JaMate.
+During the development of JaMate, I also built a dedicated AI agent designed to answer questions about my SE Factory journey and the projects I worked on, including JaMate.
 
-You can ask my ai agent about me here :
+The agent was built as a standalone project. You can explore its source code here:
+👉 https://github.com/joyagergess/sefactory-ai-knowledge-portfolio.git
+
+You can also interact with the AI agent directly to ask about my journey and projects:
 👉 http://13.37.217.214/
 
 <img src="./readme/agent.PNG" width="260" />
