@@ -36,6 +36,7 @@ export default function BandChatScreen() {
 
   const queryClient = useQueryClient();
   const listRef = useRef<FlatList<Message>>(null);
+  const [userTriggeredGeneration, setUserTriggeredGeneration] = useState(false);
 
   const { data: me } = useProfile();
   const { data: conversations } = useConversations();
@@ -48,8 +49,19 @@ export default function BandChatScreen() {
 
   const bandId = conversation?.band?.id;
 
-  const { data: setlistData } = useBandSetlist(bandId);
-  const generateSetlist = useGenerateBandSetlist(bandId);
+  const {
+    data: setlistData,
+    startPolling,
+    stopPolling,
+  } = useBandSetlist(bandId);
+
+  const generateSetlist = useGenerateBandSetlist(bandId, startPolling);
+
+  useEffect(() => {
+    if (setlistData?.status === "ready") {
+      stopPolling();
+    }
+  }, [setlistData?.status, stopPolling]);
 
   const messages = useMemo(
     () => data?.pages.flatMap((p) => p.data) ?? [],
@@ -129,6 +141,14 @@ export default function BandChatScreen() {
 
     setText("");
   };
+  const bubbleStatus: "idle" | "processing" | "ready" =
+    setlistData?.status === "ready"
+      ? "ready"
+      : setlistData?.status === "processing" && userTriggeredGeneration
+        ? "processing"
+        : "idle";
+  const readySetlist =
+    setlistData?.status === "ready" ? setlistData.setlist : undefined;
 
   return (
     <SafeAreaView style={chatStyles.screen}>
@@ -238,12 +258,13 @@ export default function BandChatScreen() {
 
       {bandId && (
         <DraggableSetlistBubble
-          status={setlistData?.status ?? "processing"}
-          setlist={
-            setlistData?.status === "ready" ? setlistData.setlist : undefined
-          }
+          status={bubbleStatus}
+          setlist={readySetlist}
           isGenerating={generateSetlist.isPending}
-          onGenerate={() => generateSetlist.mutate()}
+          onGenerate={() => {
+            setUserTriggeredGeneration(true);
+            generateSetlist.mutate();
+          }}
         />
       )}
     </SafeAreaView>

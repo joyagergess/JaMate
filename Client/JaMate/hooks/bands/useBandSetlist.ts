@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../../api/client";
-import { useEffect } from "react";
+import { useState } from "react";
 
 type BandSetlistResponse =
+  | { status: "idle" }
   | { status: "processing" }
   | {
       status: "ready";
@@ -16,25 +17,24 @@ type BandSetlistResponse =
     };
 
 export function useBandSetlist(bandId?: number) {
+  const [shouldPoll, setShouldPoll] = useState(false);
 
   const query = useQuery<BandSetlistResponse>({
     queryKey: ["band-setlist", bandId],
     enabled: !!bandId,
     queryFn: async () => {
-      console.log(" FETCH /bands/" + bandId + "/setlist");
-
-      const res = await apiClient.get(
-        `/bands/${bandId}/setlist`
-      );
-
-      return res.data.data;
+      const res = await apiClient.get(`/bands/${bandId}/setlist`);
+      return res.data.data ?? { status: "idle" };
     },
     refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === "processing" ? 3000 : false;
+      if (!shouldPoll) return false;
+      return query.state.data?.status === "processing" ? 3000 : false;
     },
   });
 
-
-  return query;
+  return {
+    ...query,
+    startPolling: () => setShouldPoll(true),
+    stopPolling: () => setShouldPoll(false),
+  };
 }

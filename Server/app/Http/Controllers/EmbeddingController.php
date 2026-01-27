@@ -9,7 +9,6 @@ class EmbeddingController extends Controller
 {
     public function generate(ProfileEmbeddingService $service): JsonResponse
     {
-
         try {
             $processed = $service->processBatch(10);
             return response()->json([
