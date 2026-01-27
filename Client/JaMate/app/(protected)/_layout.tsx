@@ -14,7 +14,9 @@ export default function ProtectedLayout() {
     if (!isReady) return;
 
     const isAuthRoute = pathname.startsWith("/(auth)");
-    const isProtectedRoute = pathname.startsWith("/(app)");
+    const isProtectedRoute =
+      pathname.startsWith("/(tabs)") ||
+      pathname.startsWith("/create-profile");
 
     if (!isAuthenticated && isProtectedRoute) {
       router.replace("/(auth)/login");

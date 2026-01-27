@@ -9,9 +9,11 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { useRouter } from "expo-router";
 import { Spinner } from "../../components/ui/Spinner";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useProfile } from "../../hooks/profile/useProfile";
 import { useProfileMedia } from "../../hooks/profile/useProfileMedia";
+import { useAuthRefresh } from "../../context/AuthRefreshContext";
 
 import { ProfileHeader } from "../../components/profile/ProfileHeader";
 import { ProfileTabs } from "../../components/profile/ProfileTabs";
@@ -20,6 +22,8 @@ import { AUTH_TOKEN_KEY } from "../../constants/auth";
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { triggerRefresh } = useAuthRefresh();
 
   const { data: profile, isLoading: loadingProfile } = useProfile();
   const {
@@ -44,11 +48,17 @@ export default function ProfileScreen() {
 
             await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
 
-            router.replace("/login");
+            apiClient.defaults.headers.common.Authorization = undefined;
+
+            queryClient.clear();
+
+            triggerRefresh();
+
+            router.replace("/(auth)/login");
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     );
   };
 
@@ -81,8 +91,6 @@ export default function ProfileScreen() {
         media={media ?? []}
         onMediaUploaded={refetchMedia}
       />
-
-     
     </ScrollView>
   );
 }
