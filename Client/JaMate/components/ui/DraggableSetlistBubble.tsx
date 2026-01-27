@@ -29,7 +29,7 @@ type SetlistItem = {
 };
 
 type Props = {
-  status: "processing" | "ready";
+  status: "idle" | "processing" | "ready";
   setlist?: SetlistItem[];
   onGenerate: () => void;
   isGenerating: boolean;
