@@ -11,6 +11,7 @@ import { useLogin } from "../../hooks/auth/useLogin";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { useAuthRefresh } from "../../context/AuthRefreshContext";
 import { setItem } from "../../utils/secureStorage";
+import { apiClient } from "@/api/client";
 
 function getLoginErrorMessage(err: any): string {
   const rawMessage = err?.response?.data?.message || "";
@@ -96,12 +97,17 @@ export default function LoginScreen() {
               {
                 onSuccess: async (token: string) => {
                   await setItem(AUTH_TOKEN_KEY, token);
-                  triggerRefresh();
-
-                  router.replace("/(tabs)");
-                },
-                onError: (err: any) => {
-                  setFormError(getLoginErrorMessage(err));
+                  apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+                  try {
+                    await apiClient.get("/profile/get");
+                    router.replace("/(tabs)");
+                  } catch (err: any) {
+                    if (err?.response?.status === 404) {
+                      router.replace("/create-profile");
+                    } else {
+                      console.error("Profile check failed", err);
+                    }
+                  }
                 },
               },
             );

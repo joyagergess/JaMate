@@ -48,11 +48,21 @@ class ProfileController extends Controller
     {
         try {
             $profile = $this->profileService->get($request->user());
-            return $this->successResponse($profile, 'Profile fetched successfully');
+
+            return $this->successResponse(
+                $profile,
+                'Profile fetched successfully'
+            );
         } catch (HttpException $e) {
-            return $this->errorResponse($e->getMessage(), $e->getStatusCode());
+
+            return $this->errorResponse(
+                $e->getMessage(),  
+                null,              
+                $e->getStatusCode() 
+            );
         }
     }
+
 
     public function show(Profile $profile)
     {
@@ -63,5 +73,4 @@ class ProfileController extends Controller
             'Profile fetched successfully'
         );
     }
-    
 }

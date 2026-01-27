@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { AUTH_TOKEN_KEY } from "../../constants/auth";
 import { apiClient } from "../../api/client";
-import { useAuthRefresh } from "../../context/AuthRefreshContext";
 import { getItem } from "../../utils/secureStorage";
+import { useAuthRefresh } from "../../context/AuthRefreshContext";
 
 export function useAuthBootstrap() {
   const { refreshKey } = useAuthRefresh();
@@ -16,29 +16,30 @@ export function useAuthBootstrap() {
 
     const bootstrap = async () => {
       setIsReady(false);
+      setIsAuthenticated(false);
+      setHasProfile(null);
+
+      const token = await getItem(AUTH_TOKEN_KEY);
+
+      if (!mounted) return;
+
+      if (!token) {
+        apiClient.defaults.headers.common.Authorization = undefined; 
+        setIsReady(true);
+        return;
+      }
+
+      apiClient.defaults.headers.common.Authorization = `Bearer ${token}`; 
+      setIsAuthenticated(true);
 
       try {
-        const token = await getItem(AUTH_TOKEN_KEY);
-
-        if (!mounted) return;
-
-        if (!token) {
-          setIsAuthenticated(false);
-          setHasProfile(null);
-          return;
-        }
-
-        setIsAuthenticated(true);
-
-        try {
-          await apiClient.get("/profile/get");
-          if (mounted) setHasProfile(true);
-        } catch {
-          if (mounted) setHasProfile(false);
-        }
-      } finally {
-        if (mounted) setIsReady(true);
+        await apiClient.get("/profile/get");
+        if (mounted) setHasProfile(true);
+      } catch {
+        if (mounted) setHasProfile(false);
       }
+
+      if (mounted) setIsReady(true);
     };
 
     bootstrap();
