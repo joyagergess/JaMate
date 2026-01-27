@@ -171,9 +171,10 @@ Docker was initially planned for the deployment setup, but hardware limitations 
 
 
 
-| API Register (Swagger) | CI / CD |
-| --------------------- | ------- |
-| ![](./readme/swagger.jpeg) | ![](./readme/CICD.PNG) |
+| API Register (Swagger) | API Create Profile (Postman) | CI / CD |
+| --------------------- | ---------------------------- | ------- |
+| ![](./readme/swagger.jpeg) | ![](./readme/postman1.PNG) | ![](./readme/CICD.PNG) |
+
 
 
 <br><br>
