@@ -37,7 +37,7 @@ class AuthController extends Controller
         } catch (AuthenticationException $e) {
             return $this->errorResponse(
                 $e->getMessage(),
-                401
+                 401
             );
         } catch (HttpException $e) {
             return $this->errorResponse(
