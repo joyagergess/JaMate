@@ -24,38 +24,17 @@ class BandSuggestionService
             ->orderByDesc('ai_score')
             ->get();
     }
-
     public function accept(int $suggestionId, Profile $profile): void
     {
         DB::transaction(function () use ($suggestionId, $profile) {
 
-            $member = BandSuggestionMember::where('band_suggestion_id', $suggestionId)
-                ->where('profile_id', $profile->id)
-                ->lockForUpdate()
-                ->first();
+            $member = $this->lockMember($suggestionId, $profile);
 
-            if (! $member) {
-                throw new HttpException(403, 'Not part of this suggestion');
-            }
+            $this->assertCanAccept($member);
 
-            if ($member->decision === 'jam') {
-                return;
-            }
+            $this->markMemberAccepted($member);
 
-            if ($member->decision !== 'pending') {
-                throw new HttpException(409, 'Decision already made');
-            }
-
-            $member->update([
-                'decision'   => 'jam',
-                'decided_at' => now(),
-            ]);
-
-            $stillPending = BandSuggestionMember::where('band_suggestion_id', $suggestionId)
-                ->where('decision', '!=', 'jam')
-                ->exists();
-
-            if ($stillPending) {
+            if ($this->hasPendingMembers($suggestionId)) {
                 return;
             }
 
@@ -67,70 +46,166 @@ class BandSuggestionService
     {
         DB::transaction(function () use ($suggestionId, $profile) {
 
-            $member = BandSuggestionMember::where('band_suggestion_id', $suggestionId)
-                ->where('profile_id', $profile->id)
-                ->lockForUpdate()
-                ->firstOrFail();
+            $member = $this->lockMemberOrFail($suggestionId, $profile);
 
-            if ($member->decision !== 'pending') {
+            if (! $this->isPending($member)) {
                 return;
             }
 
-            $member->update([
+            $this->markMemberDeclined($member);
+            $this->rejectSuggestion($suggestionId);
+            $this->declineOtherMembers($suggestionId, $profile);
+        });
+    }
+    private function lockMember(int $suggestionId, Profile $profile): ?BandSuggestionMember
+    {
+        return BandSuggestionMember::where('band_suggestion_id', $suggestionId)
+            ->where('profile_id', $profile->id)
+            ->lockForUpdate()
+            ->first();
+    }
+
+    private function lockMemberOrFail(int $suggestionId, Profile $profile): BandSuggestionMember
+    {
+        return BandSuggestionMember::where('band_suggestion_id', $suggestionId)
+            ->where('profile_id', $profile->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
+    private function assertCanAccept(BandSuggestionMember $member): void
+    {
+        if (! $member) {
+            throw new HttpException(403, 'Not part of this suggestion');
+        }
+
+        if ($member->decision === 'jam') {
+            return;
+        }
+
+        if ($member->decision !== 'pending') {
+            throw new HttpException(409, 'Decision already made');
+        }
+    }
+
+    private function markMemberAccepted(BandSuggestionMember $member): void
+    {
+        $member->update([
+            'decision'   => 'jam',
+            'decided_at' => now(),
+        ]);
+    }
+
+    private function markMemberDeclined(BandSuggestionMember $member): void
+    {
+        $member->update([
+            'decision'   => 'decline',
+            'decided_at' => now(),
+        ]);
+    }
+
+    private function isPending(BandSuggestionMember $member): bool
+    {
+        return $member->decision === 'pending';
+    }
+
+    private function hasPendingMembers(int $suggestionId): bool
+    {
+        return BandSuggestionMember::where('band_suggestion_id', $suggestionId)
+            ->where('decision', '!=', 'jam')
+            ->exists();
+    }
+
+    private function rejectSuggestion(int $suggestionId): void
+    {
+        BandSuggestion::whereKey($suggestionId)
+            ->update(['status' => 'rejected']);
+    }
+
+    private function declineOtherMembers(int $suggestionId, Profile $profile): void
+    {
+        BandSuggestionMember::where('band_suggestion_id', $suggestionId)
+            ->where('profile_id', '!=', $profile->id)
+            ->update([
                 'decision'   => 'decline',
                 'decided_at' => now(),
             ]);
-
-            BandSuggestion::whereKey($suggestionId)
-                ->update(['status' => 'rejected']);
-
-            BandSuggestionMember::where('band_suggestion_id', $suggestionId)
-                ->where('profile_id', '!=', $profile->id)
-                ->update([
-                    'decision'   => 'decline',
-                    'decided_at' => now(),
-                ]);
-        });
     }
 
     protected function finalizeBand(int $suggestionId): void
     {
         DB::transaction(function () use ($suggestionId) {
 
-            $suggestion = BandSuggestion::with('members')
-                ->where('id', $suggestionId)
-                ->where('status', 'pending')
-                ->lockForUpdate()
-                ->firstOrFail();
+            $suggestion = $this->lockPendingSuggestion($suggestionId);
 
-            $suggestion->update([
-                'status' => 'accepted',
-            ]);
+            $this->markSuggestionAccepted($suggestion);
 
-            $conversation = Conversation::create([
-                'type' => 'group',
-                'name' => 'New Band',
-            ]);
+            $conversation = $this->createBandConversation();
 
-            ConversationParticipant::insert(
-                $suggestion->members->map(fn($m) => [
-                    'conversation_id' => $conversation->id,
-                    'profile_id'      => $m->profile_id,
-                ])->all()
-            );
+            $this->addMembersToConversation($conversation, $suggestion->members);
 
-            $band = Band::create([
-                'band_suggestion_id' => $suggestion->id,
-                'conversation_id'    => $conversation->id,
-            ]);
+            $band = $this->createBand($suggestion, $conversation);
 
-            BandMember::insert(
-                $suggestion->members->map(fn($m) => [
-                    'band_id'    => $band->id,
-                    'profile_id' => $m->profile_id,
-                    'joined_at'  => now(),
-                ])->all()
-            );
+            $this->addMembersToBand($band, $suggestion->members);
         });
+    }
+
+    private function lockPendingSuggestion(int $suggestionId): BandSuggestion
+    {
+        return BandSuggestion::with('members')
+            ->where('id', $suggestionId)
+            ->where('status', 'pending')
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
+    private function markSuggestionAccepted(BandSuggestion $suggestion): void
+    {
+        $suggestion->update([
+            'status' => 'accepted',
+        ]);
+    }
+
+    private function createBandConversation(): Conversation
+    {
+        return Conversation::create([
+            'type' => 'group',
+            'name' => 'New Band',
+        ]);
+    }
+
+    private function addMembersToConversation(
+        Conversation $conversation,
+        $members
+    ): void {
+        ConversationParticipant::insert(
+            $members->map(fn($m) => [
+                'conversation_id' => $conversation->id,
+                'profile_id'      => $m->profile_id,
+            ])->all()
+        );
+    }
+
+    private function createBand(
+        BandSuggestion $suggestion,
+        Conversation $conversation
+    ): Band {
+        return Band::create([
+            'band_suggestion_id' => $suggestion->id,
+            'conversation_id'    => $conversation->id,
+        ]);
+    }
+
+    private function addMembersToBand(
+        Band $band,
+        $members
+    ): void {
+        BandMember::insert(
+            $members->map(fn($m) => [
+                'band_id'    => $band->id,
+                'profile_id' => $m->profile_id,
+                'joined_at'  => now(),
+            ])->all()
+        );
     }
 }
