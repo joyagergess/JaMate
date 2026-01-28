@@ -36,15 +36,13 @@ class ProfileEmbeddingService
             return;
         }
 
-            $embedding = app(OpenAIEmbeddingService::class)->generate($text);
+        $embedding = app(OpenAIEmbeddingService::class)->generate($text);
 
-            ProfileEmbedding::updateOrCreate(
-                ['profile_id' => $profile->id],
-                ['embedding' => $embedding]
-            );
+        ProfileEmbedding::updateOrCreate(
+            ['profile_id' => $profile->id],
+            ['embedding' => $embedding]
+        );
 
-            $profile->update(['embedding_dirty' => false]);
-          
-
-}
+        $profile->update(['embedding_dirty' => false]);
+    }
 }
