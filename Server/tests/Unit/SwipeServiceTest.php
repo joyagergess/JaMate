@@ -27,10 +27,7 @@ class SwipeServiceTest extends TestCase
         $this->service = app(SwipeService::class);
     }
 
-    /* -------------------------------------------------
-     | Guards
-     -------------------------------------------------*/
-
+  
     /** @test */
     public function it_throws_if_user_swipes_themselves()
     {
@@ -52,9 +49,6 @@ class SwipeServiceTest extends TestCase
         $this->service->swipe($me, $other, 'like');
     }
 
-    /* -------------------------------------------------
-     | Swipe behavior
-     -------------------------------------------------*/
 
     /** @test */
     public function skip_never_creates_match_or_conversation()
@@ -98,7 +92,6 @@ class SwipeServiceTest extends TestCase
         $me = Profile::factory()->create();
         $other = Profile::factory()->create();
 
-        // Other jams me first
         Swipe::factory()->create([
             'swiper_profile_id' => $other->id,
             'swiped_profile_id' => $me->id,
