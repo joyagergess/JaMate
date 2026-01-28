@@ -29,7 +29,7 @@ class MatchController extends Controller
         try {
             $matches = $this->matchService->getMyMatches($profile);
 
-            return $this->successResponse($matches);
+             return $this->successResponse($matches);
         } catch (\Throwable $e) {
             return $this->errorResponse(
                 'Failed to load matches',

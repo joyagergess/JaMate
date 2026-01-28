@@ -22,6 +22,26 @@ export const chatStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.06)",
   },
+  timestamp: {
+    fontSize: 11,
+    color: "#9CA3AF", 
+    marginTop: 4,
+  },
+  bubbleTime: {
+  fontSize: 11,
+  color: "rgba(255,255,255,0.6)",
+  alignSelf: "flex-end",
+  marginTop: 4,
+},
+
+
+  timestampMe: {
+    alignSelf: "flex-end",
+  },
+
+  timestampOther: {
+    alignSelf: "flex-start",
+  },
 
   headerTitle: {
     color: "#fff",
