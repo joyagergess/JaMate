@@ -23,6 +23,14 @@ export function ChatMessages({
       setModalVisible(true);
     }
   }, [result]);
+  const formatHour = (date: string) =>
+    new Date(date)
+      .toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .toLowerCase();
 
   return (
     <>
@@ -74,6 +82,9 @@ export function ChatMessages({
                   ]}
                 >
                   <Text style={styles.bubbleText}>{item.body}</Text>
+                  <Text style={styles.bubbleTime}>
+                    {formatHour(item.sent_at)}
+                  </Text>
                 </View>
               )}
 
