@@ -26,18 +26,15 @@ class FeedServiceTest extends TestCase
     {
         parent::setUp();
 
-        // Mock similarity service (deterministic)
         $similarity = $this->createMock(SimilarityService::class);
         $similarity
             ->method('cosine')
-            ->willReturn(0.8); // stable semantic similarity
+            ->willReturn(0.8);
 
         $this->service = new FeedService($similarity);
     }
 
-    /* -------------------------------------------------
-     | Helpers
-     -------------------------------------------------*/
+
 
     private function makeFeedEligibleProfile(array $overrides = []): Profile
     {
@@ -75,10 +72,7 @@ class FeedServiceTest extends TestCase
         $b->objectives()->sync([$objective->id]);
     }
 
-    /* -------------------------------------------------
-     | Tests
-     -------------------------------------------------*/
-
+  
     /** @test */
     public function it_returns_empty_feed_when_no_candidates_exist()
     {
